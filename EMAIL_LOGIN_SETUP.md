@@ -54,19 +54,49 @@ This link will expire in 15 minutes.
 
 ## Database Migration
 
-After setting up the environment variables, run the database migration:
+### For New Installations
+
+If you're setting up a fresh database, run:
 
 ```bash
-npm run db:push
-# or
+bun install
 bun run db:push
 ```
 
-This will:
-- Change the `user` table primary key from `slackId` to `email`
+This will create all tables with the email-based schema from scratch using `drizzle/0000_left_the_initiative.sql`.
+
+### For Existing Databases with Slack Authentication
+
+**WARNING: Back up your database before proceeding!**
+
+If you have an existing database with Slack-based authentication, you'll need to migrate the schema. A migration script is provided at `drizzle/migration_slack_to_email.sql`.
+
+This migration will:
+- Create the `login_tokens` table for magic link authentication
+- Add `email` column to the `user` table
+- Temporarily copy `slackId` values to `email` (users will need to update their email or re-register)
 - Make `avatarUrl` nullable
-- Create a new `login_tokens` table for magic link authentication
-- Update all foreign key references
+- Change the primary key from `slackId` to `email`
+- Update all foreign key references in `shop_orders` and `payouts` tables
+- Recreate the `users_with_tokens` view
+
+**Steps:**
+
+1. Back up your database:
+   ```bash
+   pg_dump $DATABASE_URL > backup.sql
+   ```
+
+2. Review the migration script at `drizzle/migration_slack_to_email.sql`
+
+3. Run the migration (adjust connection as needed):
+   ```bash
+   psql $DATABASE_URL < drizzle/migration_slack_to_email.sql
+   ```
+
+4. Verify the migration was successful
+
+**Note:** After migration, existing users will have their Slack IDs as placeholder email addresses. They will need to log in using the new email-based authentication system.
 
 ## How It Works
 
