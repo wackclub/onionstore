@@ -13,13 +13,23 @@ import { sql } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 
 export const rawUsers = pgTable('user', {
-	slackId: text().primaryKey(),
+	email: text().primaryKey(),
 	displayName: text(),
-	avatarUrl: text().notNull(),
+	avatarUrl: text(),
 	isAdmin: boolean().default(false).notNull(),
 	country: varchar({ length: 2 }),
 	yswsDbFulfilled: boolean().default(false).notNull()
 });
+
+export const loginTokens = pgTable('login_tokens', {
+	token: text().primaryKey(),
+	email: text().notNull(),
+	expiresAt: timestamp().notNull(),
+	createdAt: timestamp().notNull().defaultNow()
+}, (table) => ({
+	emailIdx: index('login_tokens_email_idx').on(table.email),
+	expiresAtIdx: index('login_tokens_expires_at_idx').on(table.expiresAt)
+}));
 
 export const shopItems = pgTable('shop_items', {
 	id: text()
@@ -49,7 +59,7 @@ export const shopOrders = pgTable('shop_orders', {
 	createdAt: timestamp().notNull().defaultNow(),
 	userId: text()
 		.notNull()
-		.references(() => rawUsers.slackId)
+		.references(() => rawUsers.email)
 }, (table) => ({
 	userIdIdx: index('shop_orders_user_id_idx').on(table.userId),
 	shopItemIdIdx: index('shop_orders_shop_item_id_idx').on(table.shopItemId),
@@ -64,7 +74,7 @@ export const payouts = pgTable('payouts', {
 	tokens: integer().notNull(),
 	userId: text()
 		.notNull()
-		.references(() => rawUsers.slackId),
+		.references(() => rawUsers.email),
 	memo: text(),
 	createdAt: timestamp().notNull().defaultNow(),
 	submittedToUnified: boolean().default(false).notNull(),
@@ -79,18 +89,18 @@ export const payouts = pgTable('payouts', {
 export const usersWithTokens = pgView('users_with_tokens').as((qb) => {
 	return qb
 		.select({
-			slackId: rawUsers.slackId,
+			email: rawUsers.email,
 			displayName: rawUsers.displayName,
 			avatarUrl: rawUsers.avatarUrl,
 			isAdmin: rawUsers.isAdmin,
 			tokens: sql<number>`
 			GREATEST(
 				COALESCE(
-					(SELECT SUM(tokens) FROM payouts WHERE "userId" = "user"."slackId"),
+					(SELECT SUM(tokens) FROM payouts WHERE "userId" = "user"."email"),
 					0
 				) -
 				COALESCE(
-					(SELECT SUM("priceAtOrder") FROM shop_orders WHERE "userId" = "user"."slackId" AND status IN ('pending', 'fulfilled')),
+					(SELECT SUM("priceAtOrder") FROM shop_orders WHERE "userId" = "user"."email" AND status IN ('pending', 'fulfilled')),
 					0
 				),
 				0
@@ -104,3 +114,4 @@ export type UserWithTokens = typeof usersWithTokens.$inferSelect;
 export type ShopItem = typeof shopItems.$inferSelect;
 export type ShopOrder = typeof shopOrders.$inferSelect;
 export type Payout = typeof payouts.$inferSelect;
+export type LoginToken = typeof loginTokens.$inferSelect;

@@ -33,7 +33,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	if (customerFilter) {
 		conditions.push(
 			or(
-				ilike(rawUsers.slackId, `%${customerFilter}%`),
+				ilike(rawUsers.email, `%${customerFilter}%`),
 				ilike(rawUsers.displayName, `%${customerFilter}%`)
 			)
 		);
@@ -107,7 +107,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			itemName: shopItems.name,
 			itemImageUrl: shopItems.imageUrl,
 			itemType: shopItems.type,
-			userSlackId: rawUsers.slackId,
+			userEmail: rawUsers.email,
 			userDisplayName: rawUsers.displayName,
 			userAvatarUrl: rawUsers.avatarUrl,
 			userCountry: rawUsers.country,
@@ -115,7 +115,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		})
 		.from(shopOrders)
 		.leftJoin(shopItems, eq(shopOrders.shopItemId, shopItems.id))
-		.leftJoin(rawUsers, eq(shopOrders.userId, rawUsers.slackId))
+		.leftJoin(rawUsers, eq(shopOrders.userId, rawUsers.email))
 		.where(conditions.length > 0 ? and(...conditions) : undefined)
 		.orderBy(orderByClause);
 
@@ -125,17 +125,17 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			status: shopOrders.status,
 			priceAtOrder: shopOrders.priceAtOrder,
 			itemName: shopItems.name,
-			userSlackId: rawUsers.slackId,
+			userEmail: rawUsers.email,
 			userDisplayName: rawUsers.displayName,
 			userCountry: rawUsers.country,
 			userYswsDbFulfilled: rawUsers.yswsDbFulfilled
 		})
 		.from(shopOrders)
 		.leftJoin(shopItems, eq(shopOrders.shopItemId, shopItems.id))
-		.leftJoin(rawUsers, eq(shopOrders.userId, rawUsers.slackId));
+		.leftJoin(rawUsers, eq(shopOrders.userId, rawUsers.email));
 
 	const uniqueCustomers = [
-		...new Set(allOrders.map((o) => o.userDisplayName || o.userSlackId).filter(Boolean))
+		...new Set(allOrders.map((o) => o.userDisplayName || o.userEmail).filter(Boolean))
 	].sort();
 	const uniqueItems = [...new Set(allOrders.map((o) => o.itemName).filter(Boolean))].sort();
 	const uniqueCountries = [...new Set(allOrders.map((o) => o.userCountry).filter(Boolean))].sort();

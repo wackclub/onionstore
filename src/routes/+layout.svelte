@@ -15,12 +15,21 @@
 			>
 				<div class="flex items-center gap-4">
 					<div class="relative">
-						<img
-							src={data.user.avatarUrl}
-							alt="Profile"
-							class="h-11 w-11 rounded-2xl object-cover ring-2 ring-transparent motion-pop"
-							class:ring-[#f2b46c]={data.user.isAdmin}
-						/>
+						{#if data.user.avatarUrl}
+							<img
+								src={data.user.avatarUrl}
+								alt="Profile"
+								class="h-11 w-11 rounded-2xl object-cover ring-2 ring-transparent motion-pop"
+								class:ring-[#f2b46c]={data.user.isAdmin}
+							/>
+						{:else}
+							<div
+								class="h-11 w-11 flex items-center justify-center rounded-2xl bg-[#f8e2c1] text-xl font-bold text-[#8d5c3f] ring-2 ring-transparent motion-pop"
+								class:ring-[#f2b46c]={data.user.isAdmin}
+							>
+								{(data.user.displayName || data.user.email)[0].toUpperCase()}
+							</div>
+						{/if}
 						{#if data.user.isAdmin}
 							<div
 								class="absolute -right-1 -bottom-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-[#f7c978] text-xs font-bold text-white shadow-[0_6px_10px_rgba(65,35,20,0.18)]"
