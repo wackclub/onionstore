@@ -24,18 +24,22 @@ export const rawUsers = pgTable('user', {
 	createdAt: timestamp().notNull().defaultNow()
 });
 
-export const loginTokens = pgTable('login_tokens', {
-	id: text()
-		.primaryKey()
-		.$defaultFn(() => nanoid()),
-	email: text().notNull(),
-	token: text().notNull().unique(),
-	expiresAt: timestamp().notNull(),
-	createdAt: timestamp().notNull().defaultNow()
-}, (table) => ({
-	emailIdx: index('login_tokens_email_idx').on(table.email),
-	tokenIdx: index('login_tokens_token_idx').on(table.token)
-}));
+export const loginTokens = pgTable(
+	'login_tokens',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => nanoid()),
+		email: text().notNull(),
+		token: text().notNull().unique(),
+		expiresAt: timestamp().notNull(),
+		createdAt: timestamp().notNull().defaultNow()
+	},
+	(table) => ({
+		emailIdx: index('login_tokens_email_idx').on(table.email),
+		tokenIdx: index('login_tokens_token_idx').on(table.token)
+	})
+);
 
 export const shopItems = pgTable('shop_items', {
 	id: text()
@@ -50,47 +54,55 @@ export const shopItems = pgTable('shop_items', {
 	hcbMids: text().array()
 });
 
-export const shopOrders = pgTable('shop_orders', {
-	id: text()
-		.primaryKey()
-		.$defaultFn(() => nanoid()),
-	shopItemId: text()
-		.notNull()
-		.references(() => shopItems.id),
-	priceAtOrder: integer().notNull(),
-	status: varchar({ enum: ['pending', 'fulfilled', 'rejected'] })
-		.default('pending')
-		.notNull(),
-	memo: text(),
-	createdAt: timestamp().notNull().defaultNow(),
-	userId: text()
-		.notNull()
-		.references(() => rawUsers.id)
-}, (table) => ({
-	userIdIdx: index('shop_orders_user_id_idx').on(table.userId),
-	shopItemIdIdx: index('shop_orders_shop_item_id_idx').on(table.shopItemId),
-	statusIdx: index('shop_orders_status_idx').on(table.status),
-	createdAtIdx: index('shop_orders_created_at_idx').on(table.createdAt)
-}));
+export const shopOrders = pgTable(
+	'shop_orders',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => nanoid()),
+		shopItemId: text()
+			.notNull()
+			.references(() => shopItems.id),
+		priceAtOrder: integer().notNull(),
+		status: varchar({ enum: ['pending', 'fulfilled', 'rejected'] })
+			.default('pending')
+			.notNull(),
+		memo: text(),
+		createdAt: timestamp().notNull().defaultNow(),
+		userId: text()
+			.notNull()
+			.references(() => rawUsers.id)
+	},
+	(table) => ({
+		userIdIdx: index('shop_orders_user_id_idx').on(table.userId),
+		shopItemIdIdx: index('shop_orders_shop_item_id_idx').on(table.shopItemId),
+		statusIdx: index('shop_orders_status_idx').on(table.status),
+		createdAtIdx: index('shop_orders_created_at_idx').on(table.createdAt)
+	})
+);
 
-export const payouts = pgTable('payouts', {
-	id: text()
-		.primaryKey()
-		.$defaultFn(() => nanoid()),
-	tokens: integer().notNull(),
-	userId: text()
-		.notNull()
-		.references(() => rawUsers.id),
-	memo: text(),
-	createdAt: timestamp().notNull().defaultNow(),
-	submittedToUnified: boolean().default(false).notNull(),
-	baseHackatimeHours: decimal().default('0.0').notNull(),
-	overridenHours: decimal().default('0.0')
-}, (table) => ({
-	userIdIdx: index('payouts_user_id_idx').on(table.userId),
-	createdAtIdx: index('payouts_created_at_idx').on(table.createdAt),
-	submittedToUnifiedIdx: index('payouts_submitted_to_unified_idx').on(table.submittedToUnified)
-}));
+export const payouts = pgTable(
+	'payouts',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => nanoid()),
+		tokens: integer().notNull(),
+		userId: text()
+			.notNull()
+			.references(() => rawUsers.id),
+		memo: text(),
+		createdAt: timestamp().notNull().defaultNow(),
+		submittedToUnified: boolean().default(false).notNull(),
+		baseHackatimeHours: decimal().default('0.0').notNull(),
+		overridenHours: decimal().default('0.0')
+	},
+	(table) => ({
+		userIdIdx: index('payouts_user_id_idx').on(table.userId),
+		createdAtIdx: index('payouts_created_at_idx').on(table.createdAt),
+		submittedToUnifiedIdx: index('payouts_submitted_to_unified_idx').on(table.submittedToUnified)
+	})
+);
 
 export const usersWithTokens = pgView('users_with_tokens').as((qb) => {
 	return qb
