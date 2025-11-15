@@ -1,37 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { shopItems, shopOrders } from '$lib/server/db/schema';
+import { shopItems, shopOrders, rawUsers } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
-import { WebClient } from '@slack/web-api';
-import { SLACK_BOT_TOKEN, LOOPS_API_KEY } from '$env/static/private';
-
-const slack = new WebClient(SLACK_BOT_TOKEN);
-
-async function getEmailFromSlackId(userId: string): Promise<string | null> {
-	try {
-		const result = await slack.users.info({
-			user: userId,
-		});
-
-		if (result.ok && result.user) {
-			const email = result.user.profile?.email;
-
-			if (email) {
-				return email;
-			} else {
-				console.log(`No email found for user ID: ${userId}`);
-				return null;
-			}
-		} else {
-			console.error('Failed to fetch user info:', result.error);
-			return null;
-		}
-	} catch (error) {
-		console.error('Error fetching user email:', error);
-		return null;
-	}
-}
+import { LOOPS_API_KEY } from '$env/static/private';
 
 export const PATCH: RequestHandler = async ({ request, locals }) => {
 	try {
@@ -67,8 +39,13 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Order not found' }, { status: 404 });
 		}
 
-		const email = await getEmailFromSlackId(updatedOrder[0].userId);
-		if (email) {
+		// Get user email
+		const [user] = await db
+			.select()
+			.from(rawUsers)
+			.where(eq(rawUsers.id, updatedOrder[0].userId));
+
+		if (user?.email) {
 			const [shopItem] = await db
 				.select()
 				.from(shopItems)
@@ -77,10 +54,11 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${LOOPS_API_KEY}`,
+					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
 					transactionalId: status === "fulfilled" ? "cmge904kq3fil070i2582g0yx" : "cmge93a9544ogzf0ijfkx26y3",
-					email,
+					email: user.email,
 					dataVariables: {
 						itemName: shopItem.name,
 						orderId: updatedOrder[0].id.slice(0, 8),

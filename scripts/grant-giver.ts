@@ -1,20 +1,16 @@
 import { db } from '../src/lib/server/db';
 import { rawUsers, shopItems, shopOrders } from '../src/lib/server/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
-import { WebClient } from '@slack/web-api';
 import { writeFileSync } from 'fs';
 import path from 'path';
 import * as readline from 'readline';
 
 // Configuration
 const HCBAPI_KEY = process.env.HCBAPI_KEY;
-const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const HCB_API_URL = 'https://hcbapi.skyfall.dev/api/v4/organizations/boba-drops';
 const AIRTABLE_BASE_ID = 'app1sLnxuQNDBZNju';
 const AIRTABLE_TABLE_NAME = 'tblsbrzyPghuKgMyz';
-
-const slack = new WebClient(SLACK_BOT_TOKEN);
 
 interface HCBApiResponse {
 	balance_cents: number;
@@ -64,7 +60,7 @@ interface HCBGrantRequest {
 interface AirtableRecord {
 	id: string;
 	fields: {
-		'Slack ID'?: string;
+		'Email'?: string;
 		'Status'?: string;
 		[key: string]: any;
 	};
@@ -85,12 +81,12 @@ async function promptUser(question: string): Promise<boolean> {
 	});
 }
 
-async function fetchApprovedSlackIds(): Promise<Set<string>> {
+async function fetchApprovedEmails(): Promise<Set<string>> {
 	if (!AIRTABLE_API_KEY) {
 		throw new Error('AIRTABLE_API_KEY environment variable is required for YSWS DB filtering');
 	}
 
-	console.log('Fetching approved Slack IDs from YSWS DB...');
+	console.log('Fetching approved emails from YSWS DB...');
 
 	const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE_NAME)}`;
 	const headers = {
@@ -121,17 +117,17 @@ async function fetchApprovedSlackIds(): Promise<Set<string>> {
 		offset = data.offset;
 	} while (offset);
 
-	// Extract unique Slack IDs
-	const approvedSlackIds = new Set<string>();
+	// Extract unique emails
+	const approvedEmails = new Set<string>();
 	for (const record of allRecords) {
-		const slackId = record.fields['Slack ID'];
-		if (slackId) {
-			approvedSlackIds.add(slackId);
+		const email = record.fields['Email'];
+		if (email) {
+			approvedEmails.add(email.toLowerCase());
 		}
 	}
 
-	console.log(`Found ${approvedSlackIds.size} unique approved Slack IDs from YSWS DB`);
-	return approvedSlackIds;
+	console.log(`Found ${approvedEmails.size} unique approved emails from YSWS DB`);
+	return approvedEmails;
 }
 
 async function fetchHCBBalance(): Promise<number> {
@@ -161,25 +157,6 @@ async function fetchHCBBalance(): Promise<number> {
 	} catch (error) {
 		console.error('Error fetching HCB balance:', error);
 		throw error;
-	}
-}
-
-async function getEmailFromSlackId(userId: string): Promise<string | null> {
-	try {
-		const result = await slack.users.info({
-			user: userId,
-		});
-
-		if (result.ok && result.user) {
-			const email = result.user.profile?.email;
-			return email || null;
-		} else {
-			console.error(`Failed to fetch user info for ${userId}:`, result.error);
-			return null;
-		}
-	} catch (error) {
-		console.error(`Error fetching user email for ${userId}:`, error);
-		return null;
 	}
 }
 
@@ -225,55 +202,53 @@ async function fetchPendingHCBOrders(): Promise<PendingOrder[]> {
 	return pendingOrders;
 }
 
-async function groupOrdersByUserAndItem(orders: PendingOrder[], approvedSlackIds?: Set<string>): Promise<GroupedOrder[]> {
+async function groupOrdersByUserAndItem(orders: PendingOrder[], approvedEmails?: Set<string>): Promise<GroupedOrder[]> {
 	console.log('Grouping orders by user and item...');
-
-	// Filter orders by approved Slack IDs if provided
-	let filteredOrders = orders;
-	if (approvedSlackIds) {
-		const originalCount = orders.length;
-		filteredOrders = orders.filter(order => approvedSlackIds.has(order.userId));
-		console.log(`Filtered orders by YSWS DB approval: ${originalCount} → ${filteredOrders.length} orders`);
-	}
 
 	// Group orders by userId + itemId
 	const grouped = new Map<string, GroupedOrder>();
 
-	// Get all unique user IDs to fetch emails
-	const userIds = [...new Set(filteredOrders.map(order => order.userId))];
-	console.log(`Fetching emails for ${userIds.length} unique users...`);
+	// Get all unique user IDs to fetch from database
+	const userIds = [...new Set(orders.map(order => order.userId))];
+	console.log(`Fetching user data for ${userIds.length} unique users...`);
 
-	// Fetch emails for all users in parallel
-	const emailPromises = userIds.map(async (userId) => {
-		const email = await getEmailFromSlackId(userId);
-		return { userId, email };
-	});
+	// Fetch all users from database
+	const users = await db
+		.select()
+		.from(rawUsers)
+		.where(inArray(rawUsers.id, userIds));
 
-	const userEmails = await Promise.all(emailPromises);
-	const emailMap = new Map<string, string>();
+	const userMap = new Map<string, { email: string }>();
+	for (const user of users) {
+		userMap.set(user.id, { email: user.email });
+	}
 
-	for (const { userId, email } of userEmails) {
-		if (email) {
-			emailMap.set(userId, email);
-		} else {
-			console.warn(`No email found for user ${userId}`);
-		}
+	// Filter orders by approved emails if provided
+	let filteredOrders = orders;
+	if (approvedEmails) {
+		const originalCount = orders.length;
+		filteredOrders = orders.filter(order => {
+			const user = userMap.get(order.userId);
+			return user && approvedEmails.has(user.email.toLowerCase());
+		});
+		console.log(`Filtered orders by YSWS DB approval: ${originalCount} → ${filteredOrders.length} orders`);
 	}
 
 	// Group the orders
 	for (const order of filteredOrders) {
-		const key = `${order.userId}-${order.itemId}`;
-		const email = emailMap.get(order.userId);
+		const user = userMap.get(order.userId);
 
-		if (!email) {
-			console.warn(`Skipping order ${order.orderId} - no email for user ${order.userId}`);
+		if (!user) {
+			console.warn(`Skipping order ${order.orderId} - user ${order.userId} not found in database`);
 			continue;
 		}
+
+		const key = `${order.userId}-${order.itemId}`;
 
 		if (!grouped.has(key)) {
 			grouped.set(key, {
 				userId: order.userId,
-				email,
+				email: user.email,
 				itemId: order.itemId,
 				itemName: order.itemName,
 				quantity: 0,
@@ -390,14 +365,14 @@ async function main() {
 		// Prompt user for YSWS DB filtering
 		const useYswsDbFilter = await promptUser('Only include users with YSWS DB approved submissions? (y/n): ');
 
-		let approvedSlackIds: Set<string> | undefined;
+		let approvedEmails: Set<string> | undefined;
 		if (useYswsDbFilter) {
 			try {
-				approvedSlackIds = await fetchApprovedSlackIds();
+				approvedEmails = await fetchApprovedEmails();
 			} catch (error) {
-				console.error('Failed to fetch approved Slack IDs from YSWS DB:', error);
+				console.error('Failed to fetch approved emails from YSWS DB:', error);
 				console.log('Continuing without YSWS DB filtering...\n');
-				approvedSlackIds = undefined;
+				approvedEmails = undefined;
 			}
 		} else {
 			console.log('Proceeding without YSWS DB filtering...\n');
@@ -415,7 +390,7 @@ async function main() {
 		}
 
 		// Group orders by user and item
-		const groupedOrders = await groupOrdersByUserAndItem(pendingOrders, approvedSlackIds);
+		const groupedOrders = await groupOrdersByUserAndItem(pendingOrders, approvedEmails);
 
 		if (groupedOrders.length === 0) {
 			console.log('No orders with valid emails found. Nothing to process.');

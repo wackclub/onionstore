@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	return {
 		users: users.map((user) => ({
 			...user,
-			orderCount: orderCountByUser.get(user.slackId) ?? 0
+			orderCount: orderCountByUser.get(user.id) ?? 0
 		})),
 		totalOrders
 	};

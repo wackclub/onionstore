@@ -13,13 +13,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 			createdAt: shopOrders.createdAt,
 			itemName: shopItems.name,
 			itemImageUrl: shopItems.imageUrl,
-			userSlackId: rawUsers.slackId,
+			userId: rawUsers.id,
 			userAvatarUrl: rawUsers.avatarUrl
 		})
 		.from(shopOrders)
 		.leftJoin(shopItems, eq(shopOrders.shopItemId, shopItems.id))
-		.leftJoin(rawUsers, eq(shopOrders.userId, rawUsers.slackId))
-		.where(eq(shopOrders.userId, locals.user?.slackId))
+		.leftJoin(rawUsers, eq(shopOrders.userId, rawUsers.id))
+		.where(eq(shopOrders.userId, locals.user?.id))
 		.orderBy(shopOrders.createdAt);
 
 	return {

@@ -15,7 +15,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const itemFilter = url.searchParams.get('item');
 	const typeFilter = url.searchParams.get('type');
 	const countryFilter = url.searchParams.get('country');
-	const yswsDbFilter = url.searchParams.get('yswsDb');
 	const startDate = url.searchParams.get('startDate');
 	const endDate = url.searchParams.get('endDate');
 	const minPrice = url.searchParams.get('minPrice');
@@ -33,7 +32,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	if (customerFilter) {
 		conditions.push(
 			or(
-				ilike(rawUsers.slackId, `%${customerFilter}%`),
+				ilike(rawUsers.email, `%${customerFilter}%`),
 				ilike(rawUsers.displayName, `%${customerFilter}%`)
 			)
 		);
@@ -69,11 +68,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		conditions.push(eq(rawUsers.country, countryFilter));
 	}
 
-	if (yswsDbFilter && yswsDbFilter !== 'all') {
-		const isYswsDb = yswsDbFilter === 'true';
-		conditions.push(eq(rawUsers.yswsDbFulfilled, isYswsDb));
-	}
-
 	// Build order by clause
 	let orderByClause;
 	const isDesc = sortOrder === 'desc';
@@ -107,15 +101,15 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			itemName: shopItems.name,
 			itemImageUrl: shopItems.imageUrl,
 			itemType: shopItems.type,
-			userSlackId: rawUsers.slackId,
+			userId: rawUsers.id,
+			userEmail: rawUsers.email,
 			userDisplayName: rawUsers.displayName,
 			userAvatarUrl: rawUsers.avatarUrl,
-			userCountry: rawUsers.country,
-			userYswsDbFulfilled: rawUsers.yswsDbFulfilled
+			userCountry: rawUsers.country
 		})
 		.from(shopOrders)
 		.leftJoin(shopItems, eq(shopOrders.shopItemId, shopItems.id))
-		.leftJoin(rawUsers, eq(shopOrders.userId, rawUsers.slackId))
+		.leftJoin(rawUsers, eq(shopOrders.userId, rawUsers.id))
 		.where(conditions.length > 0 ? and(...conditions) : undefined)
 		.orderBy(orderByClause);
 
@@ -125,17 +119,16 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			status: shopOrders.status,
 			priceAtOrder: shopOrders.priceAtOrder,
 			itemName: shopItems.name,
-			userSlackId: rawUsers.slackId,
+			userEmail: rawUsers.email,
 			userDisplayName: rawUsers.displayName,
-			userCountry: rawUsers.country,
-			userYswsDbFulfilled: rawUsers.yswsDbFulfilled
+			userCountry: rawUsers.country
 		})
 		.from(shopOrders)
 		.leftJoin(shopItems, eq(shopOrders.shopItemId, shopItems.id))
-		.leftJoin(rawUsers, eq(shopOrders.userId, rawUsers.slackId));
+		.leftJoin(rawUsers, eq(shopOrders.userId, rawUsers.id));
 
 	const uniqueCustomers = [
-		...new Set(allOrders.map((o) => o.userDisplayName || o.userSlackId).filter(Boolean))
+		...new Set(allOrders.map((o) => o.userDisplayName || o.userEmail).filter(Boolean))
 	].sort();
 	const uniqueItems = [...new Set(allOrders.map((o) => o.itemName).filter(Boolean))].sort();
 	const uniqueCountries = [...new Set(allOrders.map((o) => o.userCountry).filter(Boolean))].sort();
@@ -152,7 +145,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			item: itemFilter,
 			type: typeFilter,
 			country: countryFilter,
-			yswsDb: yswsDbFilter,
 			startDate,
 			endDate,
 			minPrice,
