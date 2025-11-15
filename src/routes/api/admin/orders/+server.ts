@@ -7,7 +7,6 @@ import { LOOPS_API_KEY } from '$env/static/private';
 
 export const PATCH: RequestHandler = async ({ request, locals }) => {
 	try {
-		// Check if user is admin
 		if (!locals.user?.isAdmin) {
 			return json({ error: 'Access denied' }, { status: 403 });
 		}
@@ -18,12 +17,9 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Order ID and status are required' }, { status: 400 });
 		}
 
-		// Validate status
 		if (!['fulfilled', 'rejected'].includes(status)) {
 			return json({ error: 'Invalid status' }, { status: 400 });
 		}
-
-		// Update the order
 		const updateData: { status: string; memo?: string } = { status };
 		if (memo !== undefined) {
 			updateData.memo = memo;
@@ -39,7 +35,6 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Order not found' }, { status: 404 });
 		}
 
-		// Get user email
 		const [user] = await db
 			.select()
 			.from(rawUsers)

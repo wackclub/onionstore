@@ -5,7 +5,6 @@ import { writeFileSync } from 'fs';
 import path from 'path';
 import * as readline from 'readline';
 
-// Configuration
 const HCBAPI_KEY = process.env.HCBAPI_KEY;
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const HCB_API_URL = 'https://hcbapi.skyfall.dev/api/v4/organizations/boba-drops';
@@ -117,7 +116,6 @@ async function fetchApprovedEmails(): Promise<Set<string>> {
 		offset = data.offset;
 	} while (offset);
 
-	// Extract unique emails
 	const approvedEmails = new Set<string>();
 	for (const record of allRecords) {
 		const email = record.fields['Email'];
@@ -205,14 +203,11 @@ async function fetchPendingHCBOrders(): Promise<PendingOrder[]> {
 async function groupOrdersByUserAndItem(orders: PendingOrder[], approvedEmails?: Set<string>): Promise<GroupedOrder[]> {
 	console.log('Grouping orders by user and item...');
 
-	// Group orders by userId + itemId
 	const grouped = new Map<string, GroupedOrder>();
 
-	// Get all unique user IDs to fetch from database
 	const userIds = [...new Set(orders.map(order => order.userId))];
 	console.log(`Fetching user data for ${userIds.length} unique users...`);
 
-	// Fetch all users from database
 	const users = await db
 		.select()
 		.from(rawUsers)
@@ -223,7 +218,6 @@ async function groupOrdersByUserAndItem(orders: PendingOrder[], approvedEmails?:
 		userMap.set(user.id, { email: user.email });
 	}
 
-	// Filter orders by approved emails if provided
 	let filteredOrders = orders;
 	if (approvedEmails) {
 		const originalCount = orders.length;
@@ -234,7 +228,6 @@ async function groupOrdersByUserAndItem(orders: PendingOrder[], approvedEmails?:
 		console.log(`Filtered orders by YSWS DB approval: ${originalCount} → ${filteredOrders.length} orders`);
 	}
 
-	// Group the orders
 	for (const order of filteredOrders) {
 		const user = userMap.get(order.userId);
 
@@ -275,13 +268,10 @@ async function groupOrdersByUserAndItem(orders: PendingOrder[], approvedEmails?:
 function optimizeGrantAllocation(groupedOrders: GroupedOrder[], budget: number): GrantAllocation[] {
 	console.log(`\nOptimizing grant allocation with budget: $${budget.toFixed(2)}`);
 
-	// Sort by priority: earliest order first (FIFO), then by smallest grant amount
 	const sortedOrders = [...groupedOrders].sort((a, b) => {
-		// First, sort by total USD cost (smaller grants first to maximize coverage)
 		const costDiff = a.totalUsdCost - b.totalUsdCost;
 		if (costDiff !== 0) return costDiff;
 
-		// Then by user (for consistency)
 		return a.userId.localeCompare(b.userId);
 	});
 
@@ -362,7 +352,6 @@ async function main() {
 	try {
 		console.log('=== HCB Grant Giver ===\n');
 
-		// Prompt user for YSWS DB filtering
 		const useYswsDbFilter = await promptUser('Only include users with YSWS DB approved submissions? (y/n): ');
 
 		let approvedEmails: Set<string> | undefined;
@@ -378,10 +367,8 @@ async function main() {
 			console.log('Proceeding without YSWS DB filtering...\n');
 		}
 
-		// Fetch HCB balance
 		const budget = await fetchHCBBalance();
 
-		// Fetch pending HCB orders
 		const pendingOrders = await fetchPendingHCBOrders();
 
 		if (pendingOrders.length === 0) {
@@ -389,7 +376,6 @@ async function main() {
 			return;
 		}
 
-		// Group orders by user and item
 		const groupedOrders = await groupOrdersByUserAndItem(pendingOrders, approvedEmails);
 
 		if (groupedOrders.length === 0) {
@@ -397,7 +383,6 @@ async function main() {
 			return;
 		}
 
-		// Calculate total requested
 		const totalRequested = groupedOrders.reduce((sum, order) => sum + order.totalUsdCost, 0);
 		console.log(`\nTotal grant amount requested: $${totalRequested.toFixed(2)}`);
 		console.log(`Available budget: $${budget.toFixed(2)}`);
@@ -409,10 +394,8 @@ async function main() {
 			console.log('Will optimize to maximize grants within budget...');
 		}
 
-		// Optimize grant allocation
 		const allocations = optimizeGrantAllocation(groupedOrders, budget);
 
-		// Output results
 		console.log('\n=== GRANT ALLOCATION RESULTS ===');
 
 		if (allocations.length === 0) {
@@ -443,11 +426,9 @@ async function main() {
 		console.log('\n=== JSON OUTPUT ===');
 		console.log(JSON.stringify(allocations, null, 2));
 
-		// Create HCB grant requests and write to file
 		const grantRequests = createHCBGrantRequests(allocations);
 		writeGrantRequestsToFile(grantRequests, allocations);
 
-		// Show unfulfilled orders
 		const fulfilledOrderIds = new Set(allocations.flatMap(alloc => alloc.orderIds));
 		const unfulfilledOrders = groupedOrders.filter(order =>
 			!order.orderIds.some(id => fulfilledOrderIds.has(id))
@@ -471,5 +452,4 @@ async function main() {
 	}
 }
 
-// Run the script
 main();

@@ -4,7 +4,6 @@ import { db } from '../src/lib/server/db';
 import { shopItems, shopOrders } from '../src/lib/server/db/schema';
 import { eq, inArray } from 'drizzle-orm';
 
-// Configuration
 const HCBAPI_KEY = process.env.HCBAPI_KEY;
 const LOOPS_API_KEY = process.env.LOOPS_API_KEY;
 const HCB_API_BASE_URL = 'https://hcbapi.skyfall.dev/api/v4/organizations/boba-drops/card_grants';
@@ -72,7 +71,6 @@ async function createHCBGrant(grantRequest: HCBGrantRequest): Promise<HCBGrantRe
 
 async function markOrdersFulfilledAndSendEmails(allocation: GrantAllocation): Promise<void> {
 	try {
-		// Mark orders as fulfilled in the database
 		await db
 			.update(shopOrders)
 			.set({ status: 'fulfilled' })
@@ -80,7 +78,6 @@ async function markOrdersFulfilledAndSendEmails(allocation: GrantAllocation): Pr
 
 		console.log(`✓ Marked ${allocation.orderIds.length} orders as fulfilled for ${allocation.email}`);
 
-		// Send fulfillment email via Loops
 		if (LOOPS_API_KEY) {
 			const response = await fetch("https://app.loops.so/api/v1/transactional", {
 				method: 'POST',
@@ -130,7 +127,6 @@ async function processGrantFile(filename: string): Promise<void> {
 		const failed: HCBGrantRequest[] = [];
 		const successfulAllocations: GrantAllocation[] = [];
 
-		// Process grants sequentially to avoid rate limiting
 		for (let i = 0; i < grantData.grant_requests.length; i++) {
 			const grantRequest = grantData.grant_requests[i];
 			const allocation = grantData.allocation_details[i]; // Allocation details should be in the same order
@@ -143,20 +139,17 @@ async function processGrantFile(filename: string): Promise<void> {
 				successful.push(response);
 				successfulAllocations.push(allocation);
 
-				// Mark orders as fulfilled and send emails for successful grants
 				console.log(`Processing fulfillment for ${allocation.email}...`);
 				await markOrdersFulfilledAndSendEmails(allocation);
 			} else {
 				failed.push(grantRequest);
 			}
 
-			// Add a small delay between requests to be respectful
 			if (i < grantData.grant_requests.length - 1) {
 				await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
 			}
 		}
 
-		// Summary
 		console.log('\n=== SUMMARY ===');
 		console.log(`Successful grants: ${successful.length}/${grantData.grant_requests.length}`);
 		console.log(`Failed grants: ${failed.length}/${grantData.grant_requests.length}`);
@@ -177,7 +170,6 @@ async function processGrantFile(filename: string): Promise<void> {
 			}
 		}
 
-		// Write results to file
 		const resultsFilename = filename.replace('.json', '-results.json');
 		const resultsFilepath = path.join(process.cwd(), 'scripts', resultsFilename);
 
@@ -233,5 +225,4 @@ async function main() {
 	await processGrantFile(filename);
 }
 
-// Run the script
 main().catch(console.error);
