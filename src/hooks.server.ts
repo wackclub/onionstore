@@ -6,7 +6,6 @@ import { symmetric } from '$lib/server/crypto';
 import { eq } from 'drizzle-orm';
 
 const authMiddleware: Handle = async ({ event, resolve }) => {
-	// Skip auth for public routes
 	if (event.url.pathname.startsWith('/api/auth')) return resolve(event);
 	if (event.url.pathname === '/login') return resolve(event);
 	if (event.url.pathname.startsWith('/api/uploadthing')) return resolve(event);
@@ -46,22 +45,18 @@ const authMiddleware: Handle = async ({ event, resolve }) => {
 };
 
 const redirectMiddleware: Handle = async ({ event, resolve }) => {
-	// Skip for API routes and public pages
 	if (event.url.pathname.startsWith('/api/uploadthing')) return resolve(event);
 	if (event.url.pathname.startsWith('/api/auth')) return resolve(event);
 	if (event.url.pathname === '/login') return resolve(event);
 
-	// Redirect unauthenticated users to login
 	if (!event.locals.user) {
 		return redirect(302, '/login');
 	}
 
-	// Redirect to welcome page if country is not set
 	if (!event.locals.user.country && event.url.pathname !== '/welcome') {
 		return redirect(302, '/welcome');
 	}
 
-	// Prevent non-admins from accessing admin pages
 	if (!event.locals.user.isAdmin && event.url.pathname.includes('admin')) {
 		return redirect(302, '/');
 	}

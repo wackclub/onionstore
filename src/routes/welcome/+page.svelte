@@ -1,60 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import countryList from 'country-list';
 
 	let country = $state('');
 	let loading = $state(false);
 	let error = $state('');
 
-	// List of countries with their ISO 3166-1 alpha-2 codes
 	const countries = [
-		{ code: 'US', name: 'United States' },
-		{ code: 'CA', name: 'Canada' },
-		{ code: 'GB', name: 'United Kingdom' },
-		{ code: 'AU', name: 'Australia' },
-		{ code: 'NZ', name: 'New Zealand' },
-		{ code: 'IE', name: 'Ireland' },
-		{ code: 'IN', name: 'India' },
-		{ code: 'SG', name: 'Singapore' },
-		{ code: 'MY', name: 'Malaysia' },
-		{ code: 'PH', name: 'Philippines' },
-		{ code: 'ID', name: 'Indonesia' },
-		{ code: 'TH', name: 'Thailand' },
-		{ code: 'VN', name: 'Vietnam' },
-		{ code: 'JP', name: 'Japan' },
-		{ code: 'KR', name: 'South Korea' },
-		{ code: 'CN', name: 'China' },
-		{ code: 'HK', name: 'Hong Kong' },
-		{ code: 'TW', name: 'Taiwan' },
-		{ code: 'DE', name: 'Germany' },
-		{ code: 'FR', name: 'France' },
-		{ code: 'IT', name: 'Italy' },
-		{ code: 'ES', name: 'Spain' },
-		{ code: 'NL', name: 'Netherlands' },
-		{ code: 'BE', name: 'Belgium' },
-		{ code: 'CH', name: 'Switzerland' },
-		{ code: 'AT', name: 'Austria' },
-		{ code: 'SE', name: 'Sweden' },
-		{ code: 'NO', name: 'Norway' },
-		{ code: 'DK', name: 'Denmark' },
-		{ code: 'FI', name: 'Finland' },
-		{ code: 'PL', name: 'Poland' },
-		{ code: 'CZ', name: 'Czech Republic' },
-		{ code: 'BR', name: 'Brazil' },
-		{ code: 'MX', name: 'Mexico' },
-		{ code: 'AR', name: 'Argentina' },
-		{ code: 'CL', name: 'Chile' },
-		{ code: 'CO', name: 'Colombia' },
-		{ code: 'PE', name: 'Peru' },
-		{ code: 'ZA', name: 'South Africa' },
-		{ code: 'NG', name: 'Nigeria' },
-		{ code: 'KE', name: 'Kenya' },
-		{ code: 'EG', name: 'Egypt' },
-		{ code: 'AE', name: 'United Arab Emirates' },
-		{ code: 'SA', name: 'Saudi Arabia' },
-		{ code: 'IL', name: 'Israel' },
-		{ code: 'TR', name: 'Turkey' },
-		{ code: 'RU', name: 'Russia' },
-		{ code: 'UA', name: 'Ukraine' },
+		...countryList.getData().map((c) => ({ code: c.code, name: c.name })),
 		{ code: 'OTHER', name: 'Other' }
 	].sort((a, b) => a.name.localeCompare(b.name));
 
@@ -80,7 +33,6 @@
 				return;
 			}
 
-			// Redirect to home page
 			goto('/');
 		} catch (err) {
 			error = 'Failed to update country';

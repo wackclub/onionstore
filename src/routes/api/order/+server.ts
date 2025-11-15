@@ -12,13 +12,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Shop item ID is required' }, { status: 400 });
 		}
 
-		// Get user from session
 		const userId = locals.user?.id;
 		if (!userId) {
 			return json({ error: 'Authentication required' }, { status: 401 });
 		}
 
-		// Get the shop item
 		const shopItem = await db.select().from(shopItems).where(eq(shopItems.id, shopItemId)).limit(1);
 		if (!shopItem.length) {
 			return json({ error: 'Shop item not found' }, { status: 404 });
@@ -26,7 +24,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const item = shopItem[0];
 
-		// Get user's current token balance
 		const userWithTokens = await db
 			.select()
 			.from(usersWithTokens)
@@ -38,7 +35,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const user = userWithTokens[0];
 
-		// Check if user has enough tokens
 		if (user.tokens < item.price) {
 			return json(
 				{
@@ -51,8 +47,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		const remainingTokens = user.tokens - item.price;
-
-		// Create the order
 		const newOrder = await db
 			.insert(shopOrders)
 			.values({

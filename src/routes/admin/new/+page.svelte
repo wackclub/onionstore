@@ -12,7 +12,6 @@
 
 	$effect(() => {
 		if (form?.success) {
-			// clear image url since it doesn't seem to be cleared automatically
 			imageUrl = '';
 			toast.success('Item created successfully!', {
 				duration: 3000,

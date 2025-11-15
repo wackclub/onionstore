@@ -8,7 +8,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw redirect(302, '/');
 	}
 
-	// Get all users with their token counts
 	const users = await db.select().from(usersWithTokens);
 
 	const orderCounts = await db

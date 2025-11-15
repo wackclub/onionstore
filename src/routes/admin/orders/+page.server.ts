@@ -9,7 +9,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		throw redirect(302, '/');
 	}
 
-	// Extract query parameters for filtering and sorting
 	const statusFilter = url.searchParams.get('status');
 	const customerFilter = url.searchParams.get('customer');
 	const itemFilter = url.searchParams.get('item');
@@ -21,8 +20,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const maxPrice = url.searchParams.get('maxPrice');
 	const sortBy = url.searchParams.get('sortBy') || 'createdAt';
 	const sortOrder = url.searchParams.get('sortOrder') || 'desc';
-
-	// Build where conditions
 	const conditions = [];
 
 	if (statusFilter && statusFilter !== 'all') {
@@ -52,7 +49,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	if (endDate) {
 		const endDateObj = new Date(endDate);
-		endDateObj.setHours(23, 59, 59, 999); // End of day
+		endDateObj.setHours(23, 59, 59, 999);
 		conditions.push(lte(shopOrders.createdAt, endDateObj));
 	}
 
@@ -68,7 +65,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		conditions.push(eq(rawUsers.country, countryFilter));
 	}
 
-	// Build order by clause
 	let orderByClause;
 	const isDesc = sortOrder === 'desc';
 
@@ -113,7 +109,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		.where(conditions.length > 0 ? and(...conditions) : undefined)
 		.orderBy(orderByClause);
 
-	// Get filter options for dropdowns
 	const allOrders = await db
 		.select({
 			status: shopOrders.status,

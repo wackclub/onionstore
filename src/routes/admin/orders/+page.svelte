@@ -8,7 +8,6 @@
 
 	let { data }: { data: PageData } = $props();
 
-	// Extract properties safely
 	let orders = $state(data.orders);
 	const filters = data.filters ?? {};
 	const filterOptions = data.filterOptions ?? {
@@ -17,8 +16,6 @@
 		countries: [],
 		priceRange: { min: 0, max: 1000 }
 	};
-
-	// Filter and sort state
 	let statusFilter = $state(filters?.status ?? 'all');
 	let customerFilter = $state(filters?.customer ?? '');
 	let itemFilter = $state(filters?.item ?? '');
@@ -32,30 +29,21 @@
 	let sortBy = $state(filters?.sortBy ?? 'createdAt');
 	let sortOrder = $state(filters?.sortOrder ?? 'desc');
 
-	// Show/hide filters
 	let showFilters = $state(false);
-
-	// Customer combobox state
 	let customerComboboxOpen = $state(false);
 	let customerSearchTerm = $state('');
 	let customerComboboxRef = $state<HTMLDivElement>();
 	let customerInputRef = $state<HTMLInputElement>();
 
-	// Loading state for order updates
 	let updatingOrders = $state(new Set<string>());
-
-	// Toast notification state
 	let toastMessage = $state('');
 	let toastType = $state<'success' | 'error'>('success');
 	let showToast = $state(false);
 
-	// Modal state for memos
 	let showMemoModal = $state(false);
 	let memoText = $state('');
 	let memoOrderId = $state('');
 	let memoStatus = $state<'fulfilled' | 'rejected'>('fulfilled');
-
-	// Filter customers based on search term
 	const filteredCustomers = $derived(() => {
 		if (!customerSearchTerm) return filterOptions.customers.filter(Boolean);
 		return filterOptions.customers.filter(
@@ -63,10 +51,7 @@
 		);
 	});
 
-	// Current filtered customers list
 	const currentFilteredCustomers = $derived(filteredCustomers());
-
-	// Derived state for filtered and sorted orders
 	const filteredAndSortedOrders = $derived(() => {
 		return orders;
 	});
@@ -76,13 +61,10 @@
 		toastType = type;
 		showToast = true;
 
-		// Auto hide after 3 seconds
 		setTimeout(() => {
 			showToast = false;
 		}, 3000);
 	}
-
-	// Modal functions
 	function openMemoModal(orderId: string, status: 'fulfilled' | 'rejected') {
 		memoOrderId = orderId;
 		memoStatus = status;
@@ -102,7 +84,6 @@
 		}
 	}
 
-	// Customer combobox functions
 	function selectCustomer(customer: string) {
 		customerFilter = customer;
 		customerSearchTerm = customer;
@@ -122,7 +103,6 @@
 	}
 
 	function handleCustomerInputBlur() {
-		// Delay hiding to allow clicking on dropdown items
 		setTimeout(() => {
 			customerComboboxOpen = false;
 		}, 150);
@@ -134,7 +114,6 @@
 			customerInputRef?.blur();
 		} else if (event.key === 'ArrowDown') {
 			event.preventDefault();
-			// Focus first option in dropdown
 			const firstOption = customerComboboxRef?.querySelector('[role="option"]') as HTMLElement;
 			firstOption?.focus();
 		}
@@ -150,7 +129,6 @@
 		}
 	}
 
-	// Initialize customer search input from filter
 	$effect(() => {
 		if (!customerComboboxOpen) {
 			customerSearchTerm = customerFilter || '';
@@ -238,7 +216,6 @@
 	}
 
 	async function updateOrderStatus(orderId: string, newStatus: string, memo?: string) {
-		// Add to updating set
 		updatingOrders.add(orderId);
 
 		try {
@@ -251,7 +228,6 @@
 			});
 
 			if (response.ok) {
-				// Update the local state instead of refreshing the page
 				const orderIndex = orders.findIndex((order) => order.id === orderId);
 				if (orderIndex !== -1) {
 					orders[orderIndex] = { ...orders[orderIndex], status: newStatus as any, memo };
@@ -263,7 +239,6 @@
 		} catch (error) {
 			showToastNotification('Network error. Please try again.', 'error');
 		} finally {
-			// Remove from updating set
 			updatingOrders.delete(orderId);
 		}
 	}
@@ -278,7 +253,6 @@
 		closeMemoModal();
 	}
 
-	// Get current active filters count for badge using $derived
 	const activeFiltersCount = $derived(
 		[
 			statusFilter !== 'all' ? 1 : 0,
@@ -294,7 +268,6 @@
 		].reduce((a, b) => a + b, 0)
 	);
 
-	// Update local orders when data changes (due to filtering)
 	$effect(() => {
 		orders = data.orders;
 	});

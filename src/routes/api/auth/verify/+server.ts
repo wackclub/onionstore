@@ -14,7 +14,6 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	}
 
 	try {
-		// Find the login token
 		const loginToken = await db
 			.select()
 			.from(loginTokens)
@@ -32,7 +31,6 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 		const { email } = loginToken[0];
 
-		// Find or create the user
 		let user = await db
 			.select()
 			.from(rawUsers)
@@ -40,7 +38,6 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 			.limit(1);
 
 		if (!user || user.length === 0) {
-			// Create new user
 			const newUser = await db
 				.insert(rawUsers)
 				.values({
@@ -51,27 +48,23 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 			user = newUser;
 		}
 
-		// Delete the used token
 		await db.delete(loginTokens).where(eq(loginTokens.token, token));
 
-		// Create session cookie
 		cookies.set('_boba_mahad_says_hi_session', await symmetric.encrypt(user[0].id, SESSIONS_SECRET), {
 			path: '/',
-			maxAge: 60 * 60 * 24 * 90, // 90 days
+			maxAge: 60 * 60 * 24 * 90,
 			httpOnly: true,
 			sameSite: 'lax',
 			secure: process.env.NODE_ENV === 'production'
 		});
 
-		// If user doesn't have a country, redirect to country selection
 		if (!user[0].country) {
 			throw redirect(302, '/welcome');
 		}
 
-		// Redirect to home
 		throw redirect(302, '/');
 	} catch (error) {
-		if (error instanceof Response) {
+		if (error instanceof Response || (error && typeof error === 'object' && 'status' in error && 'location' in error)) {
 			throw error;
 		}
 		console.error('Failed to verify login token:', error);
