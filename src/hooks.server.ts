@@ -6,8 +6,14 @@ import { symmetric } from '$lib/server/crypto';
 import { eq } from 'drizzle-orm';
 
 const authMiddleware: Handle = async ({ event, resolve }) => {
-	if (event.url.pathname.startsWith('/api/auth')) return resolve(event);
-	if (event.url.pathname === '/login') return resolve(event);
+	const unauthenticatedPaths = [
+		'/api/auth/send-link',
+		'/api/auth/verify',
+		'/api/auth/logout',
+		'/login'
+	];
+
+	if (unauthenticatedPaths.includes(event.url.pathname)) return resolve(event);
 	if (event.url.pathname.startsWith('/api/uploadthing')) return resolve(event);
 
 	const start = performance.now();
