@@ -1,0 +1,80 @@
+import { redirect } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+import { db } from '$lib/server/db';
+import { loginTokens, rawUsers } from '$lib/server/db/schema';
+import { eq, and, gt } from 'drizzle-orm';
+import { symmetric } from '$lib/server/crypto';
+import { SESSIONS_SECRET } from '$env/static/private';
+
+export const GET: RequestHandler = async ({ url, cookies }) => {
+	const token = url.searchParams.get('token');
+
+	if (!token) {
+		throw redirect(302, '/login?error=invalid_token');
+	}
+
+	try {
+		// Find the login token
+		const loginToken = await db
+			.select()
+			.from(loginTokens)
+			.where(
+				and(
+					eq(loginTokens.token, token),
+					gt(loginTokens.expiresAt, new Date())
+				)
+			)
+			.limit(1);
+
+		if (!loginToken || loginToken.length === 0) {
+			throw redirect(302, '/login?error=expired_token');
+		}
+
+		const { email } = loginToken[0];
+
+		// Find or create the user
+		let user = await db
+			.select()
+			.from(rawUsers)
+			.where(eq(rawUsers.email, email))
+			.limit(1);
+
+		if (!user || user.length === 0) {
+			// Create new user
+			const newUser = await db
+				.insert(rawUsers)
+				.values({
+					email,
+					displayName: email.split('@')[0]
+				})
+				.returning();
+			user = newUser;
+		}
+
+		// Delete the used token
+		await db.delete(loginTokens).where(eq(loginTokens.token, token));
+
+		// Create session cookie
+		cookies.set('_boba_mahad_says_hi_session', await symmetric.encrypt(user[0].id, SESSIONS_SECRET), {
+			path: '/',
+			maxAge: 60 * 60 * 24 * 90, // 90 days
+			httpOnly: true,
+			sameSite: 'lax',
+			secure: process.env.NODE_ENV === 'production'
+		});
+
+		// If user doesn't have a country, redirect to country selection
+		if (!user[0].country) {
+			throw redirect(302, '/welcome');
+		}
+
+		// Redirect to home
+		throw redirect(302, '/');
+	} catch (error) {
+		if (error instanceof Response) {
+			throw error;
+		}
+		console.error('Failed to verify login token:', error);
+		throw redirect(302, '/login?error=verification_failed');
+	}
+};

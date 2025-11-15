@@ -12,8 +12,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Shop item ID is required' }, { status: 400 });
 		}
 
-		// Get user from session (assuming you have auth setup)
-		const userId = locals.user?.slackId;
+		// Get user from session
+		const userId = locals.user?.id;
 		if (!userId) {
 			return json({ error: 'Authentication required' }, { status: 401 });
 		}
@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const userWithTokens = await db
 			.select()
 			.from(usersWithTokens)
-			.where(eq(usersWithTokens.slackId, userId))
+			.where(eq(usersWithTokens.id, userId))
 			.limit(1);
 		if (!userWithTokens.length) {
 			return json({ error: 'User not found' }, { status: 404 });

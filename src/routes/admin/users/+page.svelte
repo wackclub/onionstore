@@ -24,7 +24,7 @@
 	let userOrders = $state<Record<string, OrdersState>>({});
 
 	const toggleOrders = async (user: PageData['users'][number]) => {
-		const userId = user.slackId;
+		const userId = user.id;
 
 		if (selectedUser === userId) {
 			selectedUser = null;
@@ -108,11 +108,24 @@
 							<tr class="transition hover:bg-[rgba(244,213,178,0.35)]">
 								<td class="px-6 py-4 whitespace-nowrap">
 									<div class="flex items-center gap-3">
-										<div class="h-11 w-11 overflow-hidden rounded-2xl bg-[#f8e2c1]">
-											<img src={user.avatarUrl} alt="Avatar" class="h-full w-full object-cover" />
-										</div>
-										<div class="text-sm font-semibold text-stone-900">
-											{user.displayName || user.slackId}
+										{#if user.avatarUrl}
+											<div class="h-11 w-11 overflow-hidden rounded-2xl bg-[#f8e2c1]">
+												<img src={user.avatarUrl} alt="Avatar" class="h-full w-full object-cover" />
+											</div>
+										{:else}
+											<div class="h-11 w-11 flex items-center justify-center rounded-2xl bg-[#f8e2c1] text-lg font-bold text-[#8d5c3f]">
+												{user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '?'}
+											</div>
+										{/if}
+										<div>
+											<div class="text-sm font-semibold text-stone-900">
+												{user.displayName || user.email}
+											</div>
+											{#if user.displayName && user.email}
+												<div class="text-xs text-stone-500">
+													{user.email}
+												</div>
+											{/if}
 										</div>
 									</div>
 								</td>
@@ -137,12 +150,12 @@
 										onclick={() => toggleOrders(user)}
 										class="text-[#8d5c3f] transition hover:text-[#5b3522]"
 									>
-										{selectedUser === user.slackId ? 'Hide' : 'View'} Orders
+										{selectedUser === user.id ? 'Hide' : 'View'} Orders
 									</button>
 								</td>
 							</tr>
-							{#if selectedUser === user.slackId}
-								{@const ordersState = userOrders[user.slackId]}
+							{#if selectedUser === user.id}
+								{@const ordersState = userOrders[user.id]}
 								<tr class="bg-[rgba(244,213,178,0.25)]">
 									<td colspan="5" class="px-6 py-4">
 										<div class="space-y-3 rounded-2xl border border-[#ead2b2] bg-[rgba(255,255,255,0.6)] p-4">

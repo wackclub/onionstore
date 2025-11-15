@@ -13,13 +13,29 @@ import { sql } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 
 export const rawUsers = pgTable('user', {
-	slackId: text().primaryKey(),
+	id: text()
+		.primaryKey()
+		.$defaultFn(() => nanoid()),
+	email: text().notNull().unique(),
 	displayName: text(),
-	avatarUrl: text().notNull(),
+	avatarUrl: text(),
 	isAdmin: boolean().default(false).notNull(),
 	country: varchar({ length: 2 }),
-	yswsDbFulfilled: boolean().default(false).notNull()
+	createdAt: timestamp().notNull().defaultNow()
 });
+
+export const loginTokens = pgTable('login_tokens', {
+	id: text()
+		.primaryKey()
+		.$defaultFn(() => nanoid()),
+	email: text().notNull(),
+	token: text().notNull().unique(),
+	expiresAt: timestamp().notNull(),
+	createdAt: timestamp().notNull().defaultNow()
+}, (table) => ({
+	emailIdx: index('login_tokens_email_idx').on(table.email),
+	tokenIdx: index('login_tokens_token_idx').on(table.token)
+}));
 
 export const shopItems = pgTable('shop_items', {
 	id: text()
@@ -49,7 +65,7 @@ export const shopOrders = pgTable('shop_orders', {
 	createdAt: timestamp().notNull().defaultNow(),
 	userId: text()
 		.notNull()
-		.references(() => rawUsers.slackId)
+		.references(() => rawUsers.id)
 }, (table) => ({
 	userIdIdx: index('shop_orders_user_id_idx').on(table.userId),
 	shopItemIdIdx: index('shop_orders_shop_item_id_idx').on(table.shopItemId),
@@ -64,7 +80,7 @@ export const payouts = pgTable('payouts', {
 	tokens: integer().notNull(),
 	userId: text()
 		.notNull()
-		.references(() => rawUsers.slackId),
+		.references(() => rawUsers.id),
 	memo: text(),
 	createdAt: timestamp().notNull().defaultNow(),
 	submittedToUnified: boolean().default(false).notNull(),
@@ -79,18 +95,20 @@ export const payouts = pgTable('payouts', {
 export const usersWithTokens = pgView('users_with_tokens').as((qb) => {
 	return qb
 		.select({
-			slackId: rawUsers.slackId,
+			id: rawUsers.id,
+			email: rawUsers.email,
 			displayName: rawUsers.displayName,
 			avatarUrl: rawUsers.avatarUrl,
 			isAdmin: rawUsers.isAdmin,
+			country: rawUsers.country,
 			tokens: sql<number>`
 			GREATEST(
 				COALESCE(
-					(SELECT SUM(tokens) FROM payouts WHERE "userId" = "user"."slackId"),
+					(SELECT SUM(tokens) FROM payouts WHERE "userId" = "user"."id"),
 					0
 				) -
 				COALESCE(
-					(SELECT SUM("priceAtOrder") FROM shop_orders WHERE "userId" = "user"."slackId" AND status IN ('pending', 'fulfilled')),
+					(SELECT SUM("priceAtOrder") FROM shop_orders WHERE "userId" = "user"."id" AND status IN ('pending', 'fulfilled')),
 					0
 				),
 				0
@@ -101,6 +119,8 @@ export const usersWithTokens = pgView('users_with_tokens').as((qb) => {
 });
 
 export type UserWithTokens = typeof usersWithTokens.$inferSelect;
+export type RawUser = typeof rawUsers.$inferSelect;
+export type LoginToken = typeof loginTokens.$inferSelect;
 export type ShopItem = typeof shopItems.$inferSelect;
 export type ShopOrder = typeof shopOrders.$inferSelect;
 export type Payout = typeof payouts.$inferSelect;
