@@ -80,7 +80,7 @@ export const shopOrders = pgTable(
 			.notNull()
 			.references(() => shopItems.id),
 		priceAtOrder: integer().notNull(),
-		status: varchar({ enum: ['pending', 'fulfilled', 'rejected'] })
+		status: varchar({ enum: ['pending', 'approved', 'rejected'] })
 			.default('pending')
 			.notNull(),
 		memo: text(),

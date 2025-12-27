@@ -52,31 +52,35 @@
 		itemsSyncStatus = null;
 
 		try {
-			const response = await fetch('/api/admin/sync-shop-items-from-airtable', {
-				method: 'POST'
-			});
+			// Sync both shop items and shop orders
+			const [itemsResponse, ordersResponse] = await Promise.all([
+				fetch('/api/admin/sync-shop-items-from-airtable', { method: 'POST' }),
+				fetch('/api/admin/sync-shop-orders-from-airtable', { method: 'POST' })
+			]);
 
-			const result = await response.json();
+			const itemsResult = await itemsResponse.json();
+			const ordersResult = await ordersResponse.json();
 
-			if (response.ok) {
+			if (itemsResponse.ok && ordersResponse.ok) {
 				itemsSyncStatus = {
 					type: 'success',
-					message: result.message || 'Shop items sync completed successfully'
+					message: `${itemsResult.message} | ${ordersResult.message}`
 				};
-				toast.success('Shop items synced from Airtable!');
+				toast.success('Shop items & orders synced from Airtable!');
 			} else {
+				const errorMsg = !itemsResponse.ok ? itemsResult.error : ordersResult.error;
 				itemsSyncStatus = {
 					type: 'error',
-					message: result.error || 'Shop items sync failed'
+					message: errorMsg || 'Shop sync failed'
 				};
-				toast.error('Shop items sync failed');
+				toast.error('Shop sync failed');
 			}
 		} catch (error) {
 			itemsSyncStatus = {
 				type: 'error',
 				message: error instanceof Error ? error.message : 'Unknown error occurred'
 			};
-			toast.error('Shop items sync failed');
+			toast.error('Shop sync failed');
 		} finally {
 			itemsSyncInProgress = false;
 		}
@@ -270,9 +274,9 @@
 				</div>
 
 				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
-					<h3 class="text-coffee-700 mb-2 text-xs font-bold uppercase">&gt; Sync Shop Items</h3>
+					<h3 class="text-coffee-700 mb-2 text-xs font-bold uppercase">&gt; Sync Shop Items & Orders</h3>
 					<p class="text-coffee-600 mb-4 text-xs leading-relaxed">
-						Pull all shop items from Airtable's Shop Items table and update the local database.
+						Pull shop items and order statuses from Airtable. Updates item details and order status (Pending/Approved/Rejected).
 					</p>
 					{#if itemsSyncStatus}
 						<div

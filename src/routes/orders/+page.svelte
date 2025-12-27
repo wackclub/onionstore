@@ -130,13 +130,13 @@
 				<div
 					class="border-coffee-600 flex h-12 w-12 items-center justify-center border-2 bg-green-100 text-xl font-bold"
 				>
-					[F]
+					[A]
 				</div>
 				<div>
 					<div class="text-2xl font-bold text-green-700">
-						{orders.filter((o) => o.status === 'fulfilled').length}
+						{orders.filter((o) => o.status === 'approved').length}
 					</div>
-					<div class="text-coffee-500 text-xs font-bold uppercase">Fulfilled</div>
+					<div class="text-coffee-500 text-xs font-bold uppercase">Approved</div>
 				</div>
 			</div>
 			<div class="retro-panel-tight flex items-center gap-4">
