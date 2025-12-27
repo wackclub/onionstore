@@ -35,6 +35,9 @@
 						{#if data.user.isAdmin}
 							<a href="/admin" class="retro-btn !px-3 !py-2 text-xs">Admin</a>
 						{/if}
+						<form method="POST" action="/api/auth/logout">
+							<button type="submit" class="retro-btn-secondary !px-3 !py-2 text-xs">Sign Out</button>
+						</form>
 					</div>
 				</div>
 			</div>
