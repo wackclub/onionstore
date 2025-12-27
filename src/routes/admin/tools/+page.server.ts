@@ -124,7 +124,8 @@ export const actions = {
 						},
 						body: JSON.stringify({
 							fields: {
-								'Total Earned Points': newTotal
+								'Total Earned Points': newTotal,
+								'Tokens': newTotal
 							}
 						})
 					});

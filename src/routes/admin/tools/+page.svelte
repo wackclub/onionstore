@@ -9,6 +9,8 @@
 	let syncStatus = $state<{ type: 'success' | 'error'; message: string } | null>(null);
 	let itemsSyncInProgress = $state(false);
 	let itemsSyncStatus = $state<{ type: 'success' | 'error'; message: string } | null>(null);
+	let submissionsSyncInProgress = $state(false);
+	let submissionsSyncStatus = $state<{ type: 'success' | 'error'; message: string } | null>(null);
 
 	const handleSyncAirtable = async () => {
 		syncInProgress = true;
@@ -77,6 +79,41 @@
 			toast.error('Shop items sync failed');
 		} finally {
 			itemsSyncInProgress = false;
+		}
+	};
+
+	const handleSyncSubmissions = async () => {
+		submissionsSyncInProgress = true;
+		submissionsSyncStatus = null;
+
+		try {
+			const response = await fetch('/api/admin/sync-submissions', {
+				method: 'POST'
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				submissionsSyncStatus = {
+					type: 'success',
+					message: result.message || 'Submissions synced successfully'
+				};
+				toast.success('Submissions synced! Tokens updated.');
+			} else {
+				submissionsSyncStatus = {
+					type: 'error',
+					message: result.error || 'Submissions sync failed'
+				};
+				toast.error('Submissions sync failed');
+			}
+		} catch (error) {
+			submissionsSyncStatus = {
+				type: 'error',
+				message: error instanceof Error ? error.message : 'Unknown error occurred'
+			};
+			toast.error('Submissions sync failed');
+		} finally {
+			submissionsSyncInProgress = false;
 		}
 	};
 
@@ -201,6 +238,34 @@
 						class="retro-btn-secondary w-full disabled:opacity-50"
 					>
 						{syncInProgress ? '[SYNCING...]' : '[SYNC NOW]'}
+					</button>
+				</div>
+
+				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
+					<h3 class="text-coffee-700 mb-2 text-xs font-bold uppercase">&gt; Sync Submissions (Ratings → Tokens)</h3>
+					<p class="text-coffee-600 mb-4 text-xs leading-relaxed">
+						Pull approved submissions from Airtable and create/update token payouts based on ratings. This is how users earn tokens!
+					</p>
+					{#if submissionsSyncStatus}
+						<div
+							class="mb-4 border-2 p-3 {submissionsSyncStatus.type === 'success'
+								? 'border-green-700 bg-green-50'
+								: 'border-red-700 bg-red-50'}"
+						>
+							<div
+								class="mb-1 text-xs font-bold uppercase {submissionsSyncStatus.type === 'success' ? 'text-green-700' : 'text-red-700'}"
+							>
+								{submissionsSyncStatus.type === 'success' ? '✓ Success' : '✗ Error'}
+							</div>
+							<p class="text-coffee-700 text-xs">{submissionsSyncStatus.message}</p>
+						</div>
+					{/if}
+					<button
+						onclick={handleSyncSubmissions}
+						disabled={!data.hasAirtableKey || submissionsSyncInProgress}
+						class="retro-btn-secondary w-full disabled:opacity-50"
+					>
+						{submissionsSyncInProgress ? '[SYNCING...]' : '[SYNC SUBMISSIONS]'}
 					</button>
 				</div>
 
