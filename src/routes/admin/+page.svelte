@@ -5,59 +5,69 @@
 	const { items } = data;
 </script>
 
-<div class="flex flex-col gap-10">
-	<section class="boba-panel flex flex-wrap items-center justify-between gap-6 animate-bubble">
-		<div class="space-y-2">
-			<h1 class="text-3xl font-semibold text-stone-900">Admin Dashboard</h1>
-			<p class="text-base text-stone-600">right, let&apos;s do this thing!</p>
-		</div>
-		<div class="flex flex-wrap items-center gap-3">
-			<a href="/admin/users" class="boba-action motion-pop text-sm md:text-base">View Users</a>
-			<a href="/admin/orders" class="boba-action motion-pop text-sm md:text-base">View Orders</a>
-			<a href="/admin/new" class="boba-action motion-pop text-sm md:text-base">Add New Item</a>
+<div class="flex flex-col gap-8">
+	<section class="retro-panel">
+		<div class="flex flex-wrap items-center justify-between gap-6">
+			<div>
+				<pre class="text-coffee-500 mb-2 text-xs">&gt; ADMIN TERMINAL v1.0</pre>
+				<h1 class="retro-title text-2xl">Control Panel</h1>
+				<p class="retro-subtitle mt-1">&gt; SYSTEM READY_</p>
+			</div>
+			<div class="flex flex-wrap items-center gap-2">
+				<a href="/admin/users" class="retro-btn-secondary text-xs">[USERS]</a>
+				<a href="/admin/orders" class="retro-btn-secondary text-xs">[ORDERS]</a>
+				<a href="/admin/new" class="retro-btn text-xs">[+ NEW ITEM]</a>
+			</div>
 		</div>
 	</section>
 
-	<div class="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-		{#each items as item, index}
-			<div
-				class="boba-panel-tight animate-bubble motion-pop flex h-full flex-col gap-4 sm:gap-5"
-				style:animation-delay={`${index * 0.08}s`}
-			>
-				<div class="relative overflow-hidden rounded-2xl bg-[#f8e2c1] p-4 shadow-[0_12px_26px_rgba(65,35,20,0.13)]">
-					<div class="absolute inset-x-6 -top-6 h-12 rounded-full bg-[#f1c696] opacity-40"></div>
-					<img
-						src={item.imageUrl}
-						alt={item.name}
-						class="relative z-10 h-40 w-full rounded-xl object-cover shadow-[0_14px_24px_rgba(65,35,20,0.18)]"
-					/>
-				</div>
-				<div class="flex flex-col gap-2">
-					<h3 class="text-xl font-semibold text-stone-900">{item.name}</h3>
-					<p class="text-sm leading-relaxed text-stone-600">{item.description}</p>
-				</div>
-				<div class="flex items-center justify-between">
-					<span class="boba-chip text-base">
-						<span class="text-lg font-bold">{item.price}</span>
-						<span>{item.price === 1 ? 'token' : 'tokens'}</span>
-					</span>
-					<span class="boba-badge text-xs uppercase tracking-[0.14em]">{item.type}</span>
-				</div>
-				{#if item.hcbMids && item.hcbMids.length > 0}
-					<div class="rounded-2xl bg-[rgba(242,214,172,0.4)] px-4 py-2 text-xs font-medium text-stone-600">
-						MIDs: {item.hcbMids.join(', ')}
-					</div>
-				{/if}
+	{#if items.length > 0}
+		<section>
+			<div class="mb-6 flex items-center gap-3">
+				<span class="text-coffee-400">&gt;&gt;</span>
+				<h2 class="text-coffee-700 text-sm font-bold tracking-wider uppercase">Item Database</h2>
+				<span class="border-coffee-300 flex-1 border-t-2 border-dashed"></span>
+				<span class="text-coffee-500 text-xs">[{items.length} RECORDS]</span>
 			</div>
-		{/each}
-	</div>
-
-	{#if items.length === 0}
-		<div class="boba-panel text-center animate-bubble">
-			<p class="text-stone-600">No items created yet.</p>
-			<a href="/admin/new" class="boba-action motion-pop mt-4 inline-flex text-base">
-				Create Your First Item
-			</a>
-		</div>
+			<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				{#each items as item}
+					<article class="retro-card flex h-full flex-col">
+						<div
+							class="bg-cream-200 border-coffee-700 relative aspect-[4/3] overflow-hidden border-b-2"
+						>
+							<img src={item.imageUrl} alt={item.name} class="h-full w-full object-cover" />
+							<div class="absolute top-2 left-2">
+								<span class="retro-badge">{item.type}</span>
+							</div>
+						</div>
+						<div class="flex flex-1 flex-col gap-3 p-4">
+							<h3 class="text-coffee-800 text-sm font-bold tracking-wide uppercase">{item.name}</h3>
+							<p class="text-coffee-600 flex-1 text-xs leading-relaxed">{item.description}</p>
+							<hr class="retro-divider" />
+							<div class="flex items-center justify-between">
+								<span class="retro-chip text-xs">
+									<span class="font-bold">{item.price}</span>
+									<span>TOKENS</span>
+								</span>
+							</div>
+							{#if item.hcbMids && item.hcbMids.length > 0}
+								<div
+									class="text-coffee-500 bg-cream-200 border-coffee-400 border-2 border-dashed p-2 text-xs font-bold"
+								>
+									MIDs: {item.hcbMids.join(', ')}
+								</div>
+							{/if}
+						</div>
+					</article>
+				{/each}
+			</div>
+		</section>
+	{:else}
+		<section class="retro-panel py-12 text-center">
+			<pre class="text-coffee-400 mb-4 text-4xl">[ EMPTY ]</pre>
+			<h3 class="text-coffee-700 mb-2 text-lg font-bold uppercase">No Items in Database</h3>
+			<p class="text-coffee-500 mb-6 text-sm">&gt; CREATE FIRST ITEM TO BEGIN_</p>
+			<a href="/admin/new" class="retro-btn">[CREATE ITEM]</a>
+		</section>
 	{/if}
 </div>

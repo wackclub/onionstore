@@ -16,37 +16,26 @@ const authMiddleware: Handle = async ({ event, resolve }) => {
 	if (unauthenticatedPaths.includes(event.url.pathname)) return resolve(event);
 	if (event.url.pathname.startsWith('/api/uploadthing')) return resolve(event);
 
-	const start = performance.now();
 	const sessionCookie = event.cookies.get('_boba_mahad_says_hi_session');
 	if (!sessionCookie) return resolve(event);
 
-	let userId;
+	let userId: string;
 	try {
 		userId = await symmetric.decrypt(sessionCookie, SESSIONS_SECRET);
 		if (!userId) throw new Error();
 	} catch {
-		event.cookies.delete('_boba_mahad_says_hi_session', {
-			path: '/'
-		});
+		event.cookies.delete('_boba_mahad_says_hi_session', { path: '/' });
 		return resolve(event);
 	}
 
-	const [user] = await db
-		.select()
-		.from(usersWithTokens)
-		.where(eq(usersWithTokens.id, userId!))
-		.limit(1);
+	const [user] = await db.select().from(usersWithTokens).where(eq(usersWithTokens.id, userId));
 
 	if (!user) {
-		event.cookies.delete('_boba_mahad_says_hi_session', {
-			path: '/'
-		});
+		event.cookies.delete('_boba_mahad_says_hi_session', { path: '/' });
 		return resolve(event);
 	}
 
 	event.locals.user = user;
-
-	console.log(`authMiddleware took ${performance.now() - start}ms`);
 	return resolve(event);
 };
 

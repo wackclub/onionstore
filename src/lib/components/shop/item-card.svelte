@@ -37,60 +37,63 @@
 			const result = await response.json();
 
 			if (response.ok) {
-				orderMessage = result.message || 'Order placed successfully!';
+				orderMessage = 'ORDER PLACED!';
 				availableTokens = result.remainingTokens ?? availableTokens - item.price;
 				confetti({
 					particleCount: 100,
 					spread: 70,
-					origin: { y: 0.6 }
+					origin: { y: 0.6 },
+					colors: ['#d4a574', '#c9a87c', '#7d5c3a', '#f5e6d3', '#ffffff']
 				});
 				await invalidateAll();
 			} else {
-				orderMessage = result.error || 'Failed to place order';
+				orderMessage = result.error || 'ERROR: FAILED';
 			}
 		} catch (error) {
-			orderMessage = 'Network error. Please try again.';
+			orderMessage = 'ERROR: NETWORK';
 		} finally {
 			isOrdering = false;
 		}
 	}
 </script>
 
-<div
-	class="boba-panel-tight motion-pop animate-bubble flex h-full flex-col gap-5 sm:gap-6"
-	style:animation-delay={`${appearanceDelay}s`}
->
-	<div class="relative overflow-hidden rounded-2xl bg-[#f9e4c5] p-4 shadow-[0_12px_24px_rgba(91,53,34,0.12)]">
-		<div class="absolute -left-6 -top-6 h-16 w-16 rounded-full bg-[#f7c978] opacity-60"></div>
-		<div class="absolute -right-4 top-8 h-12 w-12 rounded-full bg-[#f1b986] opacity-50"></div>
-		<img
-			src={item.imageUrl}
-			alt={item.name}
-			class="relative z-10 h-44 w-full rounded-xl object-cover shadow-[0_14px_24px_rgba(91,53,34,0.2)]"
-		/>
+<article class="retro-card flex h-full flex-col">
+	<div class="bg-cream-200 border-coffee-700 relative aspect-[4/3] overflow-hidden border-b-2">
+		<img src={item.imageUrl} alt={item.name} class="h-full w-full object-cover" />
+		<div class="absolute top-2 right-2">
+			<div class="retro-chip">
+				<span class="font-bold">{item.price}</span>
+				<span class="text-xs">{item.price === 1 ? 'TKN' : 'TKNS'}</span>
+			</div>
+		</div>
 	</div>
-	<div class="flex flex-col gap-2">
-		<h3 class="text-xl font-semibold text-stone-900">{item.name}</h3>
-		<p class="flex-1 text-sm leading-relaxed text-stone-600">{item.description}</p>
-	</div>
-	<div class="flex items-center justify-between">
-		<span class="boba-chip text-base">
-			<span class="text-lg font-bold">{item.price}</span>
-			<span>{item.price === 1 ? 'token' : 'tokens'}</span>
-		</span>
+	<div class="flex flex-1 flex-col gap-3 p-4">
+		<div class="flex-1">
+			<h3 class="text-coffee-800 mb-2 text-base font-bold tracking-wide uppercase">{item.name}</h3>
+			<p class="text-coffee-600 text-xs leading-relaxed">{item.description}</p>
+		</div>
+		<hr class="retro-divider" />
 		<button
 			onclick={handleBuy}
 			disabled={isOrdering || !canAfford}
-			class="boba-action motion-pop text-sm sm:text-base"
+			class="w-full {canAfford ? 'retro-btn' : 'retro-btn-secondary cursor-not-allowed opacity-60'}"
 		>
-			{isOrdering ? 'Ordering...' : !canAfford ? 'Not enough tokens' : 'Buy'}
+			{#if isOrdering}
+				ORDERING<span class="animate-blink">_</span>
+			{:else if !canAfford}
+				INSUFFICIENT TOKENS
+			{:else}
+				PURCHASE
+			{/if}
 		</button>
+		{#if orderMessage}
+			<div
+				class="border-2 p-2 text-center text-xs font-bold {orderMessage.includes('ORDER')
+					? 'border-green-700 bg-green-100 text-green-700'
+					: 'border-red-700 bg-red-100 text-red-700'}"
+			>
+				&gt; {orderMessage}
+			</div>
+		{/if}
 	</div>
-	{#if orderMessage}
-		<div
-			class="mt-2 text-sm {orderMessage.includes('success') ? 'text-emerald-600' : 'text-red-600'}"
-		>
-			{orderMessage}
-		</div>
-	{/if}
-</div>
+</article>

@@ -72,178 +72,201 @@
 
 			userOrders[userId] = {
 				loading: false,
-				error: 'Could not load orders. Please try again.',
+				error: 'ERROR: COULD NOT LOAD ORDERS',
 				data: null
 			};
 		}
 	};
 </script>
 
-<div class="flex flex-col gap-10">
-	<section class="boba-panel animate-bubble flex flex-wrap items-center justify-between gap-6">
-		<h1 class="text-3xl font-semibold text-stone-900">User Management</h1>
-		<a href="/admin" class="boba-action motion-pop text-sm md:text-base">
-			Back to Admin
-		</a>
+<div class="flex flex-col gap-8">
+	<section class="retro-panel">
+		<div class="flex flex-wrap items-center justify-between gap-4">
+			<div>
+				<pre class="text-coffee-500 mb-2 text-xs">&gt; USER DATABASE</pre>
+				<h1 class="retro-title text-2xl">User Management</h1>
+				<p class="retro-subtitle mt-1">&gt; {users.length} USERS REGISTERED</p>
+			</div>
+			<a href="/admin" class="retro-btn-secondary">[BACK]</a>
+		</div>
 	</section>
 
-	<section class="boba-panel-tight animate-bubble overflow-hidden">
-		<div class="border-b border-[#ead2b2] px-6 py-4">
-			<h2 class="text-xl font-semibold text-stone-900">Users &amp; Tokens</h2>
+	<section class="retro-panel-tight overflow-hidden !p-0">
+		<div class="border-coffee-700 bg-cream-200 border-b-2 px-4 py-3">
+			<h2 class="text-coffee-700 text-sm font-bold tracking-wider uppercase">&gt; User Records</h2>
 		</div>
-		<div class="px-2 py-4 sm:px-6">
-			<div class="overflow-x-auto">
-				<table class="min-w-full divide-y divide-[#ead2b2]">
-					<thead class="bg-[rgba(242,214,172,0.35)] text-left uppercase tracking-wide text-xs text-stone-600">
-						<tr>
-							<th class="px-6 py-3">User</th>
-							<th class="px-6 py-3">Tokens</th>
-							<th class="px-6 py-3">Admin</th>
-							<th class="px-6 py-3">Orders</th>
-							<th class="px-6 py-3">Actions</th>
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-[#ead2b2]">
-						{#each users as user}
-							<tr class="transition hover:bg-[rgba(244,213,178,0.35)]">
-								<td class="px-6 py-4 whitespace-nowrap">
-									<div class="flex items-center gap-3">
-										{#if user.avatarUrl}
-											<div class="h-11 w-11 overflow-hidden rounded-2xl bg-[#f8e2c1]">
-												<img src={user.avatarUrl} alt="Avatar" class="h-full w-full object-cover" />
-											</div>
-										{:else}
-											<div class="h-11 w-11 flex items-center justify-center rounded-2xl bg-[#f8e2c1] text-lg font-bold text-[#8d5c3f]">
-												{user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '?'}
-											</div>
+		<div class="overflow-x-auto">
+			<table class="min-w-full">
+				<thead>
+					<tr class="border-coffee-600 bg-cream-100 border-b-2">
+						<th
+							class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+							>User</th
+						>
+						<th
+							class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+							>Tokens</th
+						>
+						<th
+							class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+							>Role</th
+						>
+						<th
+							class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+							>Orders</th
+						>
+						<th
+							class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+							>Actions</th
+						>
+					</tr>
+				</thead>
+				<tbody class="divide-coffee-300 divide-y-2">
+					{#each users as user}
+						<tr class="hover:bg-cream-100 transition-colors duration-100">
+							<td class="px-4 py-3 whitespace-nowrap">
+								<div class="flex items-center gap-3">
+									<div
+										class="border-coffee-600 bg-caramel text-coffee-900 flex h-10 w-10 items-center justify-center border-2 text-sm font-bold"
+									>
+										{user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '?'}
+									</div>
+									<div>
+										<div class="text-coffee-800 text-xs font-bold uppercase">
+											{user.displayName || user.email}
+										</div>
+										{#if user.displayName && user.email}
+											<div class="text-coffee-500 text-xs">{user.email}</div>
 										{/if}
-										<div>
-											<div class="text-sm font-semibold text-stone-900">
-												{user.displayName || user.email}
-											</div>
-											{#if user.displayName && user.email}
-												<div class="text-xs text-stone-500">
-													{user.email}
-												</div>
+									</div>
+								</div>
+							</td>
+							<td class="px-4 py-3 whitespace-nowrap">
+								<span class="retro-chip text-xs">
+									<span class="font-bold">{user.tokens}</span>
+									<span>TKN</span>
+								</span>
+							</td>
+							<td class="px-4 py-3 whitespace-nowrap">
+								{#if user.isAdmin}
+									<span class="retro-badge">ADMIN</span>
+								{:else}
+									<span class="text-coffee-500 text-xs font-bold">USER</span>
+								{/if}
+							</td>
+							<td class="text-coffee-700 px-4 py-3 text-xs font-bold whitespace-nowrap">
+								{user.orderCount}
+								{user.orderCount === 1 ? 'ORDER' : 'ORDERS'}
+							</td>
+							<td class="px-4 py-3 whitespace-nowrap">
+								<button
+									onclick={() => toggleOrders(user)}
+									class="text-coffee-600 hover:text-coffee-800 text-xs font-bold underline"
+								>
+									[{selectedUser === user.id ? 'HIDE' : 'VIEW'}]
+								</button>
+							</td>
+						</tr>
+						{#if selectedUser === user.id}
+							{@const ordersState = userOrders[user.id]}
+							<tr class="bg-cream-100">
+								<td colspan="5" class="px-4 py-4">
+									<div class="border-coffee-600 bg-cream-50 border-2 p-4">
+										<h4 class="text-coffee-700 mb-3 text-xs font-bold tracking-wider uppercase">
+											&gt; Order History
+										</h4>
+										<div class="space-y-2">
+											{#if ordersState?.loading}
+												<p class="text-coffee-600 text-xs">
+													LOADING<span class="animate-blink">_</span>
+												</p>
+											{:else if ordersState?.error}
+												<p class="text-xs font-bold text-red-700">&gt; {ordersState.error}</p>
+											{:else if ordersState?.data && ordersState.data.length > 0}
+												{#each ordersState.data as order}
+													<div
+														class="border-coffee-400 bg-cream-100 flex flex-col gap-2 border-2 p-3"
+													>
+														<div class="flex flex-wrap items-center justify-between gap-3">
+															<div
+																class="text-coffee-800 flex items-center gap-2 text-xs font-bold uppercase"
+															>
+																{order.itemName ?? 'UNKNOWN'}
+																{#if order.itemType}
+																	<span class="retro-badge text-[10px]">{order.itemType}</span>
+																{/if}
+															</div>
+															<span class="retro-chip text-xs">
+																<span class="font-bold">{order.priceAtOrder}</span>
+																<span>TKN</span>
+															</span>
+														</div>
+														<div
+															class="text-coffee-600 flex flex-wrap items-center justify-between gap-3 text-xs"
+														>
+															<span
+																class="px-2 py-1 font-bold uppercase {order.status === 'fulfilled'
+																	? 'border-2 border-green-700 bg-green-100 text-green-700'
+																	: order.status === 'rejected'
+																		? 'border-2 border-red-700 bg-red-100 text-red-700'
+																		: 'border-2 border-yellow-700 bg-yellow-100 text-yellow-700'}"
+															>
+																[{order.status}]
+															</span>
+															<span class="font-bold"
+																>{new Date(order.createdAt).toLocaleDateString()}</span
+															>
+														</div>
+													</div>
+												{/each}
+											{:else}
+												<p class="text-coffee-600 text-xs">&gt; NO ORDERS ON RECORD</p>
 											{/if}
 										</div>
 									</div>
 								</td>
-								<td class="px-6 py-4 whitespace-nowrap">
-									<span class="boba-chip text-xs sm:text-sm">
-										<span class="text-base font-bold">{user.tokens}</span>
-										<span>{Number(user.tokens) === 1 ? 'token' : 'tokens'}</span>
-									</span>
-								</td>
-								<td class="px-6 py-4 whitespace-nowrap">
-									{#if user.isAdmin}
-										<span class="boba-badge text-xs uppercase tracking-[0.16em]">Admin</span>
-									{:else}
-										<span class="text-sm font-medium text-stone-500">User</span>
-									{/if}
-								</td>
-								<td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-stone-800">
-									{user.orderCount} {user.orderCount === 1 ? 'order' : 'orders'}
-								</td>
-								<td class="px-6 py-4 text-sm font-semibold whitespace-nowrap">
-									<button
-										onclick={() => toggleOrders(user)}
-										class="text-[#8d5c3f] transition hover:text-[#5b3522]"
-									>
-										{selectedUser === user.id ? 'Hide' : 'View'} Orders
-									</button>
-								</td>
 							</tr>
-							{#if selectedUser === user.id}
-								{@const ordersState = userOrders[user.id]}
-								<tr class="bg-[rgba(244,213,178,0.25)]">
-									<td colspan="5" class="px-6 py-4">
-										<div class="space-y-3 rounded-2xl border border-[#ead2b2] bg-[rgba(255,255,255,0.6)] p-4">
-											<h4 class="text-sm font-semibold uppercase tracking-wider text-stone-700">
-												Order History
-											</h4>
-											<div class="space-y-2 text-sm">
-												{#if ordersState?.loading}
-													<p class="text-stone-600">Loading orders…</p>
-												{:else if ordersState?.error}
-													<p class="text-red-600">{ordersState.error}</p>
-												{:else if ordersState?.data && ordersState.data.length > 0}
-													{#each ordersState.data as order}
-														<div class="boba-panel-tight flex flex-col gap-3 bg-[rgba(255,255,255,0.85)] p-4">
-															<div class="flex flex-wrap items-center justify-between gap-3">
-																<div class="flex items-center gap-3 text-sm font-medium text-stone-900">
-																	{order.itemName ?? 'Unknown item'}
-																	{#if order.itemType}
-																		<span class="boba-badge text-[10px] uppercase tracking-[0.2em]">
-																			{order.itemType}
-																		</span>
-																	{/if}
-																</div>
-																<span class="boba-chip text-xs">
-																	<span class="text-base font-bold">{order.priceAtOrder}</span>
-																	<span>tokens</span>
-																</span>
-															</div>
-															<div class="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-600">
-																<span
-																	class="inline-flex items-center rounded-full px-3 py-1 font-semibold
-																	{order.status === 'fulfilled'
-																		? 'bg-[#d5f5d4] text-[#2f7d43]'
-																		: order.status === 'rejected'
-																			? 'bg-[#f6c4c0] text-[#963135]'
-																			: 'bg-[#f7d8a7] text-[#7a4b21]'}"
-																>
-																	{order.status}
-																</span>
-																<span>
-																	{new Date(order.createdAt).toLocaleDateString()}
-																</span>
-															</div>
-														</div>
-													{/each}
-												{:else}
-													<p class="text-stone-600">No orders yet.</p>
-												{/if}
-											</div>
-										</div>
-									</td>
-								</tr>
-							{/if}
-						{/each}
-					</tbody>
-				</table>
-			</div>
+						{/if}
+					{/each}
+				</tbody>
+			</table>
 		</div>
 	</section>
 
-	<section class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-		<div class="boba-panel-tight flex items-center gap-4 animate-bubble" style:animation-delay="0.05s">
-			<div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f2d6ac] text-xl">
-				👥
+	<section class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+		<div class="retro-panel-tight flex items-center gap-4">
+			<div
+				class="border-coffee-600 bg-cream-200 text-coffee-700 flex h-12 w-12 items-center justify-center border-2 text-lg font-bold"
+			>
+				[U]
 			</div>
 			<div>
-				<div class="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Total Users</div>
-				<div class="text-xl font-semibold text-stone-900">{users.length}</div>
+				<div class="text-coffee-500 text-xs font-bold tracking-wider uppercase">Total Users</div>
+				<div class="text-coffee-800 text-2xl font-bold">{users.length}</div>
 			</div>
 		</div>
-		<div class="boba-panel-tight flex items-center gap-4 animate-bubble" style:animation-delay="0.1s">
-			<div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f1c696] text-xl">
-				🪙
+		<div class="retro-panel-tight flex items-center gap-4">
+			<div
+				class="border-coffee-600 bg-caramel text-coffee-900 flex h-12 w-12 items-center justify-center border-2 text-lg font-bold"
+			>
+				[T]
 			</div>
 			<div>
-				<div class="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Total Tokens</div>
-				<div class="text-xl font-semibold text-stone-900">
+				<div class="text-coffee-500 text-xs font-bold tracking-wider uppercase">Total Tokens</div>
+				<div class="text-coffee-800 text-2xl font-bold">
 					{users.reduce((sum, user) => sum + Number(user.tokens), 0)}
 				</div>
 			</div>
 		</div>
-		<div class="boba-panel-tight flex items-center gap-4 animate-bubble" style:animation-delay="0.15s">
-			<div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f7c978] text-xl">
-				📦
+		<div class="retro-panel-tight flex items-center gap-4">
+			<div
+				class="border-coffee-600 bg-mocha text-coffee-900 flex h-12 w-12 items-center justify-center border-2 text-lg font-bold"
+			>
+				[O]
 			</div>
 			<div>
-				<div class="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Total Orders</div>
-				<div class="text-xl font-semibold text-stone-900">{totalOrders}</div>
+				<div class="text-coffee-500 text-xs font-bold tracking-wider uppercase">Total Orders</div>
+				<div class="text-coffee-800 text-2xl font-bold">{totalOrders}</div>
 			</div>
 		</div>
 	</section>

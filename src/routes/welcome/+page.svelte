@@ -28,55 +28,58 @@
 
 			if (!response.ok) {
 				const data = await response.json();
-				error = data.error || 'Failed to update country';
+				error = data.error || 'ERROR: UPDATE FAILED';
 				loading = false;
 				return;
 			}
 
 			goto('/');
 		} catch (err) {
-			error = 'Failed to update country';
+			error = 'ERROR: NETWORK FAILURE';
 			loading = false;
 		}
 	}
 </script>
 
-<div class="flex min-h-screen items-center justify-center">
-	<div class="boba-panel w-full max-w-md animate-bubble">
+<div class="flex min-h-[80vh] items-center justify-center">
+	<div class="retro-panel w-full max-w-md">
 		<div class="flex flex-col gap-6">
 			<div class="text-center">
-				<h1 class="text-3xl font-semibold">welcome!</h1>
-				<p class="boba-subtitle mt-2">where are you from?</p>
+				<h1 class="retro-title text-2xl">New User Setup</h1>
+				<p class="retro-subtitle mt-2">&gt; LOCATION DATA REQUIRED</p>
 			</div>
 
-			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="flex flex-col gap-4">
+			<form
+				onsubmit={(e) => {
+					e.preventDefault();
+					handleSubmit();
+				}}
+				class="flex flex-col gap-4"
+			>
 				<div class="flex flex-col gap-2">
-					<label for="country" class="text-sm font-medium">select your country</label>
-					<select
-						id="country"
-						bind:value={country}
-						required
-						class="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-					>
-						<option value="">choose a country...</option>
+					<label for="country" class="retro-label">&gt; Select Country</label>
+					<select id="country" bind:value={country} required class="retro-input">
+						<option value="">-- SELECT REGION --</option>
 						{#each countries as c}
-							<option value={c.code}>{c.name}</option>
+							<option value={c.code}>{c.name.toUpperCase()}</option>
 						{/each}
 					</select>
 				</div>
 
 				{#if error}
-					<div class="rounded-lg bg-red-50 p-3 text-center text-sm text-red-800">
-						{error}
+					<div
+						class="border-2 border-red-700 bg-red-100 p-3 text-center text-xs font-bold text-red-700"
+					>
+						&gt; {error}
 					</div>
 				{/if}
 
-				<button
-					type="submit"
-					disabled={loading || !country}
-					class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-				>
-					{loading ? 'saving...' : 'continue'}
+				<button type="submit" disabled={loading || !country} class="retro-btn w-full">
+					{#if loading}
+						PROCESSING<span class="animate-blink">_</span>
+					{:else}
+						CONTINUE
+					{/if}
 				</button>
 			</form>
 		</div>

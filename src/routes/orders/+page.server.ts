@@ -13,8 +13,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			createdAt: shopOrders.createdAt,
 			itemName: shopItems.name,
 			itemImageUrl: shopItems.imageUrl,
-			userId: rawUsers.id,
-			userAvatarUrl: rawUsers.avatarUrl
+			userId: rawUsers.id
 		})
 		.from(shopOrders)
 		.leftJoin(shopItems, eq(shopOrders.shopItemId, shopItems.id))

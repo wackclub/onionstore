@@ -19,58 +19,67 @@
 
 			if (!response.ok) {
 				const data = await response.json();
-				error = data.error || 'Failed to send login email';
+				error = data.error || 'ERROR: SEND FAILED';
 				loading = false;
 				return;
 			}
 
 			sent = true;
 		} catch (err) {
-			error = 'Failed to send login email';
+			error = 'ERROR: NETWORK FAILURE';
 			loading = false;
 		}
 	}
 </script>
 
-<div class="flex min-h-screen items-center justify-center">
-	<div class="boba-panel w-full max-w-md animate-bubble">
+<div class="flex min-h-[80vh] items-center justify-center">
+	<div class="retro-panel w-full max-w-md">
 		<div class="flex flex-col gap-6">
 			<div class="text-center">
-				<h1 class="text-3xl font-semibold">welcome!</h1>
-				<p class="boba-subtitle mt-2">sign in to access the store</p>
+				<h1 class="retro-title text-2xl">Welcome to Boba Olympics!</h1>
+				<p class="retro-subtitle mt-2">&gt; ENTER CREDENTIALS TO ACCESS STORE</p>
 			</div>
 
 			{#if sent}
-				<div class="rounded-lg bg-green-50 p-4 text-center text-green-800">
-					<p class="font-medium">check your email!</p>
-					<p class="mt-1 text-sm">we've sent you a magic link to sign in</p>
+				<div class="border-2 border-green-700 bg-green-100 p-4 text-center">
+					<pre class="mb-2 text-xs text-green-700">SUCCESS!</pre>
+					<p class="text-sm font-bold text-green-800 uppercase">Check Your Email!</p>
+					<p class="mt-1 text-xs text-green-700">&gt; MAGIC LINK TRANSMITTED_</p>
 				</div>
 			{:else}
-				<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="flex flex-col gap-4">
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						handleSubmit();
+					}}
+					class="flex flex-col gap-4"
+				>
 					<div class="flex flex-col gap-2">
-						<label for="email" class="text-sm font-medium">email address</label>
+						<label for="email" class="retro-label">&gt; Email Address</label>
 						<input
 							id="email"
 							type="email"
 							bind:value={email}
 							required
-							placeholder="your@email.com"
-							class="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+							placeholder="user@domain.com"
+							class="retro-input"
 						/>
 					</div>
 
 					{#if error}
-						<div class="rounded-lg bg-red-50 p-3 text-center text-sm text-red-800">
-							{error}
+						<div
+							class="border-2 border-red-700 bg-red-100 p-3 text-center text-xs font-bold text-red-700"
+						>
+							&gt; {error}
 						</div>
 					{/if}
 
-					<button
-						type="submit"
-						disabled={loading || !email}
-						class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-					>
-						{loading ? 'sending...' : 'send magic link'}
+					<button type="submit" disabled={loading || !email} class="retro-btn w-full">
+						{#if loading}
+							ONE SEC...
+						{:else}
+							SEND MAGIC LINK
+						{/if}
 					</button>
 				</form>
 			{/if}

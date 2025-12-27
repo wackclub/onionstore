@@ -59,8 +59,8 @@ interface HCBGrantRequest {
 interface AirtableRecord {
 	id: string;
 	fields: {
-		'Email'?: string;
-		'Status'?: string;
+		Email?: string;
+		Status?: string;
 		[key: string]: any;
 	};
 }
@@ -104,7 +104,9 @@ async function fetchApprovedEmails(): Promise<Set<string>> {
 
 		const response = await fetch(`${url}?${params}`, { headers });
 		if (!response.ok) {
-			throw new Error(`Failed to fetch Airtable records: ${response.status} ${response.statusText}`);
+			throw new Error(
+				`Failed to fetch Airtable records: ${response.status} ${response.statusText}`
+			);
 		}
 
 		const data = await response.json();
@@ -138,7 +140,7 @@ async function fetchHCBBalance(): Promise<number> {
 	try {
 		const response = await fetch(HCB_API_URL, {
 			headers: {
-				'Authorization': `Bearer ${HCBAPI_KEY}`,
+				Authorization: `Bearer ${HCBAPI_KEY}`,
 				'Content-Type': 'application/json'
 			}
 		});
@@ -175,17 +177,12 @@ async function fetchPendingHCBOrders(): Promise<PendingOrder[]> {
 		})
 		.from(shopOrders)
 		.innerJoin(shopItems, eq(shopOrders.shopItemId, shopItems.id))
-		.where(
-			and(
-				eq(shopOrders.status, 'pending'),
-				eq(shopItems.type, 'hcb')
-			)
-		)
+		.where(and(eq(shopOrders.status, 'pending'), eq(shopItems.type, 'hcb')))
 		.orderBy(shopOrders.createdAt);
 
 	const pendingOrders: PendingOrder[] = orders
-		.filter(order => order.usdCost && order.usdCost > 0)
-		.map(order => ({
+		.filter((order) => order.usdCost && order.usdCost > 0)
+		.map((order) => ({
 			orderId: order.orderId,
 			userId: order.userId,
 			itemId: order.itemId,
@@ -200,18 +197,18 @@ async function fetchPendingHCBOrders(): Promise<PendingOrder[]> {
 	return pendingOrders;
 }
 
-async function groupOrdersByUserAndItem(orders: PendingOrder[], approvedEmails?: Set<string>): Promise<GroupedOrder[]> {
+async function groupOrdersByUserAndItem(
+	orders: PendingOrder[],
+	approvedEmails?: Set<string>
+): Promise<GroupedOrder[]> {
 	console.log('Grouping orders by user and item...');
 
 	const grouped = new Map<string, GroupedOrder>();
 
-	const userIds = [...new Set(orders.map(order => order.userId))];
+	const userIds = [...new Set(orders.map((order) => order.userId))];
 	console.log(`Fetching user data for ${userIds.length} unique users...`);
 
-	const users = await db
-		.select()
-		.from(rawUsers)
-		.where(inArray(rawUsers.id, userIds));
+	const users = await db.select().from(rawUsers).where(inArray(rawUsers.id, userIds));
 
 	const userMap = new Map<string, { email: string }>();
 	for (const user of users) {
@@ -221,11 +218,13 @@ async function groupOrdersByUserAndItem(orders: PendingOrder[], approvedEmails?:
 	let filteredOrders = orders;
 	if (approvedEmails) {
 		const originalCount = orders.length;
-		filteredOrders = orders.filter(order => {
+		filteredOrders = orders.filter((order) => {
 			const user = userMap.get(order.userId);
 			return user && approvedEmails.has(user.email.toLowerCase());
 		});
-		console.log(`Filtered orders by YSWS DB approval: ${originalCount} → ${filteredOrders.length} orders`);
+		console.log(
+			`Filtered orders by YSWS DB approval: ${originalCount} → ${filteredOrders.length} orders`
+		);
 	}
 
 	for (const order of filteredOrders) {
@@ -292,9 +291,13 @@ function optimizeGrantAllocation(groupedOrders: GroupedOrder[], budget: number):
 			});
 
 			remainingBudget -= order.totalUsdCost;
-			console.log(`✓ Allocated $${order.totalUsdCost.toFixed(2)} to ${order.email} for ${order.quantity}x ${order.itemName}`);
+			console.log(
+				`✓ Allocated $${order.totalUsdCost.toFixed(2)} to ${order.email} for ${order.quantity}x ${order.itemName}`
+			);
 		} else {
-			console.log(`✗ Cannot allocate $${order.totalUsdCost.toFixed(2)} to ${order.email} for ${order.quantity}x ${order.itemName} (insufficient budget: $${remainingBudget.toFixed(2)})`);
+			console.log(
+				`✗ Cannot allocate $${order.totalUsdCost.toFixed(2)} to ${order.email} for ${order.quantity}x ${order.itemName} (insufficient budget: $${remainingBudget.toFixed(2)})`
+			);
 		}
 	}
 
@@ -308,13 +311,11 @@ function createHCBGrantRequests(allocations: GrantAllocation[]): HCBGrantRequest
 	const grantRequests: HCBGrantRequest[] = [];
 
 	for (const allocation of allocations) {
-		const purpose = allocation.itemName.length <= 30
-			? allocation.itemName
-			: allocation.itemName.substring(0, 30);
+		const purpose =
+			allocation.itemName.length <= 30 ? allocation.itemName : allocation.itemName.substring(0, 30);
 
-		const merchantLock = allocation.hcbMids && allocation.hcbMids.length > 0
-			? allocation.hcbMids.join(',')
-			: null;
+		const merchantLock =
+			allocation.hcbMids && allocation.hcbMids.length > 0 ? allocation.hcbMids.join(',') : null;
 
 		grantRequests.push({
 			amount_cents: Math.round(allocation.grantAmount * 100),
@@ -325,13 +326,18 @@ function createHCBGrantRequests(allocations: GrantAllocation[]): HCBGrantRequest
 			purpose: purpose
 		});
 
-		console.log(`- ${allocation.email}: $${allocation.grantAmount.toFixed(2)} for ${allocation.itemName}${merchantLock ? ` (MIDs: ${merchantLock})` : ''}`);
+		console.log(
+			`- ${allocation.email}: $${allocation.grantAmount.toFixed(2)} for ${allocation.itemName}${merchantLock ? ` (MIDs: ${merchantLock})` : ''}`
+		);
 	}
 
 	return grantRequests;
 }
 
-function writeGrantRequestsToFile(grantRequests: HCBGrantRequest[], allocations: GrantAllocation[]): void {
+function writeGrantRequestsToFile(
+	grantRequests: HCBGrantRequest[],
+	allocations: GrantAllocation[]
+): void {
 	const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
 	const filename = `grant-requests-${timestamp}.json`;
 	const filepath = path.join(process.cwd(), 'scripts', filename);
@@ -339,7 +345,7 @@ function writeGrantRequestsToFile(grantRequests: HCBGrantRequest[], allocations:
 	const output = {
 		timestamp: new Date().toISOString(),
 		total_grants: grantRequests.length,
-		total_amount_dollars: grantRequests.reduce((sum, req) => sum + (req.amount_cents / 100), 0),
+		total_amount_dollars: grantRequests.reduce((sum, req) => sum + req.amount_cents / 100, 0),
 		grant_requests: grantRequests,
 		allocation_details: allocations
 	};
@@ -352,7 +358,9 @@ async function main() {
 	try {
 		console.log('=== HCB Grant Giver ===\n');
 
-		const useYswsDbFilter = await promptUser('Only include users with YSWS DB approved submissions? (y/n): ');
+		const useYswsDbFilter = await promptUser(
+			'Only include users with YSWS DB approved submissions? (y/n): '
+		);
 
 		let approvedEmails: Set<string> | undefined;
 		if (useYswsDbFilter) {
@@ -429,23 +437,29 @@ async function main() {
 		const grantRequests = createHCBGrantRequests(allocations);
 		writeGrantRequestsToFile(grantRequests, allocations);
 
-		const fulfilledOrderIds = new Set(allocations.flatMap(alloc => alloc.orderIds));
-		const unfulfilledOrders = groupedOrders.filter(order =>
-			!order.orderIds.some(id => fulfilledOrderIds.has(id))
+		const fulfilledOrderIds = new Set(allocations.flatMap((alloc) => alloc.orderIds));
+		const unfulfilledOrders = groupedOrders.filter(
+			(order) => !order.orderIds.some((id) => fulfilledOrderIds.has(id))
 		);
 
 		if (unfulfilledOrders.length > 0) {
 			console.log('\n=== UNFULFILLED ORDERS ===');
-			const unfulfilledAmount = unfulfilledOrders.reduce((sum, order) => sum + order.totalUsdCost, 0);
-			console.log(`${unfulfilledOrders.length} orders could not be fulfilled due to budget constraints`);
+			const unfulfilledAmount = unfulfilledOrders.reduce(
+				(sum, order) => sum + order.totalUsdCost,
+				0
+			);
+			console.log(
+				`${unfulfilledOrders.length} orders could not be fulfilled due to budget constraints`
+			);
 			console.log(`Unfulfilled amount: $${unfulfilledAmount.toFixed(2)}`);
 
 			console.log('\nUnfulfilled details:');
 			for (const order of unfulfilledOrders) {
-				console.log(`- ${order.email}: ${order.quantity}x ${order.itemName} ($${order.totalUsdCost.toFixed(2)})`);
+				console.log(
+					`- ${order.email}: ${order.quantity}x ${order.itemName} ($${order.totalUsdCost.toFixed(2)})`
+				);
 			}
 		}
-
 	} catch (error) {
 		console.error('Error in grant giver:', error);
 		process.exit(1);

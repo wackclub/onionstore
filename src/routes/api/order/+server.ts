@@ -1,8 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { shopItems, shopOrders, usersWithTokens } from '$lib/server/db/schema';
+import { shopItems, shopOrders, usersWithTokens, rawUsers } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
+import { syncShopOrderToAirtable } from '$lib/server/airtable';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
@@ -46,6 +47,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			);
 		}
 
+		// Get user's airtableRecordId for linking
+		const [rawUser] = await db.select().from(rawUsers).where(eq(rawUsers.id, userId)).limit(1);
+
 		const remainingTokens = user.tokens - item.price;
 		const newOrder = await db
 			.insert(shopOrders)
@@ -56,6 +60,23 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				status: 'pending'
 			})
 			.returning();
+
+		// Sync to Airtable and store the record ID
+		syncShopOrderToAirtable({
+			itemName: item.name,
+			email: user.email!,
+			userAirtableId: rawUser?.airtableRecordId,
+			shopItemAirtableId: item.airtableRecordId,
+			priceAtOrder: item.price,
+			status: 'pending'
+		})
+			.then(async (airtableId) => {
+				await db
+					.update(shopOrders)
+					.set({ airtableRecordId: airtableId })
+					.where(eq(shopOrders.id, newOrder[0].id));
+			})
+			.catch((err) => console.error('Airtable sync failed:', err));
 
 		return json({
 			success: true,

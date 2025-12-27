@@ -18,10 +18,25 @@ export const rawUsers = pgTable('user', {
 		.$defaultFn(() => nanoid()),
 	email: text().notNull().unique(),
 	displayName: text(),
-	avatarUrl: text(),
 	isAdmin: boolean().default(false).notNull(),
 	country: varchar({ length: 2 }),
-	createdAt: timestamp().notNull().defaultNow()
+	createdAt: timestamp().notNull().defaultNow(),
+	airtableRecordId: text(),
+	totalEarnedPoints: integer().default(0).notNull(),
+	pointsRedeemed: integer().default(0).notNull(),
+	rating: integer(),
+	review: text(),
+	githubUrl: text(),
+	websiteUrl: text(),
+	description: text(),
+	screenshotUrl: text(),
+	addressLine1: text(),
+	addressLine2: text(),
+	state: text(),
+	city: text(),
+	zipPostal: text(),
+	shippingCountry: text(),
+	slackId: text()
 });
 
 export const loginTokens = pgTable(
@@ -51,7 +66,8 @@ export const shopItems = pgTable('shop_items', {
 	price: integer().notNull(),
 	usd_cost: integer(),
 	type: varchar({ enum: ['hcb', 'third_party'] }),
-	hcbMids: text().array()
+	hcbMids: text().array(),
+	airtableRecordId: text()
 });
 
 export const shopOrders = pgTable(
@@ -71,7 +87,8 @@ export const shopOrders = pgTable(
 		createdAt: timestamp().notNull().defaultNow(),
 		userId: text()
 			.notNull()
-			.references(() => rawUsers.id)
+			.references(() => rawUsers.id),
+		airtableRecordId: text()
 	},
 	(table) => ({
 		userIdIdx: index('shop_orders_user_id_idx').on(table.userId),
@@ -95,12 +112,16 @@ export const payouts = pgTable(
 		createdAt: timestamp().notNull().defaultNow(),
 		submittedToUnified: boolean().default(false).notNull(),
 		baseHackatimeHours: decimal().default('0.0').notNull(),
-		overridenHours: decimal().default('0.0')
+		overridenHours: decimal().default('0.0'),
+		airtableSubmissionId: text()
 	},
 	(table) => ({
 		userIdIdx: index('payouts_user_id_idx').on(table.userId),
 		createdAtIdx: index('payouts_created_at_idx').on(table.createdAt),
-		submittedToUnifiedIdx: index('payouts_submitted_to_unified_idx').on(table.submittedToUnified)
+		submittedToUnifiedIdx: index('payouts_submitted_to_unified_idx').on(table.submittedToUnified),
+		airtableSubmissionIdIdx: index('payouts_airtable_submission_id_idx').on(
+			table.airtableSubmissionId
+		)
 	})
 );
 
@@ -110,7 +131,6 @@ export const usersWithTokens = pgView('users_with_tokens').as((qb) => {
 			id: rawUsers.id,
 			email: rawUsers.email,
 			displayName: rawUsers.displayName,
-			avatarUrl: rawUsers.avatarUrl,
 			isAdmin: rawUsers.isAdmin,
 			country: rawUsers.country,
 			tokens: sql<number>`

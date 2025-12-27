@@ -18,7 +18,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.from(shopOrders)
 		.groupBy(shopOrders.userId);
 
-	const orderCountByUser = new Map(orderCounts.map(({ userId, orderCount }) => [userId, Number(orderCount)]));
+	const orderCountByUser = new Map(
+		orderCounts.map(({ userId, orderCount }) => [userId, Number(orderCount)])
+	);
 	const totalOrders = [...orderCountByUser.values()].reduce((sum, count) => sum + count, 0);
 
 	return {

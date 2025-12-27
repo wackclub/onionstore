@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const conditions = [];
 
 	if (statusFilter && statusFilter !== 'all') {
-		conditions.push(eq(shopOrders.status, statusFilter as any));
+		conditions.push(eq(shopOrders.status, statusFilter as 'pending' | 'fulfilled' | 'rejected'));
 	}
 
 	if (customerFilter) {
@@ -40,7 +40,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	}
 
 	if (typeFilter && typeFilter !== 'all') {
-		conditions.push(eq(shopItems.type, typeFilter as any));
+		conditions.push(eq(shopItems.type, typeFilter as 'hcb' | 'third_party'));
 	}
 
 	if (startDate) {
@@ -100,7 +100,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			userId: rawUsers.id,
 			userEmail: rawUsers.email,
 			userDisplayName: rawUsers.displayName,
-			userAvatarUrl: rawUsers.avatarUrl,
 			userCountry: rawUsers.country
 		})
 		.from(shopOrders)

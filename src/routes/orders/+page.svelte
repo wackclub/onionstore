@@ -1,103 +1,107 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { formatDate, getStatusColor } from '$lib/utils/format';
 
 	let { data }: { data: PageData } = $props();
 	const { orders } = data;
-
-	function formatDate(date: Date | string) {
-		return new Date(date).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
-		});
-	}
-
-	function getStatusColor(status: string) {
-		switch (status) {
-			case 'pending':
-				return 'bg-[#f7d8a7] text-[#7a4b21]';
-			case 'fulfilled':
-				return 'bg-[#d5f5d4] text-[#2f7d43]';
-			case 'rejected':
-				return 'bg-[#f6c4c0] text-[#963135]';
-			default:
-				return 'bg-[#ead2b2] text-[#5b3522]';
-		}
-	}
 </script>
 
-<div class="flex flex-col gap-10">
-
-	{#if orders.length > 0}
-		<h2 class="text-3xl font-bold text-stone-900">Your orders</h2>
-	{/if}
-
-	<section class="boba-panel-tight animate-bubble">
-		{#if orders.length === 0}
-			<div class="flex flex-col items-center gap-1 py-6">
-				<h3 class="text-2xl font-semibold text-stone-900">No orders... yet</h3>
-				<p class="text-stone-600">Buy something and it'll show up here!</p>
+<div class="flex flex-col gap-8">
+	<section class="retro-panel">
+		<div class="flex flex-wrap items-center justify-between gap-4">
+			<div>
+				<h1 class="retro-title text-2xl">Order History</h1>
+				<p class="retro-subtitle mt-1">
+					{#if orders.length === 0}
+						&gt; NO RECORDS FOUND
+					{:else}
+						&gt; {orders.length} {orders.length === 1 ? 'ORDER' : 'ORDERS'} ON FILE
+					{/if}
+				</p>
 			</div>
-		{:else}
+			<a href="/" class="retro-btn-secondary">BROWSE STORE</a>
+		</div>
+	</section>
+
+	{#if orders.length === 0}
+		<section class="retro-panel py-12 text-center">
+			<pre class="text-coffee-400 mb-4 text-4xl">[ NO DATA ]</pre>
+			<h3 class="text-coffee-700 mb-2 text-lg font-bold uppercase">Empty Order Log</h3>
+			<p class="text-coffee-500 mb-6 text-sm">&gt; PURCHASE ITEMS TO POPULATE THIS LIST_</p>
+			<a href="/" class="retro-btn">START SHOPPING</a>
+		</section>
+	{:else}
+		<section class="retro-panel-tight overflow-hidden !p-0">
 			<div class="overflow-x-auto">
-				<table class="min-w-full divide-y divide-[#ead2b2]">
-					<thead class="bg-[rgba(242,214,172,0.35)] text-left uppercase tracking-wide text-xs text-stone-600">
-						<tr>
-							<th class="px-6 py-3">Order</th>
-							<th class="px-6 py-3">Item</th>
-							<th class="px-6 py-3">Price</th>
-							<th class="px-6 py-3">Status</th>
-							<th class="px-6 py-3">Date</th>
+				<table class="min-w-full">
+					<thead>
+						<tr class="border-coffee-700 bg-cream-200 border-b-2">
+							<th
+								class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+								>ID</th
+							>
+							<th
+								class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+								>Item</th
+							>
+							<th
+								class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+								>Cost</th
+							>
+							<th
+								class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+								>Status</th
+							>
+							<th
+								class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+								>Date</th
+							>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-[#ead2b2]">
+					<tbody class="divide-coffee-300 divide-y-2">
 						{#each orders as order}
-							<tr class="transition hover:bg-[rgba(244,213,178,0.4)]">
-								<td class="px-6 py-4 whitespace-nowrap">
-									<div class="text-sm font-semibold text-stone-900">
-										#{order.id.slice(-8)}
-									</div>
+							<tr class="hover:bg-cream-100 transition-colors duration-100">
+								<td class="px-4 py-3 whitespace-nowrap">
+									<span class="text-coffee-700 text-xs font-bold">#{order.id.slice(-8)}</span>
 								</td>
-								<td class="px-6 py-4 whitespace-nowrap">
+								<td class="px-4 py-3 whitespace-nowrap">
 									<div class="flex items-center gap-3">
-										<div class="h-12 w-12 overflow-hidden rounded-xl bg-[#f8e2c1]">
+										<div class="border-coffee-600 bg-cream-200 h-10 w-10 overflow-hidden border-2">
 											<img
 												src={order.itemImageUrl}
 												alt={order.itemName}
 												class="h-full w-full object-cover"
 											/>
 										</div>
-										<div class="text-sm font-medium text-stone-800">
-											{order.itemName}
-										</div>
+										<span class="text-coffee-800 text-xs font-bold uppercase">{order.itemName}</span
+										>
 									</div>
 								</td>
-								<td class="px-6 py-4 whitespace-nowrap">
-									<span class="boba-chip text-xs sm:text-sm">
-										<span class="text-base font-bold">{order.priceAtOrder}</span>
-										<span>tokens</span>
+								<td class="px-4 py-3 whitespace-nowrap">
+									<span class="retro-chip text-xs">
+										<span class="font-bold">{order.priceAtOrder}</span>
+										<span>TKN</span>
 									</span>
 								</td>
-								<td class="px-6 py-4 whitespace-nowrap">
+								<td class="px-4 py-3 whitespace-nowrap">
 									<span
-										class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {getStatusColor(
+										class="inline-flex px-2 py-1 text-xs font-bold uppercase {getStatusColor(
 											order.status
 										)}"
 									>
-										{order.status}
+										[{order.status}]
 									</span>
 								</td>
-								<td class="px-6 py-4 text-sm whitespace-nowrap text-stone-600">
+								<td class="text-coffee-600 px-4 py-3 text-xs font-bold whitespace-nowrap">
 									{formatDate(order.createdAt)}
 								</td>
 							</tr>
 							{#if order.memo}
-								<tr class="bg-[rgba(244,213,178,0.35)]">
-									<td colspan="5" class="px-6 py-3">
-										<div class="text-sm text-stone-600 italic">
-											<span class="font-medium text-stone-700">Note:</span> {order.memo}
+								<tr class="bg-cream-100">
+									<td colspan="5" class="px-4 py-2">
+										<div class="text-coffee-600 text-xs">
+											<span class="text-coffee-700 font-bold">&gt; NOTE:</span>
+											{order.memo}
 										</div>
 									</td>
 								</tr>
@@ -106,36 +110,48 @@
 					</tbody>
 				</table>
 			</div>
-		{/if}
-	</section>
+		</section>
 
-	<section class="grid grid-cols-1 gap-6 md:grid-cols-3">
-		<div class="boba-panel-tight flex items-center gap-4 animate-bubble" style:animation-delay="0.05s">
-			<div class="text-3xl">📦</div>
-			<div>
-				<div class="text-2xl font-semibold text-stone-900">
-					{orders.filter((o) => o.status === 'pending').length}
+		<section class="grid grid-cols-1 gap-4 md:grid-cols-3">
+			<div class="retro-panel-tight flex items-center gap-4">
+				<div
+					class="border-coffee-600 flex h-12 w-12 items-center justify-center border-2 bg-yellow-100 text-xl font-bold"
+				>
+					[P]
 				</div>
-				<div class="text-sm text-stone-600">Pending Orders</div>
-			</div>
-		</div>
-		<div class="boba-panel-tight flex items-center gap-4 animate-bubble" style:animation-delay="0.1s">
-			<div class="text-3xl">✅</div>
-			<div>
-				<div class="text-2xl font-semibold text-emerald-600">
-					{orders.filter((o) => o.status === 'fulfilled').length}
+				<div>
+					<div class="text-coffee-800 text-2xl font-bold">
+						{orders.filter((o) => o.status === 'pending').length}
+					</div>
+					<div class="text-coffee-500 text-xs font-bold uppercase">Pending</div>
 				</div>
-				<div class="text-sm text-stone-600">Fulfilled Orders</div>
 			</div>
-		</div>
-		<div class="boba-panel-tight flex items-center gap-4 animate-bubble" style:animation-delay="0.15s">
-			<div class="text-3xl">❌</div>
-			<div>
-				<div class="text-2xl font-semibold text-rose-600">
-					{orders.filter((o) => o.status === 'rejected').length}
+			<div class="retro-panel-tight flex items-center gap-4">
+				<div
+					class="border-coffee-600 flex h-12 w-12 items-center justify-center border-2 bg-green-100 text-xl font-bold"
+				>
+					[F]
 				</div>
-				<div class="text-sm text-stone-600">Rejected Orders</div>
+				<div>
+					<div class="text-2xl font-bold text-green-700">
+						{orders.filter((o) => o.status === 'fulfilled').length}
+					</div>
+					<div class="text-coffee-500 text-xs font-bold uppercase">Fulfilled</div>
+				</div>
 			</div>
-		</div>
-	</section>
+			<div class="retro-panel-tight flex items-center gap-4">
+				<div
+					class="border-coffee-600 flex h-12 w-12 items-center justify-center border-2 bg-red-100 text-xl font-bold"
+				>
+					[R]
+				</div>
+				<div>
+					<div class="text-2xl font-bold text-red-700">
+						{orders.filter((o) => o.status === 'rejected').length}
+					</div>
+					<div class="text-coffee-500 text-xs font-bold uppercase">Rejected</div>
+				</div>
+			</div>
+		</section>
+	{/if}
 </div>

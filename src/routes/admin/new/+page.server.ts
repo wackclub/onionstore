@@ -20,18 +20,18 @@ export const actions: Actions = {
 		const description = formData.get('description') as string;
 		const imageUrl = formData.get('imageUrl') as string;
 		const price = parseInt(formData.get('price') as string);
-		const usdPrice = parseFloat(formData.get('usd-cost') as string);
+		const usdCost = parseFloat(formData.get('usd-cost') as string);
 		const type = formData.get('type') as 'hcb' | 'third_party';
 		const hcbMids = formData.get('hcbMids') as string;
 
-		if (!name || !description || !imageUrl || !price || !usdPrice || !type) {
+		if (!name || !description || !imageUrl || !price || !usdCost || !type) {
 			return fail(400, {
 				error: 'All fields are required',
 				name,
 				description,
 				imageUrl,
 				price: price.toString(),
-				usdPrice: usdPrice.toString(),
+				usdCost: usdCost.toString(),
 				type,
 				hcbMids
 			});
@@ -43,20 +43,20 @@ export const actions: Actions = {
 				description,
 				imageUrl,
 				price,
-				usdPrice,
+				usd_cost: usdCost,
 				type,
 				hcbMids: hcbMids ? hcbMids.split(',').map((mid) => mid.trim()) : null
 			});
 
 			return { success: true };
-		} catch (error) {
+		} catch {
 			return fail(500, {
 				error: 'Failed to create item',
 				name,
 				description,
 				imageUrl,
 				price: price.toString(),
-				usdPrice: usdPrice.toString(),
+				usdCost: usdCost.toString(),
 				type,
 				hcbMids
 			});

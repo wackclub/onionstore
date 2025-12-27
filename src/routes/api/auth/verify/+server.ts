@@ -13,61 +13,44 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		throw redirect(302, '/login?error=invalid_token');
 	}
 
-	try {
-		const loginToken = await db
-			.select()
-			.from(loginTokens)
-			.where(
-				and(
-					eq(loginTokens.token, token),
-					gt(loginTokens.expiresAt, new Date())
-				)
-			)
-			.limit(1);
+	const loginToken = await db
+		.select()
+		.from(loginTokens)
+		.where(and(eq(loginTokens.token, token), gt(loginTokens.expiresAt, new Date())))
+		.limit(1);
 
-		if (!loginToken || loginToken.length === 0) {
-			throw redirect(302, '/login?error=expired_token');
-		}
-
-		const { email } = loginToken[0];
-
-		let user = await db
-			.select()
-			.from(rawUsers)
-			.where(eq(rawUsers.email, email))
-			.limit(1);
-
-		if (!user || user.length === 0) {
-			const newUser = await db
-				.insert(rawUsers)
-				.values({
-					email,
-					displayName: email.split('@')[0]
-				})
-				.returning();
-			user = newUser;
-		}
-
-		await db.delete(loginTokens).where(eq(loginTokens.token, token));
-
-		cookies.set('_boba_mahad_says_hi_session', await symmetric.encrypt(user[0].id, SESSIONS_SECRET), {
-			path: '/',
-			maxAge: 60 * 60 * 24 * 90,
-			httpOnly: true,
-			sameSite: 'lax',
-			secure: process.env.NODE_ENV === 'production'
-		});
-
-		if (!user[0].country) {
-			throw redirect(302, '/welcome');
-		}
-
-		throw redirect(302, '/');
-	} catch (error) {
-		if (error instanceof Response || (error && typeof error === 'object' && 'status' in error && 'location' in error)) {
-			throw error;
-		}
-		console.error('Failed to verify login token:', error);
-		throw redirect(302, '/login?error=verification_failed');
+	if (!loginToken || loginToken.length === 0) {
+		throw redirect(302, '/login?error=expired_token');
 	}
+
+	const { email } = loginToken[0];
+
+	let user = await db.select().from(rawUsers).where(eq(rawUsers.email, email)).limit(1);
+
+	if (!user || user.length === 0) {
+		const newUser = await db
+			.insert(rawUsers)
+			.values({
+				email,
+				displayName: email.split('@')[0]
+			})
+			.returning();
+		user = newUser;
+	}
+
+	await db.delete(loginTokens).where(eq(loginTokens.token, token));
+
+	cookies.set('_boba_mahad_says_hi_session', await symmetric.encrypt(user[0].id, SESSIONS_SECRET), {
+		path: '/',
+		maxAge: 60 * 60 * 24 * 90,
+		httpOnly: true,
+		sameSite: 'lax',
+		secure: process.env.NODE_ENV === 'production'
+	});
+
+	if (!user[0].country) {
+		throw redirect(302, '/welcome');
+	}
+
+	throw redirect(302, '/');
 };

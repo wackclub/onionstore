@@ -8,6 +8,13 @@
       "when": 1763226651971,
       "tag": "0000_strange_doomsday",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766006478754,
+      "tag": "0001_wild_next_avengers",
+      "breakpoints": true
     }
   ]
 }
