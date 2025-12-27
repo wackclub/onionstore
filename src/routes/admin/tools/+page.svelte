@@ -52,7 +52,7 @@
 		itemsSyncStatus = null;
 
 		try {
-			const response = await fetch('/api/admin/sync-shop-items', {
+			const response = await fetch('/api/admin/sync-shop-items-from-airtable', {
 				method: 'POST'
 			});
 
@@ -63,7 +63,7 @@
 					type: 'success',
 					message: result.message || 'Shop items sync completed successfully'
 				};
-				toast.success('Shop items synced to Airtable!');
+				toast.success('Shop items synced from Airtable!');
 			} else {
 				itemsSyncStatus = {
 					type: 'error',
@@ -272,7 +272,7 @@
 				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
 					<h3 class="text-coffee-700 mb-2 text-xs font-bold uppercase">&gt; Sync Shop Items</h3>
 					<p class="text-coffee-600 mb-4 text-xs leading-relaxed">
-						Push all shop items from the local database to Airtable's Shop Items table.
+						Pull all shop items from Airtable's Shop Items table and update the local database.
 					</p>
 					{#if itemsSyncStatus}
 						<div
