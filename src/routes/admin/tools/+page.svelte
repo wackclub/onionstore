@@ -7,6 +7,8 @@
 
 	let syncInProgress = $state(false);
 	let syncStatus = $state<{ type: 'success' | 'error'; message: string } | null>(null);
+	let itemsSyncInProgress = $state(false);
+	let itemsSyncStatus = $state<{ type: 'success' | 'error'; message: string } | null>(null);
 
 	const handleSyncAirtable = async () => {
 		syncInProgress = true;
@@ -40,6 +42,41 @@
 			toast.error('Sync failed');
 		} finally {
 			syncInProgress = false;
+		}
+	};
+
+	const handleSyncShopItems = async () => {
+		itemsSyncInProgress = true;
+		itemsSyncStatus = null;
+
+		try {
+			const response = await fetch('/api/admin/sync-shop-items', {
+				method: 'POST'
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				itemsSyncStatus = {
+					type: 'success',
+					message: result.message || 'Shop items sync completed successfully'
+				};
+				toast.success('Shop items synced to Airtable!');
+			} else {
+				itemsSyncStatus = {
+					type: 'error',
+					message: result.error || 'Shop items sync failed'
+				};
+				toast.error('Shop items sync failed');
+			}
+		} catch (error) {
+			itemsSyncStatus = {
+				type: 'error',
+				message: error instanceof Error ? error.message : 'Unknown error occurred'
+			};
+			toast.error('Shop items sync failed');
+		} finally {
+			itemsSyncInProgress = false;
 		}
 	};
 
@@ -172,12 +209,26 @@
 					<p class="text-coffee-600 mb-4 text-xs leading-relaxed">
 						Push all shop items from the local database to Airtable's Shop Items table.
 					</p>
+					{#if itemsSyncStatus}
+						<div
+							class="mb-4 border-2 p-3 {itemsSyncStatus.type === 'success'
+								? 'border-green-700 bg-green-50'
+								: 'border-red-700 bg-red-50'}"
+						>
+							<div
+								class="mb-1 text-xs font-bold uppercase {itemsSyncStatus.type === 'success' ? 'text-green-700' : 'text-red-700'}"
+							>
+								{itemsSyncStatus.type === 'success' ? '✓ Success' : '✗ Error'}
+							</div>
+							<p class="text-coffee-700 text-xs">{itemsSyncStatus.message}</p>
+						</div>
+					{/if}
 					<button
-						disabled={!data.hasAirtableKey}
+						disabled={!data.hasAirtableKey || itemsSyncInProgress}
 						class="retro-btn-secondary w-full disabled:opacity-50"
-						onclick={() => toast.info('Feature coming soon')}
+						onclick={handleSyncShopItems}
 					>
-						[SYNC ITEMS]
+						{itemsSyncInProgress ? '[SYNCING...]' : '[SYNC ITEMS]'}
 					</button>
 				</div>
 			</div>
@@ -187,7 +238,7 @@
 	<section class="retro-panel">
 		<div class="mb-6 flex items-center gap-3">
 			<span class="text-coffee-400">&gt;&gt;</span>
-			<h2 class="text-coffee-700 text-sm font-bold tracking-wider uppercase">Point Management</h2>
+			<h2 class="text-coffee-700 text-sm font-bold tracking-wider uppercase">Give Tokens</h2>
 		</div>
 
 		<form
@@ -213,17 +264,18 @@
 
 				<div>
 					<label for="points" class="text-coffee-700 mb-2 block text-xs font-bold uppercase">
-						Points (+ to add, - to remove)
+						Tokens to Give
 					</label>
 					<input
 						type="number"
 						id="points"
 						name="points"
 						required
+						min="1"
 						class="border-coffee-700 bg-cream-50 text-coffee-800 w-full border-2 px-4 py-2 text-sm focus:border-coffee-900 focus:outline-none"
 						placeholder="100"
 					/>
-					<p class="text-coffee-500 mt-2 text-xs">Example: 100 to add, -50 to remove</p>
+					<p class="text-coffee-500 mt-2 text-xs">Enter positive number (e.g., 100)</p>
 				</div>
 
 				<div>
@@ -239,7 +291,7 @@
 					/>
 				</div>
 
-				<button type="submit" class="retro-btn w-full">[UPDATE POINTS]</button>
+				<button type="submit" class="retro-btn w-full">[GIVE TOKENS]</button>
 			</div>
 
 			<div class="border-coffee-400 bg-cream-100 flex items-center border-2 p-6">

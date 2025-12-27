@@ -1,5 +1,5 @@
 import { redirect, fail } from '@sveltejs/kit';
-import { db, rawUsers } from '$lib/server/db';
+import { db, rawUsers, payouts } from '$lib/server/db';
 import { eq } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -76,9 +76,15 @@ export const actions = {
 			return fail(400, { givePointsError: 'Email and points are required' });
 		}
 
-		const points = parseInt(pointsStr);
-		if (isNaN(points) || points === 0) {
-			return fail(400, { givePointsError: 'Points must be a valid non-zero number' });
+		const tokens = parseInt(pointsStr);
+		if (isNaN(tokens) || tokens === 0) {
+			return fail(400, { givePointsError: 'Tokens must be a valid non-zero number' });
+		}
+
+		if (tokens < 0) {
+			return fail(400, {
+				givePointsError: 'Cannot remove tokens. Use positive numbers to add tokens.'
+			});
 		}
 
 		try {
@@ -92,20 +98,21 @@ export const actions = {
 				return fail(404, { givePointsError: `User not found: ${email}` });
 			}
 
-			const currentTotal = user[0].totalEarnedPoints;
-			const newTotal = currentTotal + points;
+			// Create a payout record to add tokens
+			await db.insert(payouts).values({
+				userId: user[0].id,
+				tokens: tokens,
+				memo: reason
+			});
 
-			if (newTotal < 0) {
-				return fail(400, {
-					givePointsError: `Cannot reduce points below 0. Current: ${currentTotal}, Requested change: ${points}`
-				});
-			}
-
+			// Also update totalEarnedPoints for Airtable sync
+			const newTotal = user[0].totalEarnedPoints + tokens;
 			await db
 				.update(rawUsers)
 				.set({ totalEarnedPoints: newTotal })
 				.where(eq(rawUsers.email, email));
 
+			// Sync to Airtable
 			if (AIRTABLE_API_KEY && user[0].airtableRecordId) {
 				try {
 					const airtableUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/tblpJEJAfy5rEc5vG/${user[0].airtableRecordId}`;
@@ -128,11 +135,11 @@ export const actions = {
 
 			return {
 				givePointsSuccess: true,
-				message: `${points > 0 ? 'Added' : 'Removed'} ${Math.abs(points)} points ${points > 0 ? 'to' : 'from'} ${email}. New total: ${newTotal}`,
+				message: `Added ${tokens} tokens to ${email}. Reason: ${reason}`,
 				user: {
 					email,
-					previousTotal: currentTotal,
-					pointsChanged: points,
+					previousTotal: user[0].totalEarnedPoints,
+					pointsChanged: tokens,
 					newTotal
 				}
 			};
