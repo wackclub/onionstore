@@ -462,9 +462,6 @@
 				<table class="min-w-full">
 					<thead>
 						<tr class="border-coffee-700 bg-cream-200 border-b-2">
-							<th class="text-coffee-700 px-4 py-3 text-left font-bold tracking-wider uppercase"
-								>ID</th
-							>
 							<th
 								class="text-coffee-700 hover:text-coffee-900 cursor-pointer px-4 py-3 text-left font-bold tracking-wider uppercase"
 								onclick={() => toggleSort('customer')}
@@ -506,9 +503,6 @@
 					<tbody class="divide-coffee-300 divide-y-2">
 						{#each orders as order}
 							<tr class="hover:bg-cream-100 transition-colors duration-100">
-								<td class="px-4 py-3 whitespace-nowrap">
-									<span class="text-coffee-700 font-bold">#{order.id.slice(-8)}</span>
-								</td>
 								<td class="px-4 py-3 whitespace-nowrap">
 									<span class="text-coffee-800 font-bold uppercase"
 										>{order.userDisplayName || order.userEmail}</span
