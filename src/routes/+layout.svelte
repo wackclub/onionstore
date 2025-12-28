@@ -23,9 +23,6 @@
 							<span class="font-bold">{data.user.tokens}</span>
 							<span class="text-xs">{data.user.tokens === 1 ? 'TOKEN' : 'TOKENS'}</span>
 						</div>
-						{#if data.user.isAdmin}
-							<span class="retro-badge">ADMIN</span>
-						{/if}
 					</div>
 					<div class="flex items-center gap-2">
 						<a href="/" class="retro-btn-secondary !px-3 !py-2">Home</a>

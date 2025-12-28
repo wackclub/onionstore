@@ -152,11 +152,6 @@
 			box-shadow 100ms;
 	}
 
-	.retro-card:hover {
-		transform: translate(-2px, -2px);
-		box-shadow: 6px 6px 0 var(--color-coffee-700);
-	}
-
 	.retro-badge {
 		display: inline-flex;
 		align-items: center;
