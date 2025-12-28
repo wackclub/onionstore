@@ -11,7 +11,7 @@
 			<div>
 				<pre class="text-coffee-500 mb-2 text-xs">&gt; ADMIN TERMINAL v1.0</pre>
 				<h1 class="retro-title text-2xl">Control Panel</h1>
-				<p class="retro-subtitle mt-1">&gt; SYSTEM READY_</p>
+				<p class="retro-subtitle mt-1">SYSTEM READY</p>
 			</div>
 			<div class="flex flex-wrap items-center gap-2">
 				<a href="/admin/users" class="retro-btn-secondary text-xs">[USERS]</a>
@@ -66,7 +66,7 @@
 		<section class="retro-panel py-12 text-center">
 			<pre class="text-coffee-400 mb-4 text-4xl">[ EMPTY ]</pre>
 			<h3 class="text-coffee-700 mb-2 text-lg font-bold uppercase">No Items in Database</h3>
-			<p class="text-coffee-500 mb-6 text-sm">&gt; CREATE FIRST ITEM TO BEGIN_</p>
+			<p class="text-coffee-500 mb-6 text-sm">CREATE FIRST ITEM TO BEGIN</p>
 			<a href="/admin/new" class="retro-btn">[CREATE ITEM]</a>
 		</section>
 	{/if}

@@ -27,7 +27,7 @@
 		<section class="retro-panel py-12 text-center">
 			<pre class="text-coffee-400 mb-4 text-4xl">[ NO DATA ]</pre>
 			<h3 class="text-coffee-700 mb-2 text-lg font-bold uppercase">Empty Order Log</h3>
-			<p class="text-coffee-500 mb-6 text-sm">&gt; PURCHASE ITEMS TO POPULATE THIS LIST_</p>
+			<p class="text-coffee-500 mb-6 text-sm">PURCHASE ITEMS TO POPULATE THIS LIST</p>
 			<a href="/" class="retro-btn">START SHOPPING</a>
 		</section>
 	{:else}
@@ -100,7 +100,7 @@
 								<tr class="bg-cream-100">
 									<td colspan="5" class="px-4 py-2">
 										<div class="text-coffee-600 text-xs">
-											<span class="text-coffee-700 font-bold">&gt; NOTE:</span>
+											<span class="text-coffee-700 font-bold">NOTE:</span>
 											{order.memo}
 										</div>
 									</td>

@@ -79,7 +79,7 @@
 			class="w-full {canAfford ? 'retro-btn' : 'retro-btn-secondary cursor-not-allowed opacity-60'}"
 		>
 			{#if isOrdering}
-				ORDERING<span class="animate-blink">_</span>
+				ORDERING
 			{:else if !canAfford}
 				INSUFFICIENT TOKENS
 			{:else}

@@ -38,7 +38,7 @@
 		<section class="retro-panel py-12 text-center">
 			<pre class="mb-4 text-4xl">[ EMPTY ]</pre>
 			<h2 class="text-coffee-700 mb-2 text-lg font-bold uppercase">No Items Available</h2>
-			<p class="text-coffee-500 text-sm">&gt; CHECK BACK LATER FOR NEW STOCK_</p>
+			<p class="text-coffee-500 text-sm">CHECK BACK LATER FOR NEW STOCK</p>
 		</section>
 	{/if}
 </div>

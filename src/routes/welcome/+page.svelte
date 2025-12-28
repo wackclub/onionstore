@@ -76,7 +76,7 @@
 
 				<button type="submit" disabled={loading || !country} class="retro-btn w-full">
 					{#if loading}
-						PROCESSING<span class="animate-blink">_</span>
+						PROCESSING
 					{:else}
 						CONTINUE
 					{/if}

@@ -177,9 +177,7 @@
 										</h4>
 										<div class="space-y-2">
 											{#if ordersState?.loading}
-												<p class="text-coffee-600 text-xs">
-													LOADING<span class="animate-blink">_</span>
-												</p>
+												<p class="text-coffee-600 text-xs">LOADING</p>
 											{:else if ordersState?.error}
 												<p class="text-xs font-bold text-red-700">&gt; {ordersState.error}</p>
 											{:else if ordersState?.data && ordersState.data.length > 0}
