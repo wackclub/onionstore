@@ -589,7 +589,7 @@
 			<div
 				class="flex h-10 w-10 items-center justify-center border-2 border-yellow-700 bg-yellow-100 font-bold text-yellow-700"
 			>
-				[P]
+				P
 			</div>
 			<div>
 				<div class="text-coffee-800 text-xl font-bold">
@@ -602,7 +602,7 @@
 			<div
 				class="flex h-10 w-10 items-center justify-center border-2 border-green-700 bg-green-100 font-bold text-green-700"
 			>
-				[A]
+				A
 			</div>
 			<div>
 				<div class="text-xl font-bold text-green-700">
@@ -615,7 +615,7 @@
 			<div
 				class="flex h-10 w-10 items-center justify-center border-2 border-red-700 bg-red-100 font-bold text-red-700"
 			>
-				[R]
+				R
 			</div>
 			<div>
 				<div class="text-xl font-bold text-red-700">
@@ -628,7 +628,7 @@
 			<div
 				class="border-coffee-700 bg-caramel text-coffee-900 flex h-10 w-10 items-center justify-center border-2 font-bold"
 			>
-				[$]
+				$
 			</div>
 			<div>
 				<div class="text-coffee-800 text-xl font-bold">
