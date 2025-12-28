@@ -1,6 +1,4 @@
 <script lang="ts">
-	import '@fontsource/space-mono';
-	import '@fontsource/space-mono/700.css';
 	import '../app.css';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';

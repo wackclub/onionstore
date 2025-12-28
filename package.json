@@ -32,7 +32,6 @@
 		"@tailwindcss/vite": "^4.1.11",
 		"@types/canvas-confetti": "^1.9.0",
 		"@types/node": "^24.6.2",
-		"csv-parse": "^6.0.0",
 		"drizzle-kit": "^0.31.4",
 		"prettier": "^3.6.2",
 		"prettier-plugin-svelte": "^3.4.0",
@@ -44,14 +43,10 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
-		"@fontsource-variable/dm-sans": "^5.2.8",
-		"@fontsource-variable/fraunces": "^5.2.7",
-		"@fontsource-variable/outfit": "^5.2.8",
-		"@fontsource/space-mono": "^5.2.9",
-		"@slack/web-api": "^7.9.3",
 		"@types/pg": "^8.15.4",
 		"@uploadthing/svelte": "^7.3.2",
 		"@upstash/redis": "^1.36.0",
+		"@vercel/analytics": "^1.6.1",
 		"@vercel/speed-insights": "^1.3.1",
 		"arktype": "^2.1.29",
 		"canvas-confetti": "^1.9.3",
