@@ -25,7 +25,6 @@ async function syncAllShopItems(): Promise<void> {
 				item.airtableRecordId
 			);
 
-			// Update the local record with the Airtable ID if it's new
 			if (!item.airtableRecordId) {
 				await db
 					.update(shopItems)

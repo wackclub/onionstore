@@ -2,10 +2,9 @@ import { json, error } from '@sveltejs/kit';
 import { db, shopOrders } from '$lib/server/db';
 import { eq, isNotNull } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { AIRTABLE_BASE_ID, AIRTABLE_ORDERS_TABLE } from '$lib/server/airtable';
 
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
-const AIRTABLE_SHOP_ORDERS_TABLE = 'tblOklDMe8jJPdOIq';
 
 interface AirtableShopOrder {
 	id: string;
@@ -25,7 +24,7 @@ async function fetchShopOrdersFromAirtable(): Promise<AirtableShopOrder[]> {
 		throw new Error('AIRTABLE_API_KEY not configured');
 	}
 
-	const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_SHOP_ORDERS_TABLE)}`;
+	const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_ORDERS_TABLE)}`;
 	const headers = {
 		Authorization: `Bearer ${AIRTABLE_API_KEY}`,
 		'Content-Type': 'application/json'
@@ -63,7 +62,6 @@ export const POST: RequestHandler = async ({ locals }) => {
 	try {
 		const airtableOrders = await fetchShopOrdersFromAirtable();
 
-		// Get all local orders that have an airtableRecordId
 		const localOrders = await db
 			.select()
 			.from(shopOrders)
@@ -86,7 +84,6 @@ export const POST: RequestHandler = async ({ locals }) => {
 
 			const airtableStatus = airtableOrder.fields.status?.toLowerCase();
 
-			// Map Airtable status to our status format
 			let newStatus: 'pending' | 'approved' | 'rejected' | null = null;
 			if (airtableStatus === 'pending') {
 				newStatus = 'pending';
@@ -96,7 +93,6 @@ export const POST: RequestHandler = async ({ locals }) => {
 				newStatus = 'rejected';
 			}
 
-			// Only update if status changed
 			if (newStatus && newStatus !== localOrder.status) {
 				await db
 					.update(shopOrders)

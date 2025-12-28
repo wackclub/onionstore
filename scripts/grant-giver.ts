@@ -437,24 +437,24 @@ async function main() {
 		const grantRequests = createHCBGrantRequests(allocations);
 		writeGrantRequestsToFile(grantRequests, allocations);
 
-		const fulfilledOrderIds = new Set(allocations.flatMap((alloc) => alloc.orderIds));
-		const unfulfilledOrders = groupedOrders.filter(
-			(order) => !order.orderIds.some((id) => fulfilledOrderIds.has(id))
+		const allocatedOrderIds = new Set(allocations.flatMap((alloc) => alloc.orderIds));
+		const unallocatedOrders = groupedOrders.filter(
+			(order) => !order.orderIds.some((id) => allocatedOrderIds.has(id))
 		);
 
-		if (unfulfilledOrders.length > 0) {
-			console.log('\n=== UNFULFILLED ORDERS ===');
-			const unfulfilledAmount = unfulfilledOrders.reduce(
+		if (unallocatedOrders.length > 0) {
+			console.log('\n=== UNALLOCATED ORDERS ===');
+			const unallocatedAmount = unallocatedOrders.reduce(
 				(sum, order) => sum + order.totalUsdCost,
 				0
 			);
 			console.log(
-				`${unfulfilledOrders.length} orders could not be fulfilled due to budget constraints`
+				`${unallocatedOrders.length} orders could not be allocated due to budget constraints`
 			);
-			console.log(`Unfulfilled amount: $${unfulfilledAmount.toFixed(2)}`);
+			console.log(`Unallocated amount: $${unallocatedAmount.toFixed(2)}`);
 
-			console.log('\nUnfulfilled details:');
-			for (const order of unfulfilledOrders) {
+			console.log('\nUnallocated details:');
+			for (const order of unallocatedOrders) {
 				console.log(
 					`- ${order.email}: ${order.quantity}x ${order.itemName} ($${order.totalUsdCost.toFixed(2)})`
 				);

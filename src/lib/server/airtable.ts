@@ -1,8 +1,9 @@
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3'; // Onion Wars base
-const AIRTABLE_USERS_TABLE = 'tblpJEJAfy5rEc5vG'; // Signups table
-const AIRTABLE_ORDERS_TABLE = 'tblOklDMe8jJPdOIq'; // Shop Orders table
-const AIRTABLE_SHOP_ITEMS_TABLE = 'tbltUSi4tZ5dtUylt'; // Shop Items table
+const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
+const AIRTABLE_USERS_TABLE = 'tblpJEJAfy5rEc5vG';
+const AIRTABLE_ORDERS_TABLE = 'tblOklDMe8jJPdOIq';
+const AIRTABLE_SHOP_ITEMS_TABLE = 'tbltUSi4tZ5dtUylt';
+const AIRTABLE_SUBMISSIONS_TABLE = 'tblCNgijKlvTpz6N4';
 
 interface AirtableRecord {
 	id: string;
@@ -146,11 +147,9 @@ export async function syncShopItemToAirtable(
 
 	if (existingAirtableId) {
 		await updateAirtableRecord(AIRTABLE_SHOP_ITEMS_TABLE, existingAirtableId, fields);
-		console.log(`Updated Airtable shop item: ${data.name}`);
 		return existingAirtableId;
 	} else {
 		const record = await createAirtableRecord(AIRTABLE_SHOP_ITEMS_TABLE, fields);
-		console.log(`Created Airtable shop item: ${data.name}`);
 		return record.id;
 	}
 }
@@ -188,11 +187,9 @@ export async function syncShopOrderToAirtable(
 
 	if (existingAirtableId) {
 		await updateAirtableRecord(AIRTABLE_ORDERS_TABLE, existingAirtableId, fields);
-		console.log(`Updated Airtable order for: ${data.email}`);
 		return existingAirtableId;
 	} else {
 		const record = await createAirtableRecord(AIRTABLE_ORDERS_TABLE, fields);
-		console.log(`Created Airtable order for: ${data.email}`);
 		return record.id;
 	}
 }
@@ -201,4 +198,10 @@ function capitalizeFirst(str: string): string {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export { AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE, AIRTABLE_ORDERS_TABLE, AIRTABLE_SHOP_ITEMS_TABLE };
+export {
+	AIRTABLE_BASE_ID,
+	AIRTABLE_USERS_TABLE,
+	AIRTABLE_ORDERS_TABLE,
+	AIRTABLE_SHOP_ITEMS_TABLE,
+	AIRTABLE_SUBMISSIONS_TABLE
+};

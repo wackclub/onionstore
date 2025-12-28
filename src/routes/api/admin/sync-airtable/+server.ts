@@ -2,10 +2,9 @@ import { json, error } from '@sveltejs/kit';
 import { db, rawUsers } from '$lib/server/db';
 import { eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE } from '$lib/server/airtable';
 
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
-const AIRTABLE_USERS_TABLE = 'tblpJEJAfy5rEc5vG';
 
 interface AirtableRecord {
 	id: string;
@@ -53,7 +52,9 @@ async function fetchAllAirtableRecords(): Promise<AirtableRecord[]> {
 
 		const response = await fetch(`${url}?${params}`, { headers });
 		if (!response.ok) {
-			throw new Error(`Failed to fetch Airtable records: ${response.status} ${response.statusText}`);
+			throw new Error(
+				`Failed to fetch Airtable records: ${response.status} ${response.statusText}`
+			);
 		}
 
 		const data: AirtableResponse = await response.json();

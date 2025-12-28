@@ -5,7 +5,7 @@
 		id: string;
 		userId: string;
 		priceAtOrder: number;
-		status: 'pending' | 'fulfilled' | 'rejected';
+		status: 'pending' | 'approved' | 'rejected';
 		createdAt: string;
 		itemName: string | null;
 		itemType: string | null;
@@ -203,7 +203,7 @@
 															class="text-coffee-600 flex flex-wrap items-center justify-between gap-3 text-xs"
 														>
 															<span
-																class="px-2 py-1 font-bold uppercase {order.status === 'fulfilled'
+																class="px-2 py-1 font-bold uppercase {order.status === 'approved'
 																	? 'border-2 border-green-700 bg-green-100 text-green-700'
 																	: order.status === 'rejected'
 																		? 'border-2 border-red-700 bg-red-100 text-red-700'

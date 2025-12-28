@@ -2,9 +2,9 @@ import { redirect, fail } from '@sveltejs/kit';
 import { db, rawUsers, payouts } from '$lib/server/db';
 import { eq } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
+import { AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE } from '$lib/server/airtable';
 
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user?.isAdmin) {
@@ -32,7 +32,7 @@ export const actions = {
 		}
 
 		try {
-			const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/tblpJEJAfy5rEc5vG`;
+			const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_USERS_TABLE}`;
 			const response = await fetch(url + '?maxRecords=1', {
 				headers: {
 					Authorization: `Bearer ${AIRTABLE_API_KEY}`,
@@ -88,34 +88,27 @@ export const actions = {
 		}
 
 		try {
-			const user = await db
-				.select()
-				.from(rawUsers)
-				.where(eq(rawUsers.email, email))
-				.limit(1);
+			const user = await db.select().from(rawUsers).where(eq(rawUsers.email, email)).limit(1);
 
 			if (user.length === 0) {
 				return fail(404, { givePointsError: `User not found: ${email}` });
 			}
 
-			// Create a payout record to add tokens
 			await db.insert(payouts).values({
 				userId: user[0].id,
 				tokens: tokens,
 				memo: reason
 			});
 
-			// Also update totalEarnedPoints for Airtable sync
 			const newTotal = user[0].totalEarnedPoints + tokens;
 			await db
 				.update(rawUsers)
 				.set({ totalEarnedPoints: newTotal })
 				.where(eq(rawUsers.email, email));
 
-			// Sync to Airtable
 			if (AIRTABLE_API_KEY && user[0].airtableRecordId) {
 				try {
-					const airtableUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/tblpJEJAfy5rEc5vG/${user[0].airtableRecordId}`;
+					const airtableUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_USERS_TABLE}/${user[0].airtableRecordId}`;
 					await fetch(airtableUrl, {
 						method: 'PATCH',
 						headers: {
@@ -125,7 +118,7 @@ export const actions = {
 						body: JSON.stringify({
 							fields: {
 								'Total Earned Points': newTotal,
-								'Tokens': newTotal
+								Tokens: newTotal
 							}
 						})
 					});

@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { loginTokens, rawUsers } from '$lib/server/db/schema';
-import { eq, and, gt } from 'drizzle-orm';
+import { eq, and, gt, lt } from 'drizzle-orm';
 import { symmetric } from '$lib/server/crypto';
 import { SESSIONS_SECRET } from '$env/static/private';
 
@@ -39,6 +39,12 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	}
 
 	await db.delete(loginTokens).where(eq(loginTokens.token, token));
+
+	try {
+		await db.delete(loginTokens).where(lt(loginTokens.expiresAt, new Date()));
+	} catch (err) {
+		console.error('Token cleanup failed:', err);
+	}
 
 	cookies.set('_boba_mahad_says_hi_session', await symmetric.encrypt(user[0].id, SESSIONS_SECRET), {
 		path: '/',

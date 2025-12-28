@@ -1,10 +1,9 @@
 import { db } from '../src/lib/server/db';
 import { payouts, rawUsers } from '../src/lib/server/db/schema';
 import { eq, isNotNull } from 'drizzle-orm';
+import { AIRTABLE_BASE_ID, AIRTABLE_SUBMISSIONS_TABLE } from './airtable-config';
 
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3'; // Onion Wars base
-const AIRTABLE_SUBMISSIONS_TABLE = 'tbl1qlhGJPoHRWgM3'; // Submissions table
 
 interface AirtableSubmission {
 	id: string;

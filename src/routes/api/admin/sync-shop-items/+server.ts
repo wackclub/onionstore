@@ -36,7 +36,6 @@ export const POST: RequestHandler = async ({ locals }) => {
 					item.airtableRecordId
 				);
 
-				// Update local record with Airtable ID if it was newly created
 				if (!item.airtableRecordId && airtableId) {
 					await db
 						.update(shopItems)

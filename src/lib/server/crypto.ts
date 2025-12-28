@@ -2,8 +2,9 @@ class SymmetricEncryption {
 	private readonly algorithm = 'AES-GCM';
 	private readonly keyLength = 256;
 	private readonly ivLength = 12;
+	private readonly saltLength = 16;
 
-	private async deriveKey(password: string): Promise<CryptoKey> {
+	private async deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
 		const encoder = new TextEncoder();
 		const keyMaterial = await crypto.subtle.importKey(
 			'raw',
@@ -16,7 +17,7 @@ class SymmetricEncryption {
 		return crypto.subtle.deriveKey(
 			{
 				name: 'PBKDF2',
-				salt: encoder.encode('symmetric-encryption-salt'),
+				salt: salt,
 				iterations: 100000,
 				hash: 'SHA-256'
 			},
@@ -36,8 +37,9 @@ class SymmetricEncryption {
 		}
 
 		const encoder = new TextEncoder();
-		const key = await this.deriveKey(password);
+		const salt = crypto.getRandomValues(new Uint8Array(this.saltLength));
 		const iv = crypto.getRandomValues(new Uint8Array(this.ivLength));
+		const key = await this.deriveKey(password, salt);
 
 		const encryptedData = await crypto.subtle.encrypt(
 			{ name: this.algorithm, iv },
@@ -45,9 +47,10 @@ class SymmetricEncryption {
 			encoder.encode(plaintext)
 		);
 
-		const combined = new Uint8Array(iv.length + encryptedData.byteLength);
-		combined.set(iv);
-		combined.set(new Uint8Array(encryptedData), iv.length);
+		const combined = new Uint8Array(this.saltLength + this.ivLength + encryptedData.byteLength);
+		combined.set(salt);
+		combined.set(iv, this.saltLength);
+		combined.set(new Uint8Array(encryptedData), this.saltLength + this.ivLength);
 
 		return btoa(String.fromCharCode(...combined));
 	}
@@ -71,13 +74,15 @@ class SymmetricEncryption {
 			throw new Error('Invalid encrypted data format: not valid base64');
 		}
 
-		if (combined.length <= this.ivLength) {
+		const minLength = this.saltLength + this.ivLength + 1;
+		if (combined.length < minLength) {
 			throw new Error('Invalid encrypted data: data too short');
 		}
 
-		const iv = combined.slice(0, this.ivLength);
-		const encrypted = combined.slice(this.ivLength);
-		const key = await this.deriveKey(password);
+		const salt = combined.slice(0, this.saltLength);
+		const iv = combined.slice(this.saltLength, this.saltLength + this.ivLength);
+		const encrypted = combined.slice(this.saltLength + this.ivLength);
+		const key = await this.deriveKey(password, salt);
 
 		try {
 			const decryptedData = await crypto.subtle.decrypt(

@@ -1,32 +1,38 @@
 import { db, rawUsers, payouts, usersWithTokens } from '../src/lib/server/db';
 import { eq, sum } from 'drizzle-orm';
+import { AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE } from './airtable-config';
 
-const email = 'rushilchopra@gmail.com';
+const email = process.env.EMAIL || process.argv[2];
+
+if (!email) {
+	console.error('Error: Email is required.');
+	console.error('Usage: EMAIL=user@example.com bun run scripts/fix-my-tokens.ts');
+	console.error('   or: bun run scripts/fix-my-tokens.ts user@example.com');
+	process.exit(1);
+}
+
+if (!email.includes('@')) {
+	console.error('Error: Invalid email format.');
+	process.exit(1);
+}
+
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
 
 async function fixTokens() {
 	try {
-		// Get user info
-		const user = await db
-			.select()
-			.from(rawUsers)
-			.where(eq(rawUsers.email, email))
-			.limit(1);
+		const user = await db.select().from(rawUsers).where(eq(rawUsers.email, email)).limit(1);
 
 		if (user.length === 0) {
 			console.log('❌ User not found');
 			return;
 		}
 
-		// Get tokens from view (what shows in UI)
 		const userWithTokens = await db
 			.select()
 			.from(usersWithTokens)
 			.where(eq(usersWithTokens.email, email))
 			.limit(1);
 
-		// Get total from payouts table
 		const payoutSum = await db
 			.select({ total: sum(payouts.tokens) })
 			.from(payouts)
@@ -42,7 +48,6 @@ async function fixTokens() {
 		console.log(`totalEarnedPoints in DB: ${user[0].totalEarnedPoints}`);
 		console.log(`Airtable Record ID: ${user[0].airtableRecordId ?? 'Not set'}`);
 
-		// Update totalEarnedPoints to match actual tokens
 		const correctTotal = totalFromPayouts;
 
 		console.log(`\n=== Fixing ===`);
@@ -53,10 +58,9 @@ async function fixTokens() {
 			.set({ totalEarnedPoints: correctTotal })
 			.where(eq(rawUsers.email, email));
 
-		// Sync to Airtable
 		if (AIRTABLE_API_KEY && user[0].airtableRecordId) {
 			console.log(`Syncing to Airtable...`);
-			const airtableUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/tblpJEJAfy5rEc5vG/${user[0].airtableRecordId}`;
+			const airtableUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_USERS_TABLE}/${user[0].airtableRecordId}`;
 			const response = await fetch(airtableUrl, {
 				method: 'PATCH',
 				headers: {
@@ -66,7 +70,7 @@ async function fixTokens() {
 				body: JSON.stringify({
 					fields: {
 						'Total Earned Points': correctTotal,
-						'Tokens': correctTotal
+						Tokens: correctTotal
 					}
 				})
 			});

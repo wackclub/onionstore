@@ -4,17 +4,29 @@ import { db } from '$lib/server/db';
 import { loginTokens } from '$lib/server/db/schema';
 import { sendLoginEmail } from '$lib/server/email';
 import { nanoid } from 'nanoid';
+import { sendLinkSchema } from '$lib/server/validation';
+import { checkRateLimit } from '$lib/server/rate-limit';
+import { ArkErrors } from 'arktype';
 
 export const POST: RequestHandler = async ({ request, url }) => {
-	const { email } = await request.json();
+	const body = await request.json();
+	const parsed = sendLinkSchema(body);
 
-	if (!email || typeof email !== 'string') {
-		return json({ error: 'Email is required' }, { status: 400 });
+	if (parsed instanceof ArkErrors) {
+		return json({ error: 'Invalid email format' }, { status: 400 });
 	}
 
-	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-	if (!emailRegex.test(email)) {
-		return json({ error: 'Invalid email format' }, { status: 400 });
+	const email = parsed.email.toLowerCase();
+
+	const rateLimit = await checkRateLimit(`login:${email}`, 5, 900);
+	if (!rateLimit.success) {
+		return json(
+			{ error: 'Too many login attempts. Please try again later.' },
+			{
+				status: 429,
+				headers: { 'Retry-After': String(rateLimit.reset) }
+			}
+		);
 	}
 
 	const token = nanoid(32);
@@ -22,12 +34,12 @@ export const POST: RequestHandler = async ({ request, url }) => {
 
 	try {
 		await db.insert(loginTokens).values({
-			email: email.toLowerCase(),
+			email,
 			token,
 			expiresAt
 		});
 		const loginUrl = `${url.origin}/api/auth/verify?token=${token}`;
-		await sendLoginEmail(email.toLowerCase(), loginUrl);
+		await sendLoginEmail(email, loginUrl);
 
 		return json({ success: true });
 	} catch (error) {

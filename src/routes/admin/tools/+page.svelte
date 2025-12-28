@@ -52,7 +52,6 @@
 		itemsSyncStatus = null;
 
 		try {
-			// Sync both shop items and shop orders
 			const [itemsResponse, ordersResponse] = await Promise.all([
 				fetch('/api/admin/sync-shop-items-from-airtable', { method: 'POST' }),
 				fetch('/api/admin/sync-shop-orders-from-airtable', { method: 'POST' })
@@ -181,7 +180,9 @@
 							: 'border-red-700 bg-red-50'}"
 					>
 						<div
-							class="mb-2 text-xs font-bold uppercase {form.connectionStatus === 'success' ? 'text-green-700' : 'text-red-700'}"
+							class="mb-2 text-xs font-bold uppercase {form.connectionStatus === 'success'
+								? 'text-green-700'
+								: 'text-red-700'}"
 						>
 							{form.connectionStatus === 'success' ? '✓ Success' : '✗ Error'}
 						</div>
@@ -195,11 +196,7 @@
 				{/if}
 
 				<form method="POST" action="?/checkAirtableConnection" use:enhance>
-					<button
-						type="submit"
-						class="retro-btn w-full"
-						disabled={!data.hasAirtableKey}
-					>
+					<button type="submit" class="retro-btn w-full" disabled={!data.hasAirtableKey}>
 						[TEST CONNECTION]
 					</button>
 				</form>
@@ -220,7 +217,9 @@
 							: 'border-red-700 bg-red-50'}"
 					>
 						<div
-							class="mb-2 text-xs font-bold uppercase {syncStatus.type === 'success' ? 'text-green-700' : 'text-red-700'}"
+							class="mb-2 text-xs font-bold uppercase {syncStatus.type === 'success'
+								? 'text-green-700'
+								: 'text-red-700'}"
 						>
 							{syncStatus.type === 'success' ? '✓ Success' : '✗ Error'}
 						</div>
@@ -246,9 +245,12 @@
 				</div>
 
 				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
-					<h3 class="text-coffee-700 mb-2 text-xs font-bold uppercase">&gt; Sync Submissions (Ratings → Tokens)</h3>
+					<h3 class="text-coffee-700 mb-2 text-xs font-bold uppercase">
+						&gt; Sync Submissions (Ratings → Tokens)
+					</h3>
 					<p class="text-coffee-600 mb-4 text-xs leading-relaxed">
-						Pull approved submissions from Airtable and create/update token payouts based on ratings. This is how users earn tokens!
+						Pull approved submissions from Airtable and create/update token payouts based on
+						ratings. This is how users earn tokens!
 					</p>
 					{#if submissionsSyncStatus}
 						<div
@@ -257,7 +259,9 @@
 								: 'border-red-700 bg-red-50'}"
 						>
 							<div
-								class="mb-1 text-xs font-bold uppercase {submissionsSyncStatus.type === 'success' ? 'text-green-700' : 'text-red-700'}"
+								class="mb-1 text-xs font-bold uppercase {submissionsSyncStatus.type === 'success'
+									? 'text-green-700'
+									: 'text-red-700'}"
 							>
 								{submissionsSyncStatus.type === 'success' ? '✓ Success' : '✗ Error'}
 							</div>
@@ -274,9 +278,12 @@
 				</div>
 
 				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
-					<h3 class="text-coffee-700 mb-2 text-xs font-bold uppercase">&gt; Sync Shop Items & Orders</h3>
+					<h3 class="text-coffee-700 mb-2 text-xs font-bold uppercase">
+						&gt; Sync Shop Items & Orders
+					</h3>
 					<p class="text-coffee-600 mb-4 text-xs leading-relaxed">
-						Pull shop items and order statuses from Airtable. Updates item details and order status (Pending/Approved/Rejected).
+						Pull shop items and order statuses from Airtable. Updates item details and order status
+						(Pending/Approved/Rejected).
 					</p>
 					{#if itemsSyncStatus}
 						<div
@@ -285,7 +292,9 @@
 								: 'border-red-700 bg-red-50'}"
 						>
 							<div
-								class="mb-1 text-xs font-bold uppercase {itemsSyncStatus.type === 'success' ? 'text-green-700' : 'text-red-700'}"
+								class="mb-1 text-xs font-bold uppercase {itemsSyncStatus.type === 'success'
+									? 'text-green-700'
+									: 'text-red-700'}"
 							>
 								{itemsSyncStatus.type === 'success' ? '✓ Success' : '✗ Error'}
 							</div>
@@ -310,12 +319,7 @@
 			<h2 class="text-coffee-700 text-sm font-bold tracking-wider uppercase">Give Tokens</h2>
 		</div>
 
-		<form
-			method="POST"
-			action="?/givePoints"
-			use:enhance
-			class="grid gap-6 md:grid-cols-2"
-		>
+		<form method="POST" action="?/givePoints" use:enhance class="grid gap-6 md:grid-cols-2">
 			<div class="space-y-4">
 				<div>
 					<label for="email" class="text-coffee-700 mb-2 block text-xs font-bold uppercase">
@@ -326,7 +330,7 @@
 						id="email"
 						name="email"
 						required
-						class="border-coffee-700 bg-cream-50 text-coffee-800 w-full border-2 px-4 py-2 text-sm focus:border-coffee-900 focus:outline-none"
+						class="border-coffee-700 bg-cream-50 text-coffee-800 focus:border-coffee-900 w-full border-2 px-4 py-2 text-sm focus:outline-none"
 						placeholder="user@example.com"
 					/>
 				</div>
@@ -341,7 +345,7 @@
 						name="points"
 						required
 						min="1"
-						class="border-coffee-700 bg-cream-50 text-coffee-800 w-full border-2 px-4 py-2 text-sm focus:border-coffee-900 focus:outline-none"
+						class="border-coffee-700 bg-cream-50 text-coffee-800 focus:border-coffee-900 w-full border-2 px-4 py-2 text-sm focus:outline-none"
 						placeholder="100"
 					/>
 					<p class="text-coffee-500 mt-2 text-xs">Enter positive number (e.g., 100)</p>
@@ -355,7 +359,7 @@
 						type="text"
 						id="reason"
 						name="reason"
-						class="border-coffee-700 bg-cream-50 text-coffee-800 w-full border-2 px-4 py-2 text-sm focus:border-coffee-900 focus:outline-none"
+						class="border-coffee-700 bg-cream-50 text-coffee-800 focus:border-coffee-900 w-full border-2 px-4 py-2 text-sm focus:outline-none"
 						placeholder="Bonus for event participation"
 					/>
 				</div>
@@ -366,10 +370,8 @@
 			<div class="border-coffee-400 bg-cream-100 flex items-center border-2 p-6">
 				{#if form?.givePointsSuccess && form?.user}
 					<div class="w-full space-y-3">
-						<div
-							class="text-coffee-700 mb-3 flex items-center gap-2 text-xs font-bold uppercase"
-						>
-							<span class="bg-green-200 text-green-700 border-2 border-green-700 px-2 py-1"
+						<div class="text-coffee-700 mb-3 flex items-center gap-2 text-xs font-bold uppercase">
+							<span class="border-2 border-green-700 bg-green-200 px-2 py-1 text-green-700"
 								>✓ Success</span
 							>
 						</div>
@@ -385,7 +387,9 @@
 							<div class="flex justify-between">
 								<span class="text-coffee-600">Change:</span>
 								<span
-									class="font-bold {form.user.pointsChanged > 0 ? 'text-green-700' : 'text-red-700'}"
+									class="font-bold {form.user.pointsChanged > 0
+										? 'text-green-700'
+										: 'text-red-700'}"
 								>
 									{form.user.pointsChanged > 0 ? '+' : ''}{form.user.pointsChanged} points
 								</span>
@@ -397,9 +401,7 @@
 							</div>
 						</div>
 						{#if data.hasAirtableKey}
-							<p class="text-coffee-600 mt-4 text-xs">
-								✓ Synced to Airtable
-							</p>
+							<p class="text-coffee-600 mt-4 text-xs">✓ Synced to Airtable</p>
 						{/if}
 					</div>
 				{:else}

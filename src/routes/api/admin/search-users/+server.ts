@@ -1,7 +1,8 @@
 import { json, error } from '@sveltejs/kit';
 import { db, usersWithTokens } from '$lib/server/db';
-import { sql, or, ilike } from 'drizzle-orm';
+import { or, ilike } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { escapeLikePattern } from '$lib/server/validation';
 
 export const GET: RequestHandler = async ({ locals, url }) => {
 	if (!locals.user?.isAdmin) {
@@ -14,13 +15,15 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 		return json({ users: [] });
 	}
 
+	const escapedQuery = escapeLikePattern(query);
+
 	const users = await db
 		.select()
 		.from(usersWithTokens)
 		.where(
 			or(
-				ilike(usersWithTokens.email, `%${query}%`),
-				ilike(usersWithTokens.displayName, `%${query}%`)
+				ilike(usersWithTokens.email, `%${escapedQuery}%`),
+				ilike(usersWithTokens.displayName, `%${escapedQuery}%`)
 			)
 		)
 		.limit(10);
@@ -30,8 +33,7 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 			email: u.email,
 			displayName: u.displayName,
 			tokens: u.tokens,
-			isAdmin: u.isAdmin,
-			totalEarnedPoints: u.totalEarnedPoints
+			isAdmin: u.isAdmin
 		}))
 	});
 };

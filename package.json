@@ -51,6 +51,8 @@
 		"@slack/web-api": "^7.9.3",
 		"@types/pg": "^8.15.4",
 		"@uploadthing/svelte": "^7.3.2",
+		"@upstash/redis": "^1.36.0",
+		"arktype": "^2.1.29",
 		"canvas-confetti": "^1.9.3",
 		"country-list": "^2.4.1",
 		"drizzle-orm": "^0.44.3",

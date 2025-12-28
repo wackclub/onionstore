@@ -2,10 +2,9 @@ import { json, error } from '@sveltejs/kit';
 import { db, shopItems } from '$lib/server/db';
 import { eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { AIRTABLE_BASE_ID, AIRTABLE_SHOP_ITEMS_TABLE } from '$lib/server/airtable';
 
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
-const AIRTABLE_SHOP_ITEMS_TABLE = 'tbltUSi4tZ5dtUylt';
 
 interface AirtableShopItem {
 	id: string;
@@ -67,7 +66,6 @@ export const POST: RequestHandler = async ({ locals }) => {
 	try {
 		const airtableItems = await fetchShopItemsFromAirtable();
 
-		// Get all existing shop items
 		const existingItems = await db.select().from(shopItems);
 		const existingByAirtableId = new Map(
 			existingItems
@@ -82,7 +80,6 @@ export const POST: RequestHandler = async ({ locals }) => {
 		for (const airtableItem of airtableItems) {
 			const { name, description, imageUrl, price, usd_cost, type } = airtableItem.fields;
 
-			// Skip items without required fields
 			if (!name || !description || !imageUrl || price === undefined) {
 				skipped++;
 				continue;
@@ -101,11 +98,9 @@ export const POST: RequestHandler = async ({ locals }) => {
 			const existingItem = existingByAirtableId.get(airtableItem.id);
 
 			if (existingItem) {
-				// Update existing item
 				await db.update(shopItems).set(itemData).where(eq(shopItems.id, existingItem.id));
 				updated++;
 			} else {
-				// Create new item
 				await db.insert(shopItems).values(itemData);
 				created++;
 			}

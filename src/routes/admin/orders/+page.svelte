@@ -43,7 +43,7 @@
 	let showMemoModal = $state(false);
 	let memoText = $state('');
 	let memoOrderId = $state('');
-	let memoStatus = $state<'fulfilled' | 'rejected'>('fulfilled');
+	let memoStatus = $state<'approved' | 'rejected'>('approved');
 
 	const filteredCustomers = $derived(() => {
 		if (!customerSearchTerm) return filterOptions.customers.filter(Boolean);
@@ -63,7 +63,7 @@
 		}, 3000);
 	}
 
-	function openMemoModal(orderId: string, status: 'fulfilled' | 'rejected') {
+	function openMemoModal(orderId: string, status: 'approved' | 'rejected') {
 		memoOrderId = orderId;
 		memoStatus = status;
 		memoText = '';
@@ -135,7 +135,7 @@
 		switch (status) {
 			case 'pending':
 				return 'bg-yellow-100 text-yellow-700 border-2 border-yellow-700';
-			case 'fulfilled':
+			case 'approved':
 				return 'bg-green-100 text-green-700 border-2 border-green-700';
 			case 'rejected':
 				return 'bg-red-100 text-red-700 border-2 border-red-700';
@@ -209,7 +209,7 @@
 				if (orderIndex !== -1) {
 					orders[orderIndex] = {
 						...orders[orderIndex],
-						status: newStatus as 'pending' | 'fulfilled' | 'rejected',
+						status: newStatus as 'pending' | 'approved' | 'rejected',
 						memo: memo ?? null
 					};
 					showToastNotification(
@@ -280,7 +280,7 @@
 	<section class="retro-panel-tight">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div class="flex flex-wrap items-center gap-2">
-				{#each ['all', 'pending', 'fulfilled', 'rejected'] as status}
+				{#each ['all', 'pending', 'approved', 'rejected'] as status}
 					<button
 						onclick={() => {
 							statusFilter = status;
@@ -290,7 +290,7 @@
 							{statusFilter === status
 							? status === 'pending'
 								? 'border-yellow-700 bg-yellow-100 text-yellow-700'
-								: status === 'fulfilled'
+								: status === 'approved'
 									? 'border-green-700 bg-green-100 text-green-700'
 									: status === 'rejected'
 										? 'border-red-700 bg-red-100 text-red-700'
@@ -554,7 +554,7 @@
 									{#if order.status === 'pending'}
 										<div class="flex gap-1">
 											<button
-												onclick={() => openMemoModal(order.id, 'fulfilled')}
+												onclick={() => openMemoModal(order.id, 'approved')}
 												disabled={updatingOrders.has(order.id)}
 												class="border-2 border-green-700 bg-green-100 px-2 py-1 text-xs font-bold text-green-700 hover:bg-green-200 disabled:opacity-50"
 											>
@@ -608,13 +608,13 @@
 			<div
 				class="flex h-10 w-10 items-center justify-center border-2 border-green-700 bg-green-100 text-sm font-bold text-green-700"
 			>
-				[F]
+				[A]
 			</div>
 			<div>
 				<div class="text-xl font-bold text-green-700">
-					{orders.filter((o) => o.status === 'fulfilled').length}
+					{orders.filter((o) => o.status === 'approved').length}
 				</div>
-				<div class="text-coffee-500 text-xs font-bold uppercase">Fulfilled</div>
+				<div class="text-coffee-500 text-xs font-bold uppercase">Approved</div>
 			</div>
 		</div>
 		<div class="retro-panel-tight flex items-center gap-3">
@@ -639,7 +639,7 @@
 			<div>
 				<div class="text-coffee-800 text-xl font-bold">
 					{orders
-						.filter((o) => o.status === 'fulfilled')
+						.filter((o) => o.status === 'approved')
 						.reduce((sum, o) => sum + o.priceAtOrder, 0)}
 				</div>
 				<div class="text-coffee-500 text-xs font-bold uppercase">Revenue</div>
@@ -662,7 +662,7 @@
 		<div class="retro-panel relative w-full max-w-md">
 			<div class="mb-4">
 				<h3 class="text-coffee-800 text-lg font-bold uppercase">
-					{memoStatus === 'fulfilled' ? '> FULFILL ORDER' : '> REJECT ORDER'}
+					{memoStatus === 'approved' ? '> APPROVE ORDER' : '> REJECT ORDER'}
 				</h3>
 				<p class="text-coffee-600 mt-1 text-xs">&gt; ADD NOTE FOR CUSTOMER</p>
 			</div>
@@ -683,11 +683,11 @@
 				<button
 					onclick={submitMemo}
 					disabled={!memoText.trim() || updatingOrders.has(memoOrderId)}
-					class="border-2 px-4 py-2 text-xs font-bold {memoStatus === 'fulfilled'
+					class="border-2 px-4 py-2 text-xs font-bold {memoStatus === 'approved'
 						? 'border-green-700 bg-green-100 text-green-700 hover:bg-green-200'
 						: 'border-red-700 bg-red-100 text-red-700 hover:bg-red-200'} disabled:opacity-50"
 				>
-					[{memoStatus === 'fulfilled' ? 'FULFILL' : 'REJECT'}]
+					[{memoStatus === 'approved' ? 'APPROVE' : 'REJECT'}]
 				</button>
 			</div>
 		</div>

@@ -73,15 +73,15 @@ async function createHCBGrant(grantRequest: HCBGrantRequest): Promise<HCBGrantRe
 	}
 }
 
-async function markOrdersFulfilledAndSendEmails(allocation: GrantAllocation): Promise<void> {
+async function markOrdersApprovedAndSendEmails(allocation: GrantAllocation): Promise<void> {
 	try {
 		await db
 			.update(shopOrders)
-			.set({ status: 'fulfilled' })
+			.set({ status: 'approved' })
 			.where(inArray(shopOrders.id, allocation.orderIds));
 
 		console.log(
-			`✓ Marked ${allocation.orderIds.length} orders as fulfilled for ${allocation.email}`
+			`✓ Marked ${allocation.orderIds.length} orders as approved for ${allocation.email}`
 		);
 
 		if (LOOPS_API_KEY) {
@@ -92,7 +92,7 @@ async function markOrdersFulfilledAndSendEmails(allocation: GrantAllocation): Pr
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					transactionalId: 'cmge904kq3fil070i2582g0yx', // fulfilled email template ID
+					transactionalId: 'cmge904kq3fil070i2582g0yx', // approved email template ID
 					email: allocation.email,
 					dataVariables: {
 						itemName: allocation.itemName,
@@ -113,7 +113,7 @@ async function markOrdersFulfilledAndSendEmails(allocation: GrantAllocation): Pr
 			console.warn('LOOPS_API_KEY not set, skipping email notification');
 		}
 	} catch (error) {
-		console.error(`Error marking orders fulfilled for ${allocation.email}:`, error);
+		console.error(`Error marking orders approved for ${allocation.email}:`, error);
 	}
 }
 
@@ -152,7 +152,7 @@ async function processGrantFile(filename: string): Promise<void> {
 				successfulAllocations.push(allocation);
 
 				console.log(`Processing fulfillment for ${allocation.email}...`);
-				await markOrdersFulfilledAndSendEmails(allocation);
+				await markOrdersApprovedAndSendEmails(allocation);
 			} else {
 				failed.push(grantRequest);
 			}
@@ -166,11 +166,11 @@ async function processGrantFile(filename: string): Promise<void> {
 		console.log(`Successful grants: ${successful.length}/${grantData.grant_requests.length}`);
 		console.log(`Failed grants: ${failed.length}/${grantData.grant_requests.length}`);
 
-		const totalOrdersFulfilled = successfulAllocations.reduce(
+		const totalOrdersApproved = successfulAllocations.reduce(
 			(sum, allocation) => sum + allocation.orderIds.length,
 			0
 		);
-		console.log(`Orders marked as fulfilled: ${totalOrdersFulfilled}`);
+		console.log(`Orders marked as approved: ${totalOrdersApproved}`);
 
 		const successfulAmount = successful.reduce((sum, grant) => sum + grant.amount_cents / 100, 0);
 		const failedAmount = failed.reduce((sum, req) => sum + req.amount_cents / 100, 0);
@@ -199,11 +199,11 @@ async function processGrantFile(filename: string): Promise<void> {
 				failed: failed.length,
 				successful_amount_dollars: successfulAmount,
 				failed_amount_dollars: failedAmount,
-				orders_fulfilled: totalOrdersFulfilled
+				orders_approved: totalOrdersApproved
 			},
 			successful_grants: successful,
 			failed_requests: failed,
-			fulfilled_allocations: successfulAllocations,
+			approved_allocations: successfulAllocations,
 			all_results: results
 		};
 

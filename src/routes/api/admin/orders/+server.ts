@@ -5,6 +5,8 @@ import { shopItems, shopOrders, rawUsers } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { LOOPS_API_KEY } from '$env/static/private';
 import { syncShopOrderToAirtable } from '$lib/server/airtable';
+import { updateOrderSchema } from '$lib/server/validation';
+import { ArkErrors } from 'arktype';
 
 export const PATCH: RequestHandler = async ({ request, locals }) => {
 	try {
@@ -12,16 +14,16 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Access denied' }, { status: 403 });
 		}
 
-		const { orderId, status, memo } = await request.json();
+		const body = await request.json();
+		const parsed = updateOrderSchema(body);
 
-		if (!orderId || !status) {
-			return json({ error: 'Order ID and status are required' }, { status: 400 });
+		if (parsed instanceof ArkErrors) {
+			return json({ error: parsed.summary }, { status: 400 });
 		}
 
-		if (!['fulfilled', 'rejected'].includes(status)) {
-			return json({ error: 'Invalid status' }, { status: 400 });
-		}
-		const updateData: { status: 'fulfilled' | 'rejected'; memo?: string } = { status };
+		const { orderId, status, memo } = parsed;
+
+		const updateData: { status: 'approved' | 'rejected'; memo?: string } = { status };
 		if (memo !== undefined) {
 			updateData.memo = memo;
 		}
@@ -43,7 +45,6 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 			.from(shopItems)
 			.where(eq(shopItems.id, updatedOrder[0].shopItemId));
 
-		// Sync to Airtable (update existing or create new)
 		syncShopOrderToAirtable(
 			{
 				itemName: shopItem.name,
@@ -74,7 +75,7 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 				},
 				body: JSON.stringify({
 					transactionalId:
-						status === 'fulfilled' ? 'cmge904kq3fil070i2582g0yx' : 'cmge93a9544ogzf0ijfkx26y3',
+						status === 'approved' ? 'cmge904kq3fil070i2582g0yx' : 'cmge93a9544ogzf0ijfkx26y3',
 					email: user.email,
 					dataVariables: {
 						itemName: shopItem.name,

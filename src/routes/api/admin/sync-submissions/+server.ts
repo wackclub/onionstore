@@ -2,10 +2,9 @@ import { json, error } from '@sveltejs/kit';
 import { db, payouts, rawUsers } from '$lib/server/db';
 import { eq, isNotNull } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { AIRTABLE_BASE_ID, AIRTABLE_SUBMISSIONS_TABLE } from '$lib/server/airtable';
 
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
-const AIRTABLE_SUBMISSIONS_TABLE = 'tbl1qlhGJPoHRWgM3';
 
 interface AirtableSubmission {
 	id: string;
@@ -133,7 +132,6 @@ export const POST: RequestHandler = async ({ locals }) => {
 			}
 		}
 
-		// Delete payouts for submissions that are no longer approved
 		for (const [submissionId, payout] of existingPayoutMap) {
 			if (!seenSubmissionIds.has(submissionId!)) {
 				await db.delete(payouts).where(eq(payouts.id, payout.id));

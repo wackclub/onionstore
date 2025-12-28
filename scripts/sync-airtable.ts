@@ -1,10 +1,9 @@
 import { db } from '../src/lib/server/db';
 import { rawUsers } from '../src/lib/server/db/schema';
 import { eq } from 'drizzle-orm';
+import { AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE } from './airtable-config';
 
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3'; // Onion Wars base
-const AIRTABLE_USERS_TABLE = 'tblpJEJAfy5rEc5vG'; // Signups table
 
 interface AirtableRecord {
 	id: string;

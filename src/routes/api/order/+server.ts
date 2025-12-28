@@ -3,15 +3,26 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { shopItems, shopOrders, usersWithTokens, rawUsers } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
-import { syncShopOrderToAirtable } from '$lib/server/airtable';
+import {
+	syncShopOrderToAirtable,
+	AIRTABLE_BASE_ID,
+	AIRTABLE_USERS_TABLE
+} from '$lib/server/airtable';
+import { createOrderSchema } from '$lib/server/validation';
+import { type } from 'arktype';
+
+const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
-		const { shopItemId } = await request.json();
+		const body = await request.json();
 
-		if (!shopItemId) {
-			return json({ error: 'Shop item ID is required' }, { status: 400 });
+		const result = createOrderSchema(body);
+		if (result instanceof type.errors) {
+			return json({ error: 'Invalid request', details: result.summary }, { status: 400 });
 		}
+
+		const { shopItemId } = result;
 
 		const userId = locals.user?.id;
 		if (!userId) {
@@ -47,7 +58,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			);
 		}
 
-		// Get user's airtableRecordId for linking
 		const [rawUser] = await db.select().from(rawUsers).where(eq(rawUsers.id, userId)).limit(1);
 
 		const remainingTokens = user.tokens - item.price;
@@ -60,10 +70,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				status: 'pending'
 			})
 			.returning();
-
-		// Sync order to Airtable and update Points Redeemed
-		const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-		const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
 
 		syncShopOrderToAirtable({
 			itemName: item.name,
@@ -79,7 +85,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					.set({ airtableRecordId: airtableId })
 					.where(eq(shopOrders.id, newOrder[0].id));
 
-				// Update Points Redeemed in user's Airtable record
 				if (AIRTABLE_API_KEY && rawUser?.airtableRecordId) {
 					const newPointsRedeemed = (rawUser.pointsRedeemed || 0) + item.price;
 					await db
@@ -88,18 +93,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 						.where(eq(rawUsers.id, userId));
 
 					try {
-						await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/tblpJEJAfy5rEc5vG/${rawUser.airtableRecordId}`, {
-							method: 'PATCH',
-							headers: {
-								Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify({
-								fields: {
-									'Points Redeemed': newPointsRedeemed
-								}
-							})
-						});
+						await fetch(
+							`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_USERS_TABLE}/${rawUser.airtableRecordId}`,
+							{
+								method: 'PATCH',
+								headers: {
+									Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({
+									fields: {
+										'Points Redeemed': newPointsRedeemed
+									}
+								})
+							}
+						);
 					} catch (err) {
 						console.error('Failed to update Points Redeemed in Airtable:', err);
 					}

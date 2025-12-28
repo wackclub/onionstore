@@ -3,6 +3,7 @@ import { db } from '$lib/server/db';
 import { shopOrders, shopItems, rawUsers } from '$lib/server/db/schema';
 import { eq, and, gte, lte, ilike, desc, asc, or } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
+import { escapeLikePattern } from '$lib/server/validation';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.user?.isAdmin) {
@@ -23,20 +24,22 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const conditions = [];
 
 	if (statusFilter && statusFilter !== 'all') {
-		conditions.push(eq(shopOrders.status, statusFilter as 'pending' | 'fulfilled' | 'rejected'));
+		conditions.push(eq(shopOrders.status, statusFilter as 'pending' | 'approved' | 'rejected'));
 	}
 
 	if (customerFilter) {
+		const escapedCustomer = escapeLikePattern(customerFilter);
 		conditions.push(
 			or(
-				ilike(rawUsers.email, `%${customerFilter}%`),
-				ilike(rawUsers.displayName, `%${customerFilter}%`)
+				ilike(rawUsers.email, `%${escapedCustomer}%`),
+				ilike(rawUsers.displayName, `%${escapedCustomer}%`)
 			)
 		);
 	}
 
 	if (itemFilter) {
-		conditions.push(ilike(shopItems.name, `%${itemFilter}%`));
+		const escapedItem = escapeLikePattern(itemFilter);
+		conditions.push(ilike(shopItems.name, `%${escapedItem}%`));
 	}
 
 	if (typeFilter && typeFilter !== 'all') {

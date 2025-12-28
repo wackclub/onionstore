@@ -12,7 +12,7 @@ export function getStatusColor(status: string): string {
 	switch (status) {
 		case 'pending':
 			return 'bg-[#f7d8a7] text-[#7a4b21]';
-		case 'fulfilled':
+		case 'approved':
 			return 'bg-[#d5f5d4] text-[#2f7d43]';
 		case 'rejected':
 			return 'bg-[#f6c4c0] text-[#963135]';
