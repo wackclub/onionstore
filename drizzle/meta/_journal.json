@@ -15,6 +15,13 @@
       "when": 1766006478754,
       "tag": "0001_wild_next_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766938964315,
+      "tag": "0002_kind_power_pack",
+      "breakpoints": true
     }
   ]
 }

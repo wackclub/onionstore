@@ -12,32 +12,41 @@ import {
 import { sql } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 
-export const rawUsers = pgTable('user', {
-	id: text()
-		.primaryKey()
-		.$defaultFn(() => nanoid()),
-	email: text().notNull().unique(),
-	displayName: text(),
-	isAdmin: boolean().default(false).notNull(),
-	country: varchar({ length: 2 }),
-	createdAt: timestamp().notNull().defaultNow(),
-	airtableRecordId: text(),
-	totalEarnedPoints: integer().default(0).notNull(),
-	pointsRedeemed: integer().default(0).notNull(),
-	rating: integer(),
-	review: text(),
-	githubUrl: text(),
-	websiteUrl: text(),
-	description: text(),
-	screenshotUrl: text(),
-	addressLine1: text(),
-	addressLine2: text(),
-	state: text(),
-	city: text(),
-	zipPostal: text(),
-	shippingCountry: text(),
-	slackId: text()
-});
+export const rawUsers = pgTable(
+	'user',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => nanoid()),
+		email: text().notNull().unique(),
+		displayName: text(),
+		isAdmin: boolean().default(false).notNull(),
+		country: varchar({ length: 2 }),
+		createdAt: timestamp().notNull().defaultNow(),
+		airtableRecordId: text(),
+		totalEarnedPoints: integer().default(0).notNull(),
+		pointsRedeemed: integer().default(0).notNull(),
+		rating: integer(),
+		review: text(),
+		githubUrl: text(),
+		websiteUrl: text(),
+		description: text(),
+		screenshotUrl: text(),
+		addressLine1: text(),
+		addressLine2: text(),
+		state: text(),
+		city: text(),
+		zipPostal: text(),
+		shippingCountry: text(),
+		slackId: text()
+	},
+	(table) => ({
+		emailIdx: index('user_email_idx').on(table.email),
+		isAdminIdx: index('user_is_admin_idx').on(table.isAdmin),
+		countryIdx: index('user_country_idx').on(table.country),
+		airtableRecordIdIdx: index('user_airtable_record_id_idx').on(table.airtableRecordId)
+	})
+);
 
 export const loginTokens = pgTable(
 	'login_tokens',
@@ -52,23 +61,32 @@ export const loginTokens = pgTable(
 	},
 	(table) => ({
 		emailIdx: index('login_tokens_email_idx').on(table.email),
-		tokenIdx: index('login_tokens_token_idx').on(table.token)
+		tokenIdx: index('login_tokens_token_idx').on(table.token),
+		expiresAtIdx: index('login_tokens_expires_at_idx').on(table.expiresAt)
 	})
 );
 
-export const shopItems = pgTable('shop_items', {
-	id: text()
-		.primaryKey()
-		.$defaultFn(() => nanoid()),
-	name: text().notNull(),
-	description: text().notNull(),
-	imageUrl: text().notNull(),
-	price: integer().notNull(),
-	usd_cost: integer(),
-	type: varchar({ enum: ['hcb', 'third_party'] }),
-	hcbMids: text().array(),
-	airtableRecordId: text()
-});
+export const shopItems = pgTable(
+	'shop_items',
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => nanoid()),
+		name: text().notNull(),
+		description: text().notNull(),
+		imageUrl: text().notNull(),
+		price: integer().notNull(),
+		usd_cost: integer(),
+		type: varchar({ enum: ['hcb', 'third_party'] }),
+		hcbMids: text().array(),
+		airtableRecordId: text()
+	},
+	(table) => ({
+		typeIdx: index('shop_items_type_idx').on(table.type),
+		priceIdx: index('shop_items_price_idx').on(table.price),
+		airtableRecordIdIdx: index('shop_items_airtable_record_id_idx').on(table.airtableRecordId)
+	})
+);
 
 export const shopOrders = pgTable(
 	'shop_orders',
@@ -94,7 +112,15 @@ export const shopOrders = pgTable(
 		userIdIdx: index('shop_orders_user_id_idx').on(table.userId),
 		shopItemIdIdx: index('shop_orders_shop_item_id_idx').on(table.shopItemId),
 		statusIdx: index('shop_orders_status_idx').on(table.status),
-		createdAtIdx: index('shop_orders_created_at_idx').on(table.createdAt)
+		createdAtIdx: index('shop_orders_created_at_idx').on(table.createdAt),
+		userIdStatusIdx: index('shop_orders_user_id_status_idx').on(table.userId, table.status),
+		statusCreatedAtIdx: index('shop_orders_status_created_at_idx').on(
+			table.status,
+			table.createdAt
+		),
+		airtableRecordIdIdx: index('shop_orders_airtable_record_id_idx').on(
+			table.airtableRecordId
+		)
 	})
 );
 
@@ -121,6 +147,14 @@ export const payouts = pgTable(
 		submittedToUnifiedIdx: index('payouts_submitted_to_unified_idx').on(table.submittedToUnified),
 		airtableSubmissionIdIdx: index('payouts_airtable_submission_id_idx').on(
 			table.airtableSubmissionId
+		),
+		userIdCreatedAtIdx: index('payouts_user_id_created_at_idx').on(
+			table.userId,
+			table.createdAt
+		),
+		userIdSubmittedIdx: index('payouts_user_id_submitted_idx').on(
+			table.userId,
+			table.submittedToUnified
 		)
 	})
 );
