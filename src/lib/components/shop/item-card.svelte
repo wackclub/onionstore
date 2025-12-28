@@ -70,7 +70,7 @@
 	<div class="flex flex-1 flex-col gap-3 p-4">
 		<div class="flex-1">
 			<h3 class="text-coffee-800 mb-2 text-base font-bold tracking-wide uppercase">{item.name}</h3>
-			<p class="text-coffee-600 text-xs leading-relaxed">{item.description}</p>
+			<p class="text-coffee-600 leading-relaxed">{item.description}</p>
 		</div>
 		<hr class="retro-divider" />
 		<button
@@ -88,7 +88,7 @@
 		</button>
 		{#if orderMessage}
 			<div
-				class="border-2 p-2 text-center text-xs font-bold {orderMessage.includes('ORDER')
+				class="border-2 p-2 text-center font-bold {orderMessage.includes('ORDER')
 					? 'border-green-700 bg-green-100 text-green-700'
 					: 'border-red-700 bg-red-100 text-red-700'}"
 			>

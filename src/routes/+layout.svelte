@@ -17,7 +17,7 @@
 					<div class="flex items-center gap-4">
 						<a href="/" class="flex items-center gap-2 no-underline hover:no-underline">
 							<span class="text-xl">[</span>
-							<span class="text-coffee-700 text-sm font-bold tracking-wider uppercase">Store</span>
+							<span class="text-coffee-700 font-bold tracking-wider uppercase">Store</span>
 							<span class="text-xl">]</span>
 						</a>
 						<span class="text-coffee-400">|</span>
@@ -30,13 +30,13 @@
 						{/if}
 					</div>
 					<div class="flex items-center gap-2">
-						<a href="/" class="retro-btn-secondary !px-3 !py-2 text-xs">Home</a>
-						<a href="/orders" class="retro-btn-secondary !px-3 !py-2 text-xs">Orders</a>
+						<a href="/" class="retro-btn-secondary !px-3 !py-2">Home</a>
+						<a href="/orders" class="retro-btn-secondary !px-3 !py-2">Orders</a>
 						{#if data.user.isAdmin}
-							<a href="/admin" class="retro-btn !px-3 !py-2 text-xs">Admin</a>
+							<a href="/admin" class="retro-btn !px-3 !py-2">Admin</a>
 						{/if}
 						<form method="POST" action="/api/auth/logout">
-							<button type="submit" class="retro-btn-secondary !px-3 !py-2 text-xs">Sign Out</button>
+							<button type="submit" class="retro-btn-secondary !px-3 !py-2">Sign Out</button>
 						</form>
 					</div>
 				</div>

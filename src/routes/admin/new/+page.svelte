@@ -37,7 +37,7 @@
 <div class="mx-auto w-full max-w-2xl">
 	<section class="retro-panel">
 		<div class="mb-6">
-			<pre class="text-coffee-500 mb-2 text-xs">&gt; ITEM CREATION MODULE</pre>
+			<pre class="text-coffee-500 mb-2">&gt; ITEM CREATION MODULE</pre>
 			<h1 class="retro-title text-2xl">Add New Item</h1>
 			<p class="retro-subtitle mt-1">&gt; FILL ALL REQUIRED FIELDS</p>
 		</div>

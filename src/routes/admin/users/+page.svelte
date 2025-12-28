@@ -83,7 +83,7 @@
 	<section class="retro-panel">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div>
-				<pre class="text-coffee-500 mb-2 text-xs">&gt; USER DATABASE</pre>
+				<pre class="text-coffee-500 mb-2">&gt; USER DATABASE</pre>
 				<h1 class="retro-title text-2xl">User Management</h1>
 				<p class="retro-subtitle mt-1">&gt; {users.length} USERS REGISTERED</p>
 			</div>
@@ -93,30 +93,25 @@
 
 	<section class="retro-panel-tight overflow-hidden !p-0">
 		<div class="border-coffee-700 bg-cream-200 border-b-2 px-4 py-3">
-			<h2 class="text-coffee-700 text-sm font-bold tracking-wider uppercase">&gt; User Records</h2>
+			<h2 class="text-coffee-700 font-bold tracking-wider uppercase">&gt; User Records</h2>
 		</div>
 		<div class="overflow-x-auto">
 			<table class="min-w-full">
 				<thead>
 					<tr class="border-coffee-600 bg-cream-100 border-b-2">
-						<th
-							class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+						<th class="text-coffee-700 px-4 py-3 text-left font-bold tracking-wider uppercase"
 							>User</th
 						>
-						<th
-							class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+						<th class="text-coffee-700 px-4 py-3 text-left font-bold tracking-wider uppercase"
 							>Tokens</th
 						>
-						<th
-							class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+						<th class="text-coffee-700 px-4 py-3 text-left font-bold tracking-wider uppercase"
 							>Role</th
 						>
-						<th
-							class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+						<th class="text-coffee-700 px-4 py-3 text-left font-bold tracking-wider uppercase"
 							>Orders</th
 						>
-						<th
-							class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+						<th class="text-coffee-700 px-4 py-3 text-left font-bold tracking-wider uppercase"
 							>Actions</th
 						>
 					</tr>
@@ -127,22 +122,22 @@
 							<td class="px-4 py-3 whitespace-nowrap">
 								<div class="flex items-center gap-3">
 									<div
-										class="border-coffee-600 bg-caramel text-coffee-900 flex h-10 w-10 items-center justify-center border-2 text-sm font-bold"
+										class="border-coffee-600 bg-caramel text-coffee-900 flex h-10 w-10 items-center justify-center border-2 font-bold"
 									>
 										{user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '?'}
 									</div>
 									<div>
-										<div class="text-coffee-800 text-xs font-bold uppercase">
+										<div class="text-coffee-800 font-bold uppercase">
 											{user.displayName || user.email}
 										</div>
 										{#if user.displayName && user.email}
-											<div class="text-coffee-500 text-xs">{user.email}</div>
+											<div class="text-coffee-500">{user.email}</div>
 										{/if}
 									</div>
 								</div>
 							</td>
 							<td class="px-4 py-3 whitespace-nowrap">
-								<span class="retro-chip text-xs">
+								<span class="retro-chip">
 									<span class="font-bold">{user.tokens}</span>
 									<span>TKN</span>
 								</span>
@@ -151,17 +146,17 @@
 								{#if user.isAdmin}
 									<span class="retro-badge">ADMIN</span>
 								{:else}
-									<span class="text-coffee-500 text-xs font-bold">USER</span>
+									<span class="text-coffee-500 font-bold">USER</span>
 								{/if}
 							</td>
-							<td class="text-coffee-700 px-4 py-3 text-xs font-bold whitespace-nowrap">
+							<td class="text-coffee-700 px-4 py-3 font-bold whitespace-nowrap">
 								{user.orderCount}
 								{user.orderCount === 1 ? 'ORDER' : 'ORDERS'}
 							</td>
 							<td class="px-4 py-3 whitespace-nowrap">
 								<button
 									onclick={() => toggleOrders(user)}
-									class="text-coffee-600 hover:text-coffee-800 text-xs font-bold underline"
+									class="text-coffee-600 hover:text-coffee-800 font-bold underline"
 								>
 									[{selectedUser === user.id ? 'HIDE' : 'VIEW'}]
 								</button>
@@ -172,12 +167,12 @@
 							<tr class="bg-cream-100">
 								<td colspan="5" class="px-4 py-4">
 									<div class="border-coffee-600 bg-cream-50 border-2 p-4">
-										<h4 class="text-coffee-700 mb-3 text-xs font-bold tracking-wider uppercase">
+										<h4 class="text-coffee-700 mb-3 font-bold tracking-wider uppercase">
 											&gt; Order History
 										</h4>
 										<div class="space-y-2">
 											{#if ordersState?.loading}
-												<p class="text-coffee-600 text-xs">LOADING</p>
+												<p class="text-coffee-600">LOADING</p>
 											{:else if ordersState?.error}
 												<p class="text-xs font-bold text-red-700">&gt; {ordersState.error}</p>
 											{:else if ordersState?.data && ordersState.data.length > 0}
@@ -187,20 +182,20 @@
 													>
 														<div class="flex flex-wrap items-center justify-between gap-3">
 															<div
-																class="text-coffee-800 flex items-center gap-2 text-xs font-bold uppercase"
+																class="text-coffee-800 flex items-center gap-2 font-bold uppercase"
 															>
 																{order.itemName ?? 'UNKNOWN'}
 																{#if order.itemType}
 																	<span class="retro-badge text-[10px]">{order.itemType}</span>
 																{/if}
 															</div>
-															<span class="retro-chip text-xs">
+															<span class="retro-chip">
 																<span class="font-bold">{order.priceAtOrder}</span>
 																<span>TKN</span>
 															</span>
 														</div>
 														<div
-															class="text-coffee-600 flex flex-wrap items-center justify-between gap-3 text-xs"
+															class="text-coffee-600 flex flex-wrap items-center justify-between gap-3"
 														>
 															<span
 																class="px-2 py-1 font-bold uppercase {order.status === 'approved'
@@ -218,7 +213,7 @@
 													</div>
 												{/each}
 											{:else}
-												<p class="text-coffee-600 text-xs">&gt; NO ORDERS ON RECORD</p>
+												<p class="text-coffee-600">&gt; NO ORDERS ON RECORD</p>
 											{/if}
 										</div>
 									</div>
@@ -239,7 +234,7 @@
 				[U]
 			</div>
 			<div>
-				<div class="text-coffee-500 text-xs font-bold tracking-wider uppercase">Total Users</div>
+				<div class="text-coffee-500 font-bold tracking-wider uppercase">Total Users</div>
 				<div class="text-coffee-800 text-2xl font-bold">{users.length}</div>
 			</div>
 		</div>
@@ -250,7 +245,7 @@
 				[T]
 			</div>
 			<div>
-				<div class="text-coffee-500 text-xs font-bold tracking-wider uppercase">Total Tokens</div>
+				<div class="text-coffee-500 font-bold tracking-wider uppercase">Total Tokens</div>
 				<div class="text-coffee-800 text-2xl font-bold">
 					{users.reduce((sum, user) => sum + Number(user.tokens), 0)}
 				</div>
@@ -263,7 +258,7 @@
 				[O]
 			</div>
 			<div>
-				<div class="text-coffee-500 text-xs font-bold tracking-wider uppercase">Total Orders</div>
+				<div class="text-coffee-500 font-bold tracking-wider uppercase">Total Orders</div>
 				<div class="text-coffee-800 text-2xl font-bold">{totalOrders}</div>
 			</div>
 		</div>

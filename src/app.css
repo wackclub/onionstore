@@ -4,8 +4,38 @@
 @import 'uploadthing/tw/v4';
 @source "../node_modules/@uploadthing/svelte/dist";
 
+@font-face {
+	font-family: 'Phantom Sans';
+	src:
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Regular.woff') format('woff'),
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Regular.woff2') format('woff2');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Phantom Sans';
+	src:
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Italic.woff') format('woff'),
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Italic.woff2') format('woff2');
+	font-weight: normal;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Phantom Sans';
+	src:
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Bold.woff') format('woff'),
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Bold.woff2') format('woff2');
+	font-weight: bold;
+	font-style: normal;
+	font-display: swap;
+}
+
 @theme {
-	--font-mono: 'Space Mono', ui-monospace, monospace;
+	--font-sans: 'Phantom Sans', system-ui, sans-serif;
 	--color-cream-50: #fefcf7;
 	--color-cream-100: #fdf8ed;
 	--color-cream-200: #f9efd8;
@@ -33,7 +63,7 @@
 	}
 
 	body {
-		font-family: var(--font-mono);
+		font-family: var(--font-sans);
 		color: var(--color-coffee-800);
 		background: var(--color-cream-100);
 		min-height: 100vh;
@@ -44,13 +74,11 @@
 		content: '';
 		position: fixed;
 		inset: 0;
-		background: repeating-linear-gradient(
-			0deg,
-			transparent,
-			transparent 2px,
-			rgba(58, 40, 26, 0.03) 2px,
-			rgba(58, 40, 26, 0.03) 4px
-		);
+		background: repeating-linear-gradient(0deg,
+				transparent,
+				transparent 2px,
+				rgba(58, 40, 26, 0.03) 2px,
+				rgba(58, 40, 26, 0.03) 4px);
 		pointer-events: none;
 		z-index: 9999;
 	}
@@ -61,10 +89,8 @@
 	h4,
 	h5,
 	h6 {
-		font-family: var(--font-mono);
+		font-family: var(--font-sans);
 		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
 	}
 
 	a {
@@ -163,11 +189,9 @@
 		align-items: center;
 		justify-content: center;
 		padding: 0.625rem 1.25rem;
-		font-family: var(--font-mono);
-		font-size: 0.875rem;
+		font-family: var(--font-sans);
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
 		text-decoration: none;
 		background: var(--color-coffee-600);
 		border: 2px solid var(--color-coffee-800);
@@ -205,11 +229,9 @@
 		align-items: center;
 		justify-content: center;
 		padding: 0.625rem 1.25rem;
-		font-family: var(--font-mono);
-		font-size: 0.875rem;
+		font-family: var(--font-sans);
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
 		text-decoration: none;
 		background: var(--color-cream-200);
 		border: 2px solid var(--color-coffee-700);
@@ -236,22 +258,17 @@
 	.retro-title {
 		font-size: clamp(1.5rem, 4vw, 2.5rem);
 		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
 		color: var(--color-coffee-800);
 	}
 
 	.retro-subtitle {
-		font-size: 0.875rem;
 		color: var(--color-coffee-500);
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
 	}
 
 	.retro-input {
 		width: 100%;
 		padding: 0.75rem 1rem;
-		font-family: var(--font-mono);
+		font-family: var(--font-sans);
 		font-size: 0.875rem;
 		background: var(--color-cream-50);
 		border: 2px solid var(--color-coffee-600);
@@ -293,10 +310,12 @@
 }
 
 @keyframes blink {
+
 	0%,
 	50% {
 		opacity: 1;
 	}
+
 	51%,
 	100% {
 		opacity: 0;
@@ -307,18 +326,23 @@
 	0% {
 		opacity: 1;
 	}
+
 	5% {
 		opacity: 0.8;
 	}
+
 	10% {
 		opacity: 1;
 	}
+
 	15% {
 		opacity: 0.9;
 	}
+
 	20% {
 		opacity: 1;
 	}
+
 	100% {
 		opacity: 1;
 	}
@@ -485,6 +509,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
 	*,
 	*:before,
 	*:after {

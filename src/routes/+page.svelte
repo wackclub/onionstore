@@ -14,7 +14,7 @@
 {#if user}
 	<div class="flex flex-col gap-8">
 		<section class="retro-panel py-8 text-center">
-			<div class="mx-auto flex max-w-2xl flex-col gap-4">
+			<div class="mx-auto flex max-w-2xl flex-col">
 				<h1 class="retro-title">Welcome to the Store</h1>
 				<p class="retro-subtitle">
 					{#if user.tokens === 0}
@@ -46,7 +46,7 @@
 			<section class="retro-panel py-12 text-center">
 				<pre class="mb-4 text-4xl">[ EMPTY ]</pre>
 				<h2 class="text-coffee-700 mb-2 text-lg font-bold uppercase">No Items Available</h2>
-				<p class="text-coffee-500 text-sm">CHECK BACK LATER FOR NEW STOCK</p>
+				<p class="text-coffee-500">CHECK BACK LATER FOR NEW STOCK</p>
 			</section>
 		{/if}
 	</div>

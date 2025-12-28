@@ -266,7 +266,7 @@
 	<section class="retro-panel">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div>
-				<pre class="text-coffee-500 mb-2 text-xs">&gt; ORDER MANAGEMENT SYSTEM</pre>
+				<pre class="text-coffee-500 mb-2">&gt; ORDER MANAGEMENT SYSTEM</pre>
 				<h1 class="retro-title text-2xl">Order Control</h1>
 				<p class="retro-subtitle mt-1">
 					&gt; {orders.length}
@@ -286,7 +286,7 @@
 							statusFilter = status;
 							applyFilters();
 						}}
-						class="border-2 px-3 py-1 text-xs font-bold uppercase transition-colors duration-100
+						class="border-2 px-3 py-1 font-bold uppercase transition-colors duration-100
 							{statusFilter === status
 							? status === 'pending'
 								? 'border-yellow-700 bg-yellow-100 text-yellow-700'
@@ -303,11 +303,11 @@
 			</div>
 
 			<div class="flex items-center gap-2">
-				<button onclick={() => (showFilters = !showFilters)} class="retro-btn text-xs">
+				<button onclick={() => (showFilters = !showFilters)} class="retro-btn">
 					[FILTERS{#if activeFiltersCount > 0}: {activeFiltersCount}{/if}]
 				</button>
 				{#if activeFiltersCount > 0}
-					<button onclick={clearFilters} class="retro-btn-secondary text-xs">[CLEAR]</button>
+					<button onclick={clearFilters} class="retro-btn-secondary">[CLEAR]</button>
 				{/if}
 			</div>
 		</div>
@@ -331,7 +331,7 @@
 							aria-expanded={customerComboboxOpen}
 							aria-haspopup="listbox"
 							aria-controls="customer-listbox"
-							class="retro-input text-xs"
+							class="retro-input"
 						/>
 						{#if customerComboboxOpen && currentFilteredCustomers.length > 0}
 							<div
@@ -346,7 +346,7 @@
 											aria-selected={customerFilter === customer}
 											onclick={() => selectCustomer(customer)}
 											onkeydown={(e) => handleCustomerOptionKeydown(e, customer)}
-											class="hover:bg-cream-200 w-full px-3 py-2 text-left text-xs font-bold {customerFilter ===
+											class="hover:bg-cream-200 w-full px-3 py-2 text-left font-bold {customerFilter ===
 											customer
 												? 'bg-cream-200 text-coffee-800'
 												: 'text-coffee-600'}"
@@ -366,7 +366,7 @@
 						id="item-filter"
 						bind:value={itemFilter}
 						onchange={applyFilters}
-						class="retro-input text-xs"
+						class="retro-input"
 					>
 						<option value="">-- ALL ITEMS --</option>
 						{#each filterOptions?.items ?? [] as item}
@@ -383,7 +383,7 @@
 						id="country-filter"
 						bind:value={countryFilter}
 						onchange={applyFilters}
-						class="retro-input text-xs"
+						class="retro-input"
 					>
 						<option value="all">-- ALL --</option>
 						{#each filterOptions?.countries ?? [] as countryCode}
@@ -399,7 +399,7 @@
 						type="date"
 						bind:value={startDate}
 						onchange={applyFilters}
-						class="retro-input text-xs"
+						class="retro-input"
 					/>
 				</div>
 
@@ -410,7 +410,7 @@
 						type="date"
 						bind:value={endDate}
 						onchange={applyFilters}
-						class="retro-input text-xs"
+						class="retro-input"
 					/>
 				</div>
 
@@ -423,7 +423,7 @@
 						onchange={applyFilters}
 						placeholder="0"
 						min="0"
-						class="retro-input text-xs"
+						class="retro-input"
 					/>
 				</div>
 
@@ -436,7 +436,7 @@
 						onchange={applyFilters}
 						placeholder="999"
 						min="0"
-						class="retro-input text-xs"
+						class="retro-input"
 					/>
 				</div>
 			</div>
@@ -450,7 +450,7 @@
 				<h3 class="text-coffee-700 mb-2 text-lg font-bold uppercase">
 					{activeFiltersCount > 0 ? 'No Matching Orders' : 'No Orders Yet'}
 				</h3>
-				<p class="text-coffee-500 mb-6 text-xs">
+				<p class="text-coffee-500 mb-6">
 					{activeFiltersCount > 0 ? '> ADJUST FILTERS TO SEE RESULTS' : '> ORDERS WILL APPEAR HERE'}
 				</p>
 				{#if activeFiltersCount > 0}
@@ -462,46 +462,43 @@
 				<table class="min-w-full">
 					<thead>
 						<tr class="border-coffee-700 bg-cream-200 border-b-2">
-							<th
-								class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+							<th class="text-coffee-700 px-4 py-3 text-left font-bold tracking-wider uppercase"
 								>ID</th
 							>
 							<th
-								class="text-coffee-700 hover:text-coffee-900 cursor-pointer px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+								class="text-coffee-700 hover:text-coffee-900 cursor-pointer px-4 py-3 text-left font-bold tracking-wider uppercase"
 								onclick={() => toggleSort('customer')}
 							>
 								Customer {getSortIcon('customer')}
 							</th>
-							<th
-								class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+							<th class="text-coffee-700 px-4 py-3 text-left font-bold tracking-wider uppercase"
 								>Country</th
 							>
 							<th
-								class="text-coffee-700 hover:text-coffee-900 cursor-pointer px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+								class="text-coffee-700 hover:text-coffee-900 cursor-pointer px-4 py-3 text-left font-bold tracking-wider uppercase"
 								onclick={() => toggleSort('item')}
 							>
 								Item {getSortIcon('item')}
 							</th>
 							<th
-								class="text-coffee-700 hover:text-coffee-900 cursor-pointer px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+								class="text-coffee-700 hover:text-coffee-900 cursor-pointer px-4 py-3 text-left font-bold tracking-wider uppercase"
 								onclick={() => toggleSort('price')}
 							>
 								Price {getSortIcon('price')}
 							</th>
 							<th
-								class="text-coffee-700 hover:text-coffee-900 cursor-pointer px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+								class="text-coffee-700 hover:text-coffee-900 cursor-pointer px-4 py-3 text-left font-bold tracking-wider uppercase"
 								onclick={() => toggleSort('status')}
 							>
 								Status {getSortIcon('status')}
 							</th>
 							<th
-								class="text-coffee-700 hover:text-coffee-900 cursor-pointer px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+								class="text-coffee-700 hover:text-coffee-900 cursor-pointer px-4 py-3 text-left font-bold tracking-wider uppercase"
 								onclick={() => toggleSort('createdAt')}
 							>
 								Date {getSortIcon('createdAt')}
 							</th>
-							<th
-								class="text-coffee-700 px-4 py-3 text-left text-xs font-bold tracking-wider uppercase"
+							<th class="text-coffee-700 px-4 py-3 text-left font-bold tracking-wider uppercase"
 								>Actions</th
 							>
 						</tr>
@@ -510,15 +507,15 @@
 						{#each orders as order}
 							<tr class="hover:bg-cream-100 transition-colors duration-100">
 								<td class="px-4 py-3 whitespace-nowrap">
-									<span class="text-coffee-700 text-xs font-bold">#{order.id.slice(-8)}</span>
+									<span class="text-coffee-700 font-bold">#{order.id.slice(-8)}</span>
 								</td>
 								<td class="px-4 py-3 whitespace-nowrap">
-									<span class="text-coffee-800 text-xs font-bold uppercase"
+									<span class="text-coffee-800 font-bold uppercase"
 										>{order.userDisplayName || order.userEmail}</span
 									>
 								</td>
 								<td class="px-4 py-3 whitespace-nowrap">
-									<span class="text-coffee-600 text-xs font-bold"
+									<span class="text-coffee-600 font-bold"
 										>{getCountryDisplay(order.userCountry)}</span
 									>
 								</td>
@@ -531,23 +528,20 @@
 												class="h-full w-full object-cover"
 											/>
 										</div>
-										<span class="text-coffee-800 text-xs font-bold uppercase">{order.itemName}</span
-										>
+										<span class="text-coffee-800 font-bold uppercase">{order.itemName}</span>
 									</div>
 								</td>
 								<td class="px-4 py-3 whitespace-nowrap">
-									<span class="text-coffee-800 text-xs font-bold">{order.priceAtOrder} TKN</span>
+									<span class="text-coffee-800 font-bold">{order.priceAtOrder} TKN</span>
 								</td>
 								<td class="px-4 py-3 whitespace-nowrap">
 									<span
-										class="inline-flex px-2 py-1 text-xs font-bold uppercase {getStatusColor(
-											order.status
-										)}"
+										class="inline-flex px-2 py-1 font-bold uppercase {getStatusColor(order.status)}"
 									>
 										[{order.status}]
 									</span>
 								</td>
-								<td class="text-coffee-600 px-4 py-3 text-xs font-bold whitespace-nowrap"
+								<td class="text-coffee-600 px-4 py-3 font-bold whitespace-nowrap"
 									>{formatDate(order.createdAt)}</td
 								>
 								<td class="px-4 py-3 whitespace-nowrap">
@@ -556,27 +550,27 @@
 											<button
 												onclick={() => openMemoModal(order.id, 'approved')}
 												disabled={updatingOrders.has(order.id)}
-												class="border-2 border-green-700 bg-green-100 px-2 py-1 text-xs font-bold text-green-700 hover:bg-green-200 disabled:opacity-50"
+												class="border-2 border-green-700 bg-green-100 px-2 py-1 font-bold text-green-700 hover:bg-green-200 disabled:opacity-50"
 											>
 												[OK]
 											</button>
 											<button
 												onclick={() => openMemoModal(order.id, 'rejected')}
 												disabled={updatingOrders.has(order.id)}
-												class="border-2 border-red-700 bg-red-100 px-2 py-1 text-xs font-bold text-red-700 hover:bg-red-200 disabled:opacity-50"
+												class="border-2 border-red-700 bg-red-100 px-2 py-1 font-bold text-red-700 hover:bg-red-200 disabled:opacity-50"
 											>
 												[X]
 											</button>
 										</div>
 									{:else}
-										<span class="text-coffee-400 text-xs">--</span>
+										<span class="text-coffee-400">--</span>
 									{/if}
 								</td>
 							</tr>
 							{#if order.memo}
 								<tr class="bg-cream-100">
 									<td colspan="8" class="px-4 py-2">
-										<div class="text-coffee-600 text-xs">
+										<div class="text-coffee-600">
 											<span class="text-coffee-700 font-bold">&gt; NOTE:</span>
 											{order.memo}
 										</div>
@@ -593,7 +587,7 @@
 	<section class="grid grid-cols-2 gap-4 lg:grid-cols-4">
 		<div class="retro-panel-tight flex items-center gap-3">
 			<div
-				class="flex h-10 w-10 items-center justify-center border-2 border-yellow-700 bg-yellow-100 text-sm font-bold text-yellow-700"
+				class="flex h-10 w-10 items-center justify-center border-2 border-yellow-700 bg-yellow-100 font-bold text-yellow-700"
 			>
 				[P]
 			</div>
@@ -601,12 +595,12 @@
 				<div class="text-coffee-800 text-xl font-bold">
 					{orders.filter((o) => o.status === 'pending').length}
 				</div>
-				<div class="text-coffee-500 text-xs font-bold uppercase">Pending</div>
+				<div class="text-coffee-500 font-bold uppercase">Pending</div>
 			</div>
 		</div>
 		<div class="retro-panel-tight flex items-center gap-3">
 			<div
-				class="flex h-10 w-10 items-center justify-center border-2 border-green-700 bg-green-100 text-sm font-bold text-green-700"
+				class="flex h-10 w-10 items-center justify-center border-2 border-green-700 bg-green-100 font-bold text-green-700"
 			>
 				[A]
 			</div>
@@ -614,12 +608,12 @@
 				<div class="text-xl font-bold text-green-700">
 					{orders.filter((o) => o.status === 'approved').length}
 				</div>
-				<div class="text-coffee-500 text-xs font-bold uppercase">Approved</div>
+				<div class="text-coffee-500 font-bold uppercase">Approved</div>
 			</div>
 		</div>
 		<div class="retro-panel-tight flex items-center gap-3">
 			<div
-				class="flex h-10 w-10 items-center justify-center border-2 border-red-700 bg-red-100 text-sm font-bold text-red-700"
+				class="flex h-10 w-10 items-center justify-center border-2 border-red-700 bg-red-100 font-bold text-red-700"
 			>
 				[R]
 			</div>
@@ -627,12 +621,12 @@
 				<div class="text-xl font-bold text-red-700">
 					{orders.filter((o) => o.status === 'rejected').length}
 				</div>
-				<div class="text-coffee-500 text-xs font-bold uppercase">Rejected</div>
+				<div class="text-coffee-500 font-bold uppercase">Rejected</div>
 			</div>
 		</div>
 		<div class="retro-panel-tight flex items-center gap-3">
 			<div
-				class="border-coffee-700 bg-caramel text-coffee-900 flex h-10 w-10 items-center justify-center border-2 text-sm font-bold"
+				class="border-coffee-700 bg-caramel text-coffee-900 flex h-10 w-10 items-center justify-center border-2 font-bold"
 			>
 				[$]
 			</div>
@@ -642,7 +636,7 @@
 						.filter((o) => o.status === 'approved')
 						.reduce((sum, o) => sum + o.priceAtOrder, 0)}
 				</div>
-				<div class="text-coffee-500 text-xs font-bold uppercase">Revenue</div>
+				<div class="text-coffee-500 font-bold uppercase">Revenue</div>
 			</div>
 		</div>
 	</section>
@@ -664,7 +658,7 @@
 				<h3 class="text-coffee-800 text-lg font-bold uppercase">
 					{memoStatus === 'approved' ? '> APPROVE ORDER' : '> REJECT ORDER'}
 				</h3>
-				<p class="text-coffee-600 mt-1 text-xs">&gt; ADD NOTE FOR CUSTOMER</p>
+				<p class="text-coffee-600 mt-1">&gt; ADD NOTE FOR CUSTOMER</p>
 			</div>
 			<hr class="retro-divider" />
 			<div class="my-4">
@@ -675,15 +669,15 @@
 					onkeydown={handleMemoKeydown}
 					placeholder="ENTER NOTE..."
 					rows="4"
-					class="retro-input resize-none text-xs"
+					class="retro-input resize-none"
 				></textarea>
 			</div>
 			<div class="flex justify-end gap-2">
-				<button onclick={closeMemoModal} class="retro-btn-secondary text-xs">[CANCEL]</button>
+				<button onclick={closeMemoModal} class="retro-btn-secondary">[CANCEL]</button>
 				<button
 					onclick={submitMemo}
 					disabled={!memoText.trim() || updatingOrders.has(memoOrderId)}
-					class="border-2 px-4 py-2 text-xs font-bold {memoStatus === 'approved'
+					class="border-2 px-4 py-2 font-bold {memoStatus === 'approved'
 						? 'border-green-700 bg-green-100 text-green-700 hover:bg-green-200'
 						: 'border-red-700 bg-red-100 text-red-700 hover:bg-red-200'} disabled:opacity-50"
 				>
@@ -701,7 +695,7 @@
 				? 'border-green-700 bg-green-100 text-green-700'
 				: 'border-red-700 bg-red-100 text-red-700'}"
 		>
-			<div class="flex items-center gap-2 text-xs font-bold">
+			<div class="flex items-center gap-2 font-bold">
 				<span>&gt; {toastMessage}</span>
 				<button onclick={() => (showToast = false)} class="hover:opacity-70" aria-label="Close"
 					>[X]</button

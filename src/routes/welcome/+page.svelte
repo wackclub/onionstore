@@ -67,9 +67,7 @@
 				</div>
 
 				{#if error}
-					<div
-						class="border-2 border-red-700 bg-red-100 p-3 text-center text-xs font-bold text-red-700"
-					>
+					<div class="border-2 border-red-700 bg-red-100 p-3 text-center font-bold text-red-700">
 						&gt; {error}
 					</div>
 				{/if}

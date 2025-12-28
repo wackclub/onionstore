@@ -139,7 +139,7 @@
 	<section class="retro-panel">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div>
-				<pre class="text-coffee-500 mb-2 text-xs">&gt; ADMIN TOOLS v2.0</pre>
+				<pre class="text-coffee-500 mb-2">&gt; ADMIN TOOLS v2.0</pre>
 				<h1 class="retro-title text-2xl">System Tools</h1>
 				<p class="retro-subtitle mt-1">&gt; AIRTABLE SYNC & MANAGEMENT_</p>
 			</div>
@@ -150,10 +150,7 @@
 	<div class="grid gap-6 lg:grid-cols-2">
 		<section class="retro-panel">
 			<div class="mb-6 flex items-center gap-3">
-				<span class="text-coffee-400">&gt;&gt;</span>
-				<h2 class="text-coffee-700 text-sm font-bold tracking-wider uppercase">
-					Airtable Connection
-				</h2>
+				<h2 class="text-coffee-700 font-bold tracking-wider uppercase">Airtable Connection</h2>
 			</div>
 
 			<div class="space-y-4">
@@ -166,8 +163,8 @@
 						{data.hasAirtableKey ? '✓' : '✗'}
 					</div>
 					<div class="min-w-0 flex-1">
-						<div class="text-coffee-700 text-xs font-bold uppercase">API Key Status</div>
-						<div class="text-coffee-600 truncate text-xs">
+						<div class="text-coffee-700 font-bold uppercase">API Key Status</div>
+						<div class="text-coffee-600 truncate">
 							{data.hasAirtableKey ? 'Configured' : 'Not configured'}
 						</div>
 					</div>
@@ -180,17 +177,17 @@
 							: 'border-red-700 bg-red-50'}"
 					>
 						<div
-							class="mb-2 text-xs font-bold uppercase {form.connectionStatus === 'success'
+							class="mb-2 font-bold uppercase {form.connectionStatus === 'success'
 								? 'text-green-700'
 								: 'text-red-700'}"
 						>
 							{form.connectionStatus === 'success' ? '✓ Success' : '✗ Error'}
 						</div>
-						<p class="text-coffee-700 text-xs">
+						<p class="text-coffee-700">
 							{form.message || form.error}
 						</p>
 						{#if form.baseId}
-							<p class="text-coffee-600 mt-2 text-xs">Base ID: {form.baseId}</p>
+							<p class="text-coffee-600 mt-2">Base ID: {form.baseId}</p>
 						{/if}
 					</div>
 				{/if}
@@ -206,7 +203,7 @@
 		<section class="retro-panel">
 			<div class="mb-6 flex items-center gap-3">
 				<span class="text-coffee-400">&gt;&gt;</span>
-				<h2 class="text-coffee-700 text-sm font-bold tracking-wider uppercase">Sync Operations</h2>
+				<h2 class="text-coffee-700 font-bold tracking-wider uppercase">Sync Operations</h2>
 			</div>
 
 			<div class="space-y-4">
@@ -217,21 +214,19 @@
 							: 'border-red-700 bg-red-50'}"
 					>
 						<div
-							class="mb-2 text-xs font-bold uppercase {syncStatus.type === 'success'
+							class="mb-2 font-bold uppercase {syncStatus.type === 'success'
 								? 'text-green-700'
 								: 'text-red-700'}"
 						>
 							{syncStatus.type === 'success' ? '✓ Success' : '✗ Error'}
 						</div>
-						<p class="text-coffee-700 text-xs">{syncStatus.message}</p>
+						<p class="text-coffee-700">{syncStatus.message}</p>
 					</div>
 				{/if}
 
 				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
-					<h3 class="text-coffee-700 mb-2 text-xs font-bold uppercase">
-						&gt; Sync Users from Airtable
-					</h3>
-					<p class="text-coffee-600 mb-4 text-xs leading-relaxed">
+					<h3 class="text-coffee-700 mb-2 font-bold uppercase">&gt; Sync Users from Airtable</h3>
+					<p class="text-coffee-600 mb-4 leading-relaxed">
 						Pull all user data from the Onion Wars Airtable (emails, points, addresses, admin
 						status) and update the local database.
 					</p>
@@ -245,10 +240,10 @@
 				</div>
 
 				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
-					<h3 class="text-coffee-700 mb-2 text-xs font-bold uppercase">
+					<h3 class="text-coffee-700 mb-2 font-bold uppercase">
 						&gt; Sync Submissions (Ratings → Tokens)
 					</h3>
-					<p class="text-coffee-600 mb-4 text-xs leading-relaxed">
+					<p class="text-coffee-600 mb-4 leading-relaxed">
 						Pull approved submissions from Airtable and create/update token payouts based on
 						ratings. This is how users earn tokens!
 					</p>
@@ -259,13 +254,13 @@
 								: 'border-red-700 bg-red-50'}"
 						>
 							<div
-								class="mb-1 text-xs font-bold uppercase {submissionsSyncStatus.type === 'success'
+								class="mb-1 font-bold uppercase {submissionsSyncStatus.type === 'success'
 									? 'text-green-700'
 									: 'text-red-700'}"
 							>
 								{submissionsSyncStatus.type === 'success' ? '✓ Success' : '✗ Error'}
 							</div>
-							<p class="text-coffee-700 text-xs">{submissionsSyncStatus.message}</p>
+							<p class="text-coffee-700">{submissionsSyncStatus.message}</p>
 						</div>
 					{/if}
 					<button
@@ -278,10 +273,8 @@
 				</div>
 
 				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
-					<h3 class="text-coffee-700 mb-2 text-xs font-bold uppercase">
-						&gt; Sync Shop Items & Orders
-					</h3>
-					<p class="text-coffee-600 mb-4 text-xs leading-relaxed">
+					<h3 class="text-coffee-700 mb-2 font-bold uppercase">&gt; Sync Shop Items & Orders</h3>
+					<p class="text-coffee-600 mb-4 leading-relaxed">
 						Pull shop items and order statuses from Airtable. Updates item details and order status
 						(Pending/Approved/Rejected).
 					</p>
@@ -292,13 +285,13 @@
 								: 'border-red-700 bg-red-50'}"
 						>
 							<div
-								class="mb-1 text-xs font-bold uppercase {itemsSyncStatus.type === 'success'
+								class="mb-1 font-bold uppercase {itemsSyncStatus.type === 'success'
 									? 'text-green-700'
 									: 'text-red-700'}"
 							>
 								{itemsSyncStatus.type === 'success' ? '✓ Success' : '✗ Error'}
 							</div>
-							<p class="text-coffee-700 text-xs">{itemsSyncStatus.message}</p>
+							<p class="text-coffee-700">{itemsSyncStatus.message}</p>
 						</div>
 					{/if}
 					<button
@@ -316,13 +309,13 @@
 	<section class="retro-panel">
 		<div class="mb-6 flex items-center gap-3">
 			<span class="text-coffee-400">&gt;&gt;</span>
-			<h2 class="text-coffee-700 text-sm font-bold tracking-wider uppercase">Give Tokens</h2>
+			<h2 class="text-coffee-700 font-bold tracking-wider uppercase">Give Tokens</h2>
 		</div>
 
 		<form method="POST" action="?/givePoints" use:enhance class="grid gap-6 md:grid-cols-2">
 			<div class="space-y-4">
 				<div>
-					<label for="email" class="text-coffee-700 mb-2 block text-xs font-bold uppercase">
+					<label for="email" class="text-coffee-700 mb-2 block font-bold uppercase">
 						User Email
 					</label>
 					<input
@@ -330,13 +323,13 @@
 						id="email"
 						name="email"
 						required
-						class="border-coffee-700 bg-cream-50 text-coffee-800 focus:border-coffee-900 w-full border-2 px-4 py-2 text-sm focus:outline-none"
+						class="border-coffee-700 bg-cream-50 text-coffee-800 focus:border-coffee-900 w-full border-2 px-4 py-2 focus:outline-none"
 						placeholder="user@example.com"
 					/>
 				</div>
 
 				<div>
-					<label for="points" class="text-coffee-700 mb-2 block text-xs font-bold uppercase">
+					<label for="points" class="text-coffee-700 mb-2 block font-bold uppercase">
 						Tokens to Give
 					</label>
 					<input
@@ -345,21 +338,21 @@
 						name="points"
 						required
 						min="1"
-						class="border-coffee-700 bg-cream-50 text-coffee-800 focus:border-coffee-900 w-full border-2 px-4 py-2 text-sm focus:outline-none"
+						class="border-coffee-700 bg-cream-50 text-coffee-800 focus:border-coffee-900 w-full border-2 px-4 py-2 focus:outline-none"
 						placeholder="100"
 					/>
-					<p class="text-coffee-500 mt-2 text-xs">Enter positive number (e.g., 100)</p>
+					<p class="text-coffee-500 mt-2">Enter positive number (e.g., 100)</p>
 				</div>
 
 				<div>
-					<label for="reason" class="text-coffee-700 mb-2 block text-xs font-bold uppercase">
+					<label for="reason" class="text-coffee-700 mb-2 block font-bold uppercase">
 						Reason (optional)
 					</label>
 					<input
 						type="text"
 						id="reason"
 						name="reason"
-						class="border-coffee-700 bg-cream-50 text-coffee-800 focus:border-coffee-900 w-full border-2 px-4 py-2 text-sm focus:outline-none"
+						class="border-coffee-700 bg-cream-50 text-coffee-800 focus:border-coffee-900 w-full border-2 px-4 py-2 focus:outline-none"
 						placeholder="Bonus for event participation"
 					/>
 				</div>
@@ -370,12 +363,12 @@
 			<div class="border-coffee-400 bg-cream-100 flex items-center border-2 p-6">
 				{#if form?.givePointsSuccess && form?.user}
 					<div class="w-full space-y-3">
-						<div class="text-coffee-700 mb-3 flex items-center gap-2 text-xs font-bold uppercase">
+						<div class="text-coffee-700 mb-3 flex items-center gap-2 font-bold uppercase">
 							<span class="border-2 border-green-700 bg-green-200 px-2 py-1 text-green-700"
 								>✓ Success</span
 							>
 						</div>
-						<div class="space-y-2 text-xs">
+						<div class="space-y-2">
 							<div class="flex justify-between">
 								<span class="text-coffee-600">User:</span>
 								<span class="text-coffee-800 font-bold">{form.user.email}</span>
@@ -401,11 +394,11 @@
 							</div>
 						</div>
 						{#if data.hasAirtableKey}
-							<p class="text-coffee-600 mt-4 text-xs">✓ Synced to Airtable</p>
+							<p class="text-coffee-600 mt-4">✓ Synced to Airtable</p>
 						{/if}
 					</div>
 				{:else}
-					<div class="text-coffee-500 w-full text-center text-xs">
+					<div class="text-coffee-500 w-full text-center">
 						<pre class="mb-2 text-2xl">[ ]</pre>
 						<p>&gt; RESULTS WILL APPEAR HERE_</p>
 					</div>

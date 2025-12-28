@@ -42,9 +42,9 @@
 
 			{#if sent}
 				<div class="border-2 border-green-700 bg-green-100 p-4 text-center">
-					<pre class="mb-2 text-xs text-green-700">SUCCESS!</pre>
+					<pre class="mb-2 text-green-700">SUCCESS!</pre>
 					<p class="text-sm font-bold text-green-800 uppercase">Check Your Email!</p>
-					<p class="mt-1 text-xs text-green-700">MAGIC LINK TRANSMITTED</p>
+					<p class="mt-1 text-green-700">MAGIC LINK TRANSMITTED</p>
 				</div>
 			{:else}
 				<form
@@ -67,9 +67,7 @@
 					</div>
 
 					{#if error}
-						<div
-							class="border-2 border-red-700 bg-red-100 p-3 text-center text-xs font-bold text-red-700"
-						>
+						<div class="border-2 border-red-700 bg-red-100 p-3 text-center font-bold text-red-700">
 							&gt; {error}
 						</div>
 					{/if}
