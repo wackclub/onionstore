@@ -16,6 +16,7 @@
 			<div class="flex flex-wrap items-center gap-2">
 				<a href="/admin/users" class="retro-btn-secondary text-xs">[USERS]</a>
 				<a href="/admin/orders" class="retro-btn-secondary text-xs">[ORDERS]</a>
+				<a href="/admin/tools" class="retro-btn-secondary text-xs">[TOOLS]</a>
 				<a href="/admin/new" class="retro-btn text-xs">[+ NEW ITEM]</a>
 			</div>
 		</div>

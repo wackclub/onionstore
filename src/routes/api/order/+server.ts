@@ -61,7 +61,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			})
 			.returning();
 
-		// Sync to Airtable and store the record ID
+		// Sync order to Airtable and update Points Redeemed
+		const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+		const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
+
 		syncShopOrderToAirtable({
 			itemName: item.name,
 			email: user.email!,
@@ -75,6 +78,32 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					.update(shopOrders)
 					.set({ airtableRecordId: airtableId })
 					.where(eq(shopOrders.id, newOrder[0].id));
+
+				// Update Points Redeemed in user's Airtable record
+				if (AIRTABLE_API_KEY && rawUser?.airtableRecordId) {
+					const newPointsRedeemed = (rawUser.pointsRedeemed || 0) + item.price;
+					await db
+						.update(rawUsers)
+						.set({ pointsRedeemed: newPointsRedeemed })
+						.where(eq(rawUsers.id, userId));
+
+					try {
+						await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/tblpJEJAfy5rEc5vG/${rawUser.airtableRecordId}`, {
+							method: 'PATCH',
+							headers: {
+								Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({
+								fields: {
+									'Points Redeemed': newPointsRedeemed
+								}
+							})
+						});
+					} catch (err) {
+						console.error('Failed to update Points Redeemed in Airtable:', err);
+					}
+				}
 			})
 			.catch((err) => console.error('Airtable sync failed:', err));
 

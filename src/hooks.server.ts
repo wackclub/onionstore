@@ -52,7 +52,7 @@ const redirectMiddleware: Handle = async ({ event, resolve }) => {
 		return redirect(302, '/welcome');
 	}
 
-	if (!event.locals.user.isAdmin && event.url.pathname.includes('admin')) {
+	if (!event.locals.user.isAdmin && (event.url.pathname.startsWith('/admin') || event.url.pathname.startsWith('/api/admin'))) {
 		return redirect(302, '/');
 	}
 
