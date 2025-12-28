@@ -37,16 +37,16 @@
 <div class="mx-auto w-full max-w-2xl">
 	<section class="retro-panel">
 		<div class="mb-6">
-			<pre class="text-coffee-500 mb-2">&gt; ITEM CREATION MODULE</pre>
+			<pre class="text-coffee-500 mb-2">ITEM CREATION MODULE</pre>
 			<h1 class="retro-title text-2xl">Add New Item</h1>
-			<p class="retro-subtitle mt-1">&gt; FILL ALL REQUIRED FIELDS</p>
+			<p class="retro-subtitle mt-1">FILL ALL REQUIRED FIELDS</p>
 		</div>
 
 		<hr class="retro-divider" />
 
 		<form method="POST" use:enhance class="mt-6 space-y-5">
 			<div>
-				<label for="name" class="retro-label">&gt; Item Name</label>
+				<label for="name" class="retro-label">Item Name</label>
 				<input
 					type="text"
 					id="name"
@@ -59,7 +59,7 @@
 			</div>
 
 			<div>
-				<label for="description" class="retro-label">&gt; Description</label>
+				<label for="description" class="retro-label">Description</label>
 				<textarea
 					id="description"
 					name="description"
@@ -72,7 +72,7 @@
 			</div>
 
 			<div>
-				<label for="imageUrl" class="retro-label">&gt; Image Upload</label>
+				<label for="imageUrl" class="retro-label">Image Upload</label>
 				{#if imageUrl}
 					<div class="border-coffee-600 mb-4 inline-block border-2">
 						<img src={imageUrl} alt="Uploaded content" class="w-48" />
@@ -86,7 +86,7 @@
 
 			<div class="grid grid-cols-2 gap-4">
 				<div>
-					<label for="price" class="retro-label">&gt; Price (Tokens)</label>
+					<label for="price" class="retro-label">Price (Tokens)</label>
 					<input
 						type="number"
 						id="price"
@@ -100,7 +100,7 @@
 				</div>
 
 				<div>
-					<label for="usd-cost" class="retro-label">&gt; USD Cost</label>
+					<label for="usd-cost" class="retro-label">USD Cost</label>
 					<input
 						type="number"
 						id="usd-cost"
@@ -115,7 +115,7 @@
 			</div>
 
 			<div>
-				<label for="type" class="retro-label">&gt; Item Type</label>
+				<label for="type" class="retro-label">Item Type</label>
 				<select id="type" name="type" required class="retro-input">
 					<option value="">-- SELECT TYPE --</option>
 					<option value="hcb" selected={form && 'type' in form ? form.type === 'hcb' : false}
@@ -130,7 +130,7 @@
 			</div>
 
 			<div>
-				<label for="hcbMids" class="retro-label">&gt; HCB MIDs (Optional)</label>
+				<label for="hcbMids" class="retro-label">HCB MIDs (Optional)</label>
 				<input
 					type="text"
 					id="hcbMids"

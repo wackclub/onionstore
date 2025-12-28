@@ -5,52 +5,35 @@
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	let syncInProgress = $state(false);
-	let syncStatus = $state<{ type: 'success' | 'error'; message: string } | null>(null);
-	let itemsSyncInProgress = $state(false);
-	let itemsSyncStatus = $state<{ type: 'success' | 'error'; message: string } | null>(null);
-	let submissionsSyncInProgress = $state(false);
-	let submissionsSyncStatus = $state<{ type: 'success' | 'error'; message: string } | null>(null);
+	function createSyncHandler(endpoint: string, successMessage: string) {
+		return async () => {
+			try {
+				const response = await fetch(endpoint, { method: 'POST' });
 
-	const handleSyncAirtable = async () => {
-		syncInProgress = true;
-		syncStatus = null;
+				if (!response.ok) {
+					const result = await response.json();
+					throw new Error(result.error || 'Operation failed');
+				}
 
-		try {
-			const response = await fetch('/api/admin/sync-airtable', {
-				method: 'POST'
-			});
-
-			const result = await response.json();
-
-			if (response.ok) {
-				syncStatus = {
-					type: 'success',
-					message: result.message || 'Sync completed successfully'
-				};
-				toast.success('Airtable sync completed!');
-			} else {
-				syncStatus = {
-					type: 'error',
-					message: result.error || 'Sync failed'
-				};
-				toast.error('Sync failed');
+				const result = await response.json();
+				toast.success(result.message || successMessage);
+			} catch (error) {
+				const message = error instanceof Error ? error.message : 'Unknown error occurred';
+				toast.error(message);
 			}
-		} catch (error) {
-			syncStatus = {
-				type: 'error',
-				message: error instanceof Error ? error.message : 'Unknown error occurred'
-			};
-			toast.error('Sync failed');
-		} finally {
-			syncInProgress = false;
-		}
-	};
+		};
+	}
+
+	const handleSyncAirtable = createSyncHandler(
+		'/api/admin/sync-airtable',
+		'Airtable sync completed!'
+	);
+	const handleSyncSubmissions = createSyncHandler(
+		'/api/admin/sync-submissions',
+		'Submissions synced! Tokens updated.'
+	);
 
 	const handleSyncShopItems = async () => {
-		itemsSyncInProgress = true;
-		itemsSyncStatus = null;
-
 		try {
 			const [itemsResponse, ordersResponse] = await Promise.all([
 				fetch('/api/admin/sync-shop-items-from-airtable', { method: 'POST' }),
@@ -61,62 +44,15 @@
 			const ordersResult = await ordersResponse.json();
 
 			if (itemsResponse.ok && ordersResponse.ok) {
-				itemsSyncStatus = {
-					type: 'success',
-					message: `${itemsResult.message} | ${ordersResult.message}`
-				};
 				toast.success('Shop items & orders synced from Airtable!');
 			} else {
-				const errorMsg = !itemsResponse.ok ? itemsResult.error : ordersResult.error;
-				itemsSyncStatus = {
-					type: 'error',
-					message: errorMsg || 'Shop sync failed'
-				};
-				toast.error('Shop sync failed');
+				const errors = [];
+				if (!itemsResponse.ok) errors.push(`Items: ${itemsResult.error}`);
+				if (!ordersResponse.ok) errors.push(`Orders: ${ordersResult.error}`);
+				toast.error(errors.join(' | '));
 			}
 		} catch (error) {
-			itemsSyncStatus = {
-				type: 'error',
-				message: error instanceof Error ? error.message : 'Unknown error occurred'
-			};
-			toast.error('Shop sync failed');
-		} finally {
-			itemsSyncInProgress = false;
-		}
-	};
-
-	const handleSyncSubmissions = async () => {
-		submissionsSyncInProgress = true;
-		submissionsSyncStatus = null;
-
-		try {
-			const response = await fetch('/api/admin/sync-submissions', {
-				method: 'POST'
-			});
-
-			const result = await response.json();
-
-			if (response.ok) {
-				submissionsSyncStatus = {
-					type: 'success',
-					message: result.message || 'Submissions synced successfully'
-				};
-				toast.success('Submissions synced! Tokens updated.');
-			} else {
-				submissionsSyncStatus = {
-					type: 'error',
-					message: result.error || 'Submissions sync failed'
-				};
-				toast.error('Submissions sync failed');
-			}
-		} catch (error) {
-			submissionsSyncStatus = {
-				type: 'error',
-				message: error instanceof Error ? error.message : 'Unknown error occurred'
-			};
-			toast.error('Submissions sync failed');
-		} finally {
-			submissionsSyncInProgress = false;
+			toast.error(error instanceof Error ? error.message : 'Unknown error occurred');
 		}
 	};
 
@@ -139,9 +75,9 @@
 	<section class="retro-panel">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div>
-				<pre class="text-coffee-500 mb-2">&gt; ADMIN TOOLS v2.0</pre>
+				<pre class="text-coffee-500 mb-2">ADMIN TOOLS v2.0</pre>
 				<h1 class="retro-title text-2xl">System Tools</h1>
-				<p class="retro-subtitle mt-1">&gt; AIRTABLE SYNC & MANAGEMENT_</p>
+				<p class="retro-subtitle mt-1">AIRTABLE SYNC & MANAGEMENT_</p>
 			</div>
 			<a href="/admin" class="retro-btn-secondary">[BACK]</a>
 		</div>
@@ -170,28 +106,6 @@
 					</div>
 				</div>
 
-				{#if form?.connectionStatus}
-					<div
-						class="border-2 p-4 {form.connectionStatus === 'success'
-							? 'border-green-700 bg-green-50'
-							: 'border-red-700 bg-red-50'}"
-					>
-						<div
-							class="mb-2 font-bold uppercase {form.connectionStatus === 'success'
-								? 'text-green-700'
-								: 'text-red-700'}"
-						>
-							{form.connectionStatus === 'success' ? '✓ Success' : '✗ Error'}
-						</div>
-						<p class="text-coffee-700">
-							{form.message || form.error}
-						</p>
-						{#if form.baseId}
-							<p class="text-coffee-600 mt-2">Base ID: {form.baseId}</p>
-						{/if}
-					</div>
-				{/if}
-
 				<form method="POST" action="?/checkAirtableConnection" use:enhance>
 					<button type="submit" class="retro-btn w-full" disabled={!data.hasAirtableKey}>
 						[TEST CONNECTION]
@@ -207,99 +121,50 @@
 			</div>
 
 			<div class="space-y-4">
-				{#if syncStatus}
-					<div
-						class="border-2 p-4 {syncStatus.type === 'success'
-							? 'border-green-700 bg-green-50'
-							: 'border-red-700 bg-red-50'}"
-					>
-						<div
-							class="mb-2 font-bold uppercase {syncStatus.type === 'success'
-								? 'text-green-700'
-								: 'text-red-700'}"
-						>
-							{syncStatus.type === 'success' ? '✓ Success' : '✗ Error'}
-						</div>
-						<p class="text-coffee-700">{syncStatus.message}</p>
-					</div>
-				{/if}
-
 				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
-					<h3 class="text-coffee-700 mb-2 font-bold uppercase">&gt; Sync Users from Airtable</h3>
+					<h3 class="text-coffee-700 mb-2 font-bold uppercase">Sync Users from Airtable</h3>
 					<p class="text-coffee-600 mb-4 leading-relaxed">
 						Pull all user data from the Onion Wars Airtable (emails, points, addresses, admin
 						status) and update the local database.
 					</p>
 					<button
 						onclick={handleSyncAirtable}
-						disabled={!data.hasAirtableKey || syncInProgress}
+						disabled={!data.hasAirtableKey}
 						class="retro-btn-secondary w-full disabled:opacity-50"
 					>
-						{syncInProgress ? '[SYNCING...]' : '[SYNC NOW]'}
+						[SYNC NOW]
 					</button>
 				</div>
 
 				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
 					<h3 class="text-coffee-700 mb-2 font-bold uppercase">
-						&gt; Sync Submissions (Ratings → Tokens)
+						Sync Submissions (Ratings → Tokens)
 					</h3>
 					<p class="text-coffee-600 mb-4 leading-relaxed">
 						Pull approved submissions from Airtable and create/update token payouts based on
 						ratings. This is how users earn tokens!
 					</p>
-					{#if submissionsSyncStatus}
-						<div
-							class="mb-4 border-2 p-3 {submissionsSyncStatus.type === 'success'
-								? 'border-green-700 bg-green-50'
-								: 'border-red-700 bg-red-50'}"
-						>
-							<div
-								class="mb-1 font-bold uppercase {submissionsSyncStatus.type === 'success'
-									? 'text-green-700'
-									: 'text-red-700'}"
-							>
-								{submissionsSyncStatus.type === 'success' ? '✓ Success' : '✗ Error'}
-							</div>
-							<p class="text-coffee-700">{submissionsSyncStatus.message}</p>
-						</div>
-					{/if}
 					<button
 						onclick={handleSyncSubmissions}
-						disabled={!data.hasAirtableKey || submissionsSyncInProgress}
+						disabled={!data.hasAirtableKey}
 						class="retro-btn-secondary w-full disabled:opacity-50"
 					>
-						{submissionsSyncInProgress ? '[SYNCING...]' : '[SYNC SUBMISSIONS]'}
+						[SYNC SUBMISSIONS]
 					</button>
 				</div>
 
 				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
-					<h3 class="text-coffee-700 mb-2 font-bold uppercase">&gt; Sync Shop Items & Orders</h3>
+					<h3 class="text-coffee-700 mb-2 font-bold uppercase">Sync Shop Items & Orders</h3>
 					<p class="text-coffee-600 mb-4 leading-relaxed">
 						Pull shop items and order statuses from Airtable. Updates item details and order status
 						(Pending/Approved/Rejected).
 					</p>
-					{#if itemsSyncStatus}
-						<div
-							class="mb-4 border-2 p-3 {itemsSyncStatus.type === 'success'
-								? 'border-green-700 bg-green-50'
-								: 'border-red-700 bg-red-50'}"
-						>
-							<div
-								class="mb-1 font-bold uppercase {itemsSyncStatus.type === 'success'
-									? 'text-green-700'
-									: 'text-red-700'}"
-							>
-								{itemsSyncStatus.type === 'success' ? '✓ Success' : '✗ Error'}
-							</div>
-							<p class="text-coffee-700">{itemsSyncStatus.message}</p>
-						</div>
-					{/if}
 					<button
-						disabled={!data.hasAirtableKey || itemsSyncInProgress}
-						class="retro-btn-secondary w-full disabled:opacity-50"
+						disabled={!data.hasAirtableKey}
 						onclick={handleSyncShopItems}
+						class="retro-btn-secondary w-full disabled:opacity-50"
 					>
-						{itemsSyncInProgress ? '[SYNCING...]' : '[SYNC ITEMS]'}
+						[SYNC ITEMS]
 					</button>
 				</div>
 			</div>
@@ -379,13 +244,7 @@
 							</div>
 							<div class="flex justify-between">
 								<span class="text-coffee-600">Change:</span>
-								<span
-									class="font-bold {form.user.pointsChanged > 0
-										? 'text-green-700'
-										: 'text-red-700'}"
-								>
-									{form.user.pointsChanged > 0 ? '+' : ''}{form.user.pointsChanged} points
-								</span>
+								<span class="font-bold text-green-700">+{form.user.pointsChanged} points</span>
 							</div>
 							<hr class="border-coffee-400 my-2 border-t-2 border-dashed" />
 							<div class="flex justify-between">
@@ -393,14 +252,14 @@
 								<span class="text-coffee-800 text-lg font-bold">{form.user.newTotal} points</span>
 							</div>
 						</div>
-						{#if data.hasAirtableKey}
+						{#if form.airtableSynced ?? data.hasAirtableKey}
 							<p class="text-coffee-600 mt-4">✓ Synced to Airtable</p>
 						{/if}
 					</div>
 				{:else}
 					<div class="text-coffee-500 w-full text-center">
 						<pre class="mb-2 text-2xl">[ ]</pre>
-						<p>&gt; RESULTS WILL APPEAR HERE_</p>
+						<p>RESULTS WILL APPEAR HERE_</p>
 					</div>
 				{/if}
 			</div>

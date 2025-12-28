@@ -46,7 +46,7 @@
 		<div class="flex flex-col gap-6">
 			<div class="text-center">
 				<h1 class="retro-title text-2xl">New User Setup</h1>
-				<p class="retro-subtitle mt-2">&gt; LOCATION DATA REQUIRED</p>
+				<p class="retro-subtitle mt-2">where you at?</p>
 			</div>
 
 			<form
@@ -57,7 +57,7 @@
 				class="flex flex-col gap-4"
 			>
 				<div class="flex flex-col gap-2">
-					<label for="country" class="retro-label">&gt; Select Country</label>
+					<label for="country" class="retro-label">Select Country</label>
 					<select id="country" bind:value={country} required class="retro-input">
 						<option value="">-- SELECT REGION --</option>
 						{#each countries as c}
@@ -68,7 +68,7 @@
 
 				{#if error}
 					<div class="border-2 border-red-700 bg-red-100 p-3 text-center font-bold text-red-700">
-						&gt; {error}
+						{error}
 					</div>
 				{/if}
 

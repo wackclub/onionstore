@@ -83,9 +83,9 @@
 	<section class="retro-panel">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div>
-				<pre class="text-coffee-500 mb-2">&gt; USER DATABASE</pre>
+				<pre class="text-coffee-500 mb-2">USER DATABASE</pre>
 				<h1 class="retro-title text-2xl">User Management</h1>
-				<p class="retro-subtitle mt-1">&gt; {users.length} USERS REGISTERED</p>
+				<p class="retro-subtitle mt-1">{users.length} USERS REGISTERED</p>
 			</div>
 			<a href="/admin" class="retro-btn-secondary">[BACK]</a>
 		</div>
@@ -93,7 +93,7 @@
 
 	<section class="retro-panel-tight overflow-hidden !p-0">
 		<div class="border-coffee-700 bg-cream-200 border-b-2 px-4 py-3">
-			<h2 class="text-coffee-700 font-bold tracking-wider uppercase">&gt; User Records</h2>
+			<h2 class="text-coffee-700 font-bold tracking-wider uppercase">User Records</h2>
 		</div>
 		<div class="overflow-x-auto">
 			<table class="min-w-full">
@@ -168,13 +168,13 @@
 								<td colspan="5" class="px-4 py-4">
 									<div class="border-coffee-600 bg-cream-50 border-2 p-4">
 										<h4 class="text-coffee-700 mb-3 font-bold tracking-wider uppercase">
-											&gt; Order History
+											Order History
 										</h4>
 										<div class="space-y-2">
 											{#if ordersState?.loading}
 												<p class="text-coffee-600">LOADING</p>
 											{:else if ordersState?.error}
-												<p class="text-xs font-bold text-red-700">&gt; {ordersState.error}</p>
+												<p class="text-xs font-bold text-red-700">{ordersState.error}</p>
 											{:else if ordersState?.data && ordersState.data.length > 0}
 												{#each ordersState.data as order}
 													<div
@@ -213,7 +213,7 @@
 													</div>
 												{/each}
 											{:else}
-												<p class="text-coffee-600">&gt; NO ORDERS ON RECORD</p>
+												<p class="text-coffee-600">NO ORDERS ON RECORD</p>
 											{/if}
 										</div>
 									</div>

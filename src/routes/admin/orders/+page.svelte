@@ -266,10 +266,10 @@
 	<section class="retro-panel">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div>
-				<pre class="text-coffee-500 mb-2">&gt; ORDER MANAGEMENT SYSTEM</pre>
+				<pre class="text-coffee-500 mb-2">ORDER MANAGEMENT SYSTEM</pre>
 				<h1 class="retro-title text-2xl">Order Control</h1>
 				<p class="retro-subtitle mt-1">
-					&gt; {orders.length}
+					{orders.length}
 					{orders.length === 1 ? 'ORDER' : 'ORDERS'} IN DATABASE
 				</p>
 			</div>
@@ -316,7 +316,7 @@
 			<hr class="retro-divider" />
 			<div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<div class="relative">
-					<label for="customer-filter" class="retro-label">&gt; Customer</label>
+					<label for="customer-filter" class="retro-label">Customer</label>
 					<div class="relative" bind:this={customerComboboxRef}>
 						<input
 							id="customer-filter"
@@ -361,7 +361,7 @@
 				</div>
 
 				<div>
-					<label for="item-filter" class="retro-label">&gt; Item</label>
+					<label for="item-filter" class="retro-label">Item</label>
 					<select
 						id="item-filter"
 						bind:value={itemFilter}
@@ -378,7 +378,7 @@
 				</div>
 
 				<div>
-					<label for="country-filter" class="retro-label">&gt; Country</label>
+					<label for="country-filter" class="retro-label">Country</label>
 					<select
 						id="country-filter"
 						bind:value={countryFilter}
@@ -393,7 +393,7 @@
 				</div>
 
 				<div>
-					<label for="start-date" class="retro-label">&gt; Start Date</label>
+					<label for="start-date" class="retro-label">Start Date</label>
 					<input
 						id="start-date"
 						type="date"
@@ -404,7 +404,7 @@
 				</div>
 
 				<div>
-					<label for="end-date" class="retro-label">&gt; End Date</label>
+					<label for="end-date" class="retro-label">End Date</label>
 					<input
 						id="end-date"
 						type="date"
@@ -415,7 +415,7 @@
 				</div>
 
 				<div>
-					<label for="min-price" class="retro-label">&gt; Min Price</label>
+					<label for="min-price" class="retro-label">Min Price</label>
 					<input
 						id="min-price"
 						type="number"
@@ -428,7 +428,7 @@
 				</div>
 
 				<div>
-					<label for="max-price" class="retro-label">&gt; Max Price</label>
+					<label for="max-price" class="retro-label">Max Price</label>
 					<input
 						id="max-price"
 						type="number"
@@ -565,7 +565,7 @@
 								<tr class="bg-cream-100">
 									<td colspan="8" class="px-4 py-2">
 										<div class="text-coffee-600">
-											<span class="text-coffee-700 font-bold">&gt; NOTE:</span>
+											<span class="text-coffee-700 font-bold">NOTE:</span>
 											{order.memo}
 										</div>
 									</td>
@@ -652,11 +652,11 @@
 				<h3 class="text-coffee-800 text-lg font-bold uppercase">
 					{memoStatus === 'approved' ? '> APPROVE ORDER' : '> REJECT ORDER'}
 				</h3>
-				<p class="text-coffee-600 mt-1">&gt; ADD NOTE FOR CUSTOMER</p>
+				<p class="text-coffee-600 mt-1">ADD NOTE FOR CUSTOMER</p>
 			</div>
 			<hr class="retro-divider" />
 			<div class="my-4">
-				<label for="memo-input" class="retro-label">&gt; Memo</label>
+				<label for="memo-input" class="retro-label">Memo</label>
 				<textarea
 					id="memo-input"
 					bind:value={memoText}
@@ -690,7 +690,7 @@
 				: 'border-red-700 bg-red-100 text-red-700'}"
 		>
 			<div class="flex items-center gap-2 font-bold">
-				<span>&gt; {toastMessage}</span>
+				<span>{toastMessage}</span>
 				<button onclick={() => (showToast = false)} class="hover:opacity-70" aria-label="Close"
 					>[X]</button
 				>

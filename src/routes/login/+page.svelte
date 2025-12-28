@@ -55,7 +55,7 @@
 					class="flex flex-col gap-4"
 				>
 					<div class="flex flex-col gap-2">
-						<label for="email" class="retro-label">&gt; Email Address</label>
+						<label for="email" class="retro-label">Email Address</label>
 						<input
 							id="email"
 							type="email"
@@ -68,7 +68,7 @@
 
 					{#if error}
 						<div class="border-2 border-red-700 bg-red-100 p-3 text-center font-bold text-red-700">
-							&gt; {error}
+							{error}
 						</div>
 					{/if}
 

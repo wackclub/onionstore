@@ -94,22 +94,26 @@ export const actions = {
 				return fail(404, { givePointsError: `User not found: ${email}` });
 			}
 
-			await db.insert(payouts).values({
-				userId: user[0].id,
-				tokens: tokens,
-				memo: reason
+			const newTotal = user[0].totalEarnedPoints + tokens;
+
+			await db.transaction(async (tx) => {
+				await tx.insert(payouts).values({
+					userId: user[0].id,
+					tokens: tokens,
+					memo: reason
+				});
+
+				await tx
+					.update(rawUsers)
+					.set({ totalEarnedPoints: newTotal })
+					.where(eq(rawUsers.email, email));
 			});
 
-			const newTotal = user[0].totalEarnedPoints + tokens;
-			await db
-				.update(rawUsers)
-				.set({ totalEarnedPoints: newTotal })
-				.where(eq(rawUsers.email, email));
-
+			let airtableSynced = false;
 			if (AIRTABLE_API_KEY && user[0].airtableRecordId) {
 				try {
 					const airtableUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_USERS_TABLE}/${user[0].airtableRecordId}`;
-					await fetch(airtableUrl, {
+					const response = await fetch(airtableUrl, {
 						method: 'PATCH',
 						headers: {
 							Authorization: `Bearer ${AIRTABLE_API_KEY}`,
@@ -122,6 +126,12 @@ export const actions = {
 							}
 						})
 					});
+
+					if (response.ok) {
+						airtableSynced = true;
+					} else {
+						console.error('Airtable sync failed:', response.status, response.statusText);
+					}
 				} catch (airtableError) {
 					console.error('Failed to sync to Airtable:', airtableError);
 				}
@@ -135,7 +145,8 @@ export const actions = {
 					previousTotal: user[0].totalEarnedPoints,
 					pointsChanged: tokens,
 					newTotal
-				}
+				},
+				airtableSynced
 			};
 		} catch (error) {
 			console.error('Give points error:', error);
