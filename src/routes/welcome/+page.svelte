@@ -45,7 +45,7 @@
 	<div class="retro-panel w-full max-w-md">
 		<div class="flex flex-col gap-6">
 			<div class="text-center">
-				<h1 class="retro-title text-2xl">New User Setup</h1>
+				<h1 class="retro-title text-2xl">Hey there!</h1>
 				<p class="retro-subtitle mt-2">where you at?</p>
 			</div>
 

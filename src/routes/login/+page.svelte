@@ -37,14 +37,13 @@
 		<div class="flex flex-col gap-6">
 			<div class="text-center">
 				<h1 class="retro-title text-2xl">Welcome to Boba Olympics!</h1>
-				<p class="retro-subtitle mt-2">ENTER CREDENTIALS TO ACCESS STORE</p>
+				<p class="retro-subtitle mt-2">Use the same email you used to submit your projects.</p>
 			</div>
 
 			{#if sent}
 				<div class="border-2 border-green-700 bg-green-100 p-4 text-center">
-					<pre class="mb-2 text-green-700">SUCCESS!</pre>
 					<p class="text-sm font-bold text-green-800 uppercase">Check Your Email!</p>
-					<p class="mt-1 text-green-700">MAGIC LINK TRANSMITTED</p>
+					<p class="mt-1 text-green-700">(but be quick - it expires in 15 minutes.)</p>
 				</div>
 			{:else}
 				<form
