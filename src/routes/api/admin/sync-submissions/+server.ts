@@ -11,13 +11,13 @@ interface AirtableSubmission {
 	fields: {
 		Name?: string;
 		Review?: string;
-		Rating?: string[];
+		Rating?: number;
 		'Github URL'?: string;
 		'Website URL'?: string;
 		filloutemail?: string;
-		Points?: string;
+		Points?: number;
 		Description?: string;
-		'Challenge (from Challenge)'?: string[];
+		Challenge?: string[];
 		[key: string]: unknown;
 	};
 }
@@ -59,8 +59,9 @@ async function fetchApprovedSubmissions(): Promise<AirtableSubmission[]> {
 	return allRecords;
 }
 
-function parsePoints(pointsField: string | undefined): number {
+function parsePoints(pointsField: string | number | undefined): number {
 	if (!pointsField) return 0;
+	if (typeof pointsField === 'number') return pointsField;
 	const parsed = parseInt(pointsField, 10);
 	return isNaN(parsed) ? 0 : parsed;
 }

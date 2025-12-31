@@ -3,7 +3,7 @@ const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
 const AIRTABLE_USERS_TABLE = 'tblpJEJAfy5rEc5vG';
 const AIRTABLE_ORDERS_TABLE = 'tblOklDMe8jJPdOIq';
 const AIRTABLE_SHOP_ITEMS_TABLE = 'tbltUSi4tZ5dtUylt';
-const AIRTABLE_SUBMISSIONS_TABLE = 'tblCNgijKlvTpz6N4';
+const AIRTABLE_SUBMISSIONS_TABLE = 'tbl1qlhGJPoHRWgM3';
 
 interface AirtableRecord {
 	id: string;
@@ -110,7 +110,9 @@ export async function findAirtableRecordByField(
 	fieldName: string,
 	value: string
 ): Promise<AirtableRecord | null> {
-	const records = await fetchAirtableRecords(tableId, `{${fieldName}} = "${value}"`);
+	const sanitizedFieldName = fieldName.replace(/[{}"']/g, '');
+	const sanitizedValue = value.replace(/"/g, '\\"');
+	const records = await fetchAirtableRecords(tableId, `{${sanitizedFieldName}} = "${sanitizedValue}"`);
 	return records.length > 0 ? records[0] : null;
 }
 
