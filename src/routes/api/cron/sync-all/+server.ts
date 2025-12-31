@@ -2,7 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import { db, payouts, rawUsers, shopItems, shopOrders } from '$lib/server/db';
 import { eq, isNotNull } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
-import { AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE, AIRTABLE_SUBMISSIONS_TABLE, AIRTABLE_SHOP_ITEMS_TABLE } from '$lib/server/airtable';
+import { AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE, AIRTABLE_SHOP_ITEMS_TABLE, AIRTABLE_SUBMISSIONS_TABLE } from '$lib/server/airtable';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;

@@ -3,7 +3,7 @@ const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
 const AIRTABLE_USERS_TABLE = 'tblpJEJAfy5rEc5vG';
 const AIRTABLE_ORDERS_TABLE = 'tblOklDMe8jJPdOIq';
 const AIRTABLE_SHOP_ITEMS_TABLE = 'tbltUSi4tZ5dtUylt';
-const AIRTABLE_SUBMISSIONS_TABLE = 'tblCNgijKlvTpz6N4';
+const AIRTABLE_SUBMISSIONS_TABLE = 'tbl1qlhGJPoHRWgM3';
 
 interface AirtableRecord {
 	id: string;
