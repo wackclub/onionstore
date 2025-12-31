@@ -110,7 +110,6 @@ export async function findAirtableRecordByField(
 	fieldName: string,
 	value: string
 ): Promise<AirtableRecord | null> {
-	// Sanitize inputs to prevent formula injection
 	const sanitizedFieldName = fieldName.replace(/[{}"']/g, '');
 	const sanitizedValue = value.replace(/"/g, '\\"');
 	const records = await fetchAirtableRecords(tableId, `{${sanitizedFieldName}} = "${sanitizedValue}"`);
