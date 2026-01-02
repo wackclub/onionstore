@@ -2,8 +2,13 @@ import { redirect, error } from '@sveltejs/kit';
 import { db, rawUsers } from '$lib/server/db';
 import { eq } from 'drizzle-orm';
 import { symmetric } from '$lib/server/crypto';
-import { SESSIONS_SECRET, HACKCLUB_CLIENT_ID, HACKCLUB_CLIENT_SECRET, HACKCLUB_REDIRECT_URI } from '$env/static/private';
+import { SESSIONS_SECRET } from '$env/static/private';
 import type { RequestHandler } from './$types';
+
+// Hack Club OAuth credentials - optional
+const HACKCLUB_CLIENT_ID = process.env.HACKCLUB_CLIENT_ID;
+const HACKCLUB_CLIENT_SECRET = process.env.HACKCLUB_CLIENT_SECRET;
+const HACKCLUB_REDIRECT_URI = process.env.HACKCLUB_REDIRECT_URI || 'http://localhost:3000/api/auth/callback';
 
 interface HackClubTokenResponse {
 	access_token: string;
