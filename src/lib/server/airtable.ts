@@ -1,4 +1,5 @@
-const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+import { AIRTABLE_API_KEY } from '$env/static/private';
+
 const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
 const AIRTABLE_USERS_TABLE = 'tblpJEJAfy5rEc5vG';
 const AIRTABLE_ORDERS_TABLE = 'tblOklDMe8jJPdOIq';

@@ -3,8 +3,7 @@ import { db, payouts, rawUsers } from '$lib/server/db';
 import { eq, isNotNull } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 import { AIRTABLE_BASE_ID, AIRTABLE_SUBMISSIONS_TABLE } from '$lib/server/airtable';
-
-const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+import { AIRTABLE_API_KEY } from '$env/static/private';
 
 interface AirtableSubmission {
 	id: string;

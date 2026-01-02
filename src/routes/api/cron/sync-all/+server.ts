@@ -3,9 +3,8 @@ import { db, payouts, rawUsers, shopItems, shopOrders } from '$lib/server/db';
 import { eq, isNotNull } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 import { AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE, AIRTABLE_SHOP_ITEMS_TABLE, AIRTABLE_SUBMISSIONS_TABLE } from '$lib/server/airtable';
+import { CRON_SECRET, AIRTABLE_API_KEY } from '$env/static/private';
 
-const CRON_SECRET = process.env.CRON_SECRET;
-const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_SHOP_ORDERS_TABLE = 'tblOklDMe8jJPdOIq';
 
 interface AirtableResponse {

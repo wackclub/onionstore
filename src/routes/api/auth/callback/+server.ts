@@ -2,12 +2,8 @@ import { redirect, error } from '@sveltejs/kit';
 import { db, rawUsers } from '$lib/server/db';
 import { eq } from 'drizzle-orm';
 import { symmetric } from '$lib/server/crypto';
-import { SESSIONS_SECRET } from '$env/static/private';
+import { SESSIONS_SECRET, HACKCLUB_CLIENT_ID, HACKCLUB_CLIENT_SECRET, HACKCLUB_REDIRECT_URI } from '$env/static/private';
 import type { RequestHandler } from './$types';
-
-const HACKCLUB_CLIENT_ID = process.env.HACKCLUB_CLIENT_ID;
-const HACKCLUB_CLIENT_SECRET = process.env.HACKCLUB_CLIENT_SECRET;
-const HACKCLUB_REDIRECT_URI = process.env.HACKCLUB_REDIRECT_URI || 'http://localhost:5173/api/auth/callback';
 
 interface HackClubTokenResponse {
 	access_token: string;
@@ -45,19 +41,28 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 	try {
 		// Exchange code for access token
+		// Try form-urlencoded format as well since JSON isn't working
+		const formData = new URLSearchParams();
+		formData.append('client_id', HACKCLUB_CLIENT_ID);
+		formData.append('client_secret', HACKCLUB_CLIENT_SECRET);
+		formData.append('redirect_uri', HACKCLUB_REDIRECT_URI);
+		formData.append('code', code);
+		formData.append('grant_type', 'authorization_code');
+
+		console.log('Token exchange request (form-urlencoded):', {
+			url: 'https://auth.hackclub.com/oauth/token',
+			params: Object.fromEntries(formData.entries())
+		});
+
 		const tokenResponse = await fetch('https://auth.hackclub.com/oauth/token', {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/x-www-form-urlencoded'
 			},
-			body: JSON.stringify({
-				client_id: HACKCLUB_CLIENT_ID,
-				client_secret: HACKCLUB_CLIENT_SECRET,
-				redirect_uri: HACKCLUB_REDIRECT_URI,
-				code,
-				grant_type: 'authorization_code'
-			})
+			body: formData.toString()
 		});
+
+		console.log('Token response status:', tokenResponse.status);
 
 		if (!tokenResponse.ok) {
 			const errorText = await tokenResponse.text();
@@ -82,7 +87,10 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 		const hackClubUser: HackClubUser = await userResponse.json();
 
+		console.log('Hack Club user data:', hackClubUser);
+
 		if (!hackClubUser.email) {
+			console.error('No email in user data. Full user object:', JSON.stringify(hackClubUser, null, 2));
 			throw error(400, 'No email address returned from Hack Club');
 		}
 

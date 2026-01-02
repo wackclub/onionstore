@@ -1,8 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { AIRTABLE_BASE_ID, AIRTABLE_SUBMISSIONS_TABLE } from '$lib/server/airtable';
-
-const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+import { AIRTABLE_API_KEY } from '$env/static/private';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	if (!locals.user?.isAdmin) {
