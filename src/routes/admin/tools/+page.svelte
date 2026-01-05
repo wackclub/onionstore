@@ -4,6 +4,7 @@
 	import { toast } from 'svelte-sonner';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let dangerZoneUnlocked = $state(false);
 
 	function createSyncHandler(endpoint: string, successMessage: string) {
 		return async () => {
@@ -237,39 +238,120 @@
 		</form>
 	</section>
 
-	<section class="retro-panel">
-		<div class="mb-6 flex items-center gap-3">
-			<span class="text-coffee-400">&gt;&gt;</span>
-			<h2 class="text-coffee-700 font-bold tracking-wider uppercase">Danger Zone</h2>
+	<section class="retro-panel relative">
+		<div class="mb-6 flex items-center justify-between gap-3">
+			<div class="flex items-center gap-3">
+				<span class="text-coffee-400">&gt;&gt;</span>
+				<h2 class="text-coffee-700 font-bold tracking-wider uppercase">Danger Zone</h2>
+			</div>
+			{#if !dangerZoneUnlocked}
+				<div class="flex items-center gap-2">
+					<svg class="h-6 w-6 text-red-700" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zM9 7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9V7zm9 13H6v-8h12v8z"/>
+						<circle cx="12" cy="16" r="1.5"/>
+					</svg>
+					<span class="text-red-700 text-sm font-bold uppercase">Locked</span>
+				</div>
+			{/if}
 		</div>
 
-		<div class="space-y-4">
-			<div class="border-red-500 bg-red-50 border-2 p-4">
-				<h3 class="text-red-700 mb-2 font-bold uppercase">Clear All Test Orders</h3>
-				<p class="text-red-600 mb-4 leading-relaxed">
-					Delete all shop orders from the database. Use this after wiping Airtable to reset the system.
-				</p>
-				<button
-					onclick={handleClearTestOrders}
-					class="bg-red-600 hover:bg-red-700 w-full border-2 border-black px-6 py-2 font-bold uppercase text-white transition-colors"
-				>
-					[CLEAR ORDERS]
-				</button>
-			</div>
+		{#if !dangerZoneUnlocked}
+			<!-- Locked Overlay -->
+			<div class="relative">
+				<div class="border-red-500 bg-red-900/20 blur-sm border-2 p-4">
+					<div class="space-y-4 opacity-50">
+						<div class="bg-red-100 border-2 border-red-300 p-4">
+							<h3 class="text-red-700 mb-2 font-bold uppercase">Clear All Test Orders</h3>
+							<p class="text-red-600 mb-4 leading-relaxed">
+								Delete all shop orders from the database.
+							</p>
+							<button disabled class="w-full border-2 border-black bg-gray-400 px-6 py-2 font-bold uppercase text-white">
+								[LOCKED]
+							</button>
+						</div>
+						<div class="bg-red-100 border-2 border-red-300 p-4">
+							<h3 class="text-red-700 mb-2 font-bold uppercase">Clear Test Payouts</h3>
+							<p class="text-red-600 mb-4 leading-relaxed">
+								Delete all manual payouts.
+							</p>
+							<button disabled class="w-full border-2 border-black bg-gray-400 px-6 py-2 font-bold uppercase text-white">
+								[LOCKED]
+							</button>
+						</div>
+					</div>
+				</div>
 
-			<div class="border-red-500 bg-red-50 border-2 p-4">
-				<h3 class="text-red-700 mb-2 font-bold uppercase">Clear Test Payouts</h3>
-				<p class="text-red-600 mb-4 leading-relaxed">
-					Delete all manual payouts (like TEST) that aren't linked to Airtable submissions.
-				</p>
+				<!-- Lock Screen -->
+				<div class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-red-100/95 to-red-50/95">
+					<div class="border-coffee-700 bg-cream-50 border-4 p-8 text-center">
+						<svg class="mx-auto mb-4 h-24 w-24 text-red-700" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zM9 7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9V7zm9 13H6v-8h12v8z"/>
+							<circle cx="12" cy="16" r="1.5"/>
+							<path d="M12 17.5v2"/>
+						</svg>
+						<h3 class="text-coffee-800 mb-2 font-mono text-xl font-bold uppercase">
+							[DANGER ZONE LOCKED]
+						</h3>
+						<p class="text-coffee-700 mb-6 font-mono text-sm">
+							&gt; These destructive actions are protected_<br/>
+							&gt; Ask Rushmore to unlock manually_
+						</p>
+						<div class="border-coffee-400 bg-cream-100 inline-block border-2 px-6 py-3">
+							<p class="text-coffee-600 font-mono text-xs">
+								SECURITY: ENABLED<br/>
+								PROTECTION: ACTIVE
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		{:else}
+			<!-- Unlocked State -->
+			<div class="space-y-4">
+				<div class="border-yellow-500 bg-yellow-50 border-2 p-4">
+					<div class="mb-4 flex items-center gap-2">
+						<svg class="h-5 w-5 text-yellow-700" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M12 2C9.243 2 7 4.243 7 7v1h1V7c0-1.654 1.346-3 3-3s3 1.346 3 3v1h1V7c0-2.757-2.243-5-5-5z"/>
+							<path d="M18 10H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2zm0 10H6v-8h12v8z"/>
+						</svg>
+						<span class="text-yellow-700 font-bold uppercase">⚠️ Unlocked - Proceed with Caution</span>
+					</div>
+				</div>
+
+				<div class="border-red-500 bg-red-50 border-2 p-4">
+					<h3 class="text-red-700 mb-2 font-bold uppercase">Clear All Test Orders</h3>
+					<p class="text-red-600 mb-4 leading-relaxed">
+						Delete all shop orders from the database. Use this after wiping Airtable to reset the system.
+					</p>
+					<button
+						onclick={handleClearTestOrders}
+						class="bg-red-600 hover:bg-red-700 w-full border-2 border-black px-6 py-2 font-bold uppercase text-white transition-colors"
+					>
+						[CLEAR ORDERS]
+					</button>
+				</div>
+
+				<div class="border-red-500 bg-red-50 border-2 p-4">
+					<h3 class="text-red-700 mb-2 font-bold uppercase">Clear Test Payouts</h3>
+					<p class="text-red-600 mb-4 leading-relaxed">
+						Delete all manual payouts (like TEST) that aren't linked to Airtable submissions.
+					</p>
+					<button
+						onclick={handleClearTestPayouts}
+						class="bg-red-600 hover:bg-red-700 w-full border-2 border-black px-6 py-2 font-bold uppercase text-white transition-colors"
+					>
+						[CLEAR TEST PAYOUTS]
+					</button>
+				</div>
+
 				<button
-					onclick={handleClearTestPayouts}
-					class="bg-red-600 hover:bg-red-700 w-full border-2 border-black px-6 py-2 font-bold uppercase text-white transition-colors"
+					onclick={() => { dangerZoneUnlocked = false; toast.info('Danger Zone locked'); }}
+					class="border-coffee-700 bg-cream-100 hover:bg-cream-200 w-full border-2 px-6 py-2 font-bold uppercase transition-colors"
 				>
-					[CLEAR TEST PAYOUTS]
+					🔒 [LOCK DANGER ZONE]
 				</button>
 			</div>
-		</div>
+		{/if}
 	</section>
 
 	<section class="retro-panel">
