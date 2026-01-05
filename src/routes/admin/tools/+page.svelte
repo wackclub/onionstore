@@ -33,6 +33,11 @@
 		'Submissions synced! Tokens updated.'
 	);
 
+	const handleClearTestOrders = createSyncHandler(
+		'/api/admin/clear-test-orders',
+		'Test orders cleared!'
+	);
+
 	const handleSyncShopItems = async () => {
 		try {
 			const [itemsResponse, ordersResponse] = await Promise.all([
@@ -221,9 +226,38 @@
 						placeholder="Bonus for event participation"
 					/>
 				</div>
-
-				<button type="submit" class="retro-btn w-full">[GIVE TOKENS]</button>
 			</div>
+
+			<button type="submit" class="retro-btn w-full">[GIVE TOKENS]</button>
+		</form>
+	</section>
+
+	<section class="retro-panel">
+		<div class="mb-6 flex items-center gap-3">
+			<span class="text-coffee-400">&gt;&gt;</span>
+			<h2 class="text-coffee-700 font-bold tracking-wider uppercase">Danger Zone</h2>
+		</div>
+
+		<div class="space-y-4">
+			<div class="border-red-500 bg-red-50 border-2 p-4">
+				<h3 class="text-red-700 mb-2 font-bold uppercase">Clear All Test Orders</h3>
+				<p class="text-red-600 mb-4 leading-relaxed">
+					Delete all shop orders from the database. Use this after wiping Airtable to reset the system.
+				</p>
+				<button
+					onclick={handleClearTestOrders}
+					class="bg-red-600 hover:bg-red-700 w-full border-2 border-black px-6 py-2 font-bold uppercase text-white transition-colors"
+				>
+					[CLEAR ORDERS]
+				</button>
+			</div>
+		</div>
+	</section>
+
+	<section class="retro-panel">
+		<div class="mb-6 flex items-center gap-3">
+			<span class="text-coffee-400">&gt;&gt;</span>
+			<h2 class="text-coffee-700 font-bold tracking-wider uppercase">Give Tokens Result</h2>
 
 			<div class="border-coffee-400 bg-cream-100 flex items-center border-2 p-6">
 				{#if form?.givePointsSuccess && form?.user}
