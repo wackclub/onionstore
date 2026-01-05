@@ -38,6 +38,11 @@
 		'Test orders cleared!'
 	);
 
+	const handleClearTestPayouts = createSyncHandler(
+		'/api/admin/clear-test-payouts',
+		'Test payouts cleared!'
+	);
+
 	const handleSyncShopItems = async () => {
 		try {
 			const [itemsResponse, ordersResponse] = await Promise.all([
@@ -249,6 +254,19 @@
 					class="bg-red-600 hover:bg-red-700 w-full border-2 border-black px-6 py-2 font-bold uppercase text-white transition-colors"
 				>
 					[CLEAR ORDERS]
+				</button>
+			</div>
+
+			<div class="border-red-500 bg-red-50 border-2 p-4">
+				<h3 class="text-red-700 mb-2 font-bold uppercase">Clear Test Payouts</h3>
+				<p class="text-red-600 mb-4 leading-relaxed">
+					Delete all manual payouts (like TEST) that aren't linked to Airtable submissions.
+				</p>
+				<button
+					onclick={handleClearTestPayouts}
+					class="bg-red-600 hover:bg-red-700 w-full border-2 border-black px-6 py-2 font-bold uppercase text-white transition-colors"
+				>
+					[CLEAR TEST PAYOUTS]
 				</button>
 			</div>
 		</div>
