@@ -77,6 +77,11 @@ export const POST: RequestHandler = async ({ locals }) => {
 	try {
 		const submissions = await fetchApprovedSubmissions();
 
+		console.log(`Found ${submissions.length} approved submissions`);
+		if (submissions.length > 0) {
+			console.log('First submission fields:', submissions[0].fields);
+		}
+
 		const existingPayouts = await db
 			.select()
 			.from(payouts)
@@ -95,6 +100,7 @@ export const POST: RequestHandler = async ({ locals }) => {
 			seenSubmissionIds.add(submission.id);
 
 			if (!email) {
+				console.log(`Skipping submission ${submission.id}: no email`);
 				skipped++;
 				continue;
 			}
@@ -102,14 +108,17 @@ export const POST: RequestHandler = async ({ locals }) => {
 			const user = await db.select().from(rawUsers).where(eq(rawUsers.email, email)).limit(1);
 
 			if (user.length === 0) {
+				console.log(`Skipping submission ${submission.id}: user not found for email ${email}`);
 				skipped++;
 				continue;
 			}
 
 			const tokens = parsePoints(submission.fields.Points);
-			const challengeName = submission.fields['Challenge (from Challenge)']?.[0] ?? 'Submission';
+			const challengeName = submission.fields.Challenge?.[0] ?? 'Submission';
 			const projectName = submission.fields.Name ?? 'Unknown';
 			const memo = `${challengeName}: ${projectName}`;
+
+			console.log(`Processing submission ${submission.id}: email=${email}, tokens=${tokens}, memo=${memo}`);
 
 			const existingPayout = existingPayoutMap.get(submission.id);
 
