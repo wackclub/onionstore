@@ -59,7 +59,7 @@
 				>
 					<div>
 						<label for="email" class="text-coffee-700 mb-2 block text-sm font-bold uppercase">
-							&gt; Email Address
+							Email Address
 						</label>
 						<input
 							type="email"
@@ -74,7 +74,7 @@
 
 					{#if error}
 						<div class="border-2 border-red-500 bg-red-50 p-3 text-center">
-							<p class="text-sm font-bold text-red-700">&gt; ERROR: {error}</p>
+							<p class="text-sm font-bold text-red-700">ERROR: {error}</p>
 						</div>
 					{/if}
 
