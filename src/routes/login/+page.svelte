@@ -43,17 +43,23 @@
 			{#if sent}
 				<div class="border-coffee-400 bg-cream-100 border-2 p-6">
 					<div class="text-coffee-700 mb-2 text-center text-sm font-bold uppercase">
-						&gt; EMAIL SENT_
+						EMAIL SENT!
 					</div>
 					<p class="text-coffee-600 text-center text-sm">
 						Check your inbox for a login link. It will expire in 15 minutes.
 					</p>
 				</div>
 			{:else}
-				<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="flex flex-col gap-4">
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						handleSubmit();
+					}}
+					class="flex flex-col gap-4"
+				>
 					<div>
 						<label for="email" class="text-coffee-700 mb-2 block text-sm font-bold uppercase">
-							&gt; Email Address_
+							&gt; Email Address
 						</label>
 						<input
 							type="email"
@@ -67,26 +73,16 @@
 					</div>
 
 					{#if error}
-						<div class="border-red-500 bg-red-50 border-2 p-3 text-center">
-							<p class="text-red-700 text-sm font-bold">&gt; ERROR: {error}</p>
+						<div class="border-2 border-red-500 bg-red-50 p-3 text-center">
+							<p class="text-sm font-bold text-red-700">&gt; ERROR: {error}</p>
 						</div>
 					{/if}
 
-					<button
-						type="submit"
-						disabled={loading || !email}
-						class="retro-btn w-full"
-					>
-						{loading ? '[SENDING...]' : '[SEND LOGIN LINK]'}
+					<button type="submit" disabled={loading || !email} class="retro-btn w-full">
+						{loading ? 'SENDING...' : 'SEND LOGIN LINK'}
 					</button>
 				</form>
 			{/if}
-
-			<div class="border-coffee-400 border-t-2 border-dashed pt-4">
-				<p class="text-coffee-500 text-center text-xs">
-					&gt; SECURE AUTHENTICATION VIA EMAIL_
-				</p>
-			</div>
 		</div>
 	</div>
 </div>
