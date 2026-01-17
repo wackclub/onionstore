@@ -325,8 +325,7 @@ export async function fetchApprovedSubmissions(): Promise<AirtableSubmission[]> 
 			const email = fields['filloutemail']?.trim().toLowerCase();
 			if (!email) continue;
 
-			const ratingArray = fields['Rating'] as string[] | undefined;
-			const tokens = ratingArray?.[0] ? parseInt(ratingArray[0], 10) : 0;
+			const tokens = Number(fields['Points']);
 			if (tokens === 0) continue;
 
 			const challengeArray = fields['Challenge (from Challenge)'] as string[] | undefined;
