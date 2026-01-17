@@ -5,6 +5,7 @@ import { loginTokens, rawUsers } from '$lib/server/db/schema';
 import { eq, and, gt, lt } from 'drizzle-orm';
 import { symmetric } from '$lib/server/crypto';
 import { SESSIONS_SECRET } from '$env/static/private';
+import { lookupAirtableSignupByEmail } from '$lib/server/airtable';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	const token = url.searchParams.get('token');
@@ -36,6 +37,21 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 			})
 			.returning();
 		user = newUser;
+	}
+
+	if (!user[0].airtableSignupsRecordId) {
+		try {
+			const signupsRecordId = await lookupAirtableSignupByEmail(email);
+			if (signupsRecordId) {
+				await db
+					.update(rawUsers)
+					.set({ airtableSignupsRecordId: signupsRecordId })
+					.where(eq(rawUsers.id, user[0].id));
+				user[0].airtableSignupsRecordId = signupsRecordId;
+			}
+		} catch (err) {
+			console.error('Failed to lookup Airtable Signups record:', err);
+		}
 	}
 
 	await db.delete(loginTokens).where(eq(loginTokens.token, token));

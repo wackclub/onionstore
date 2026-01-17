@@ -35,12 +35,16 @@ export const rawUsers = pgTable(
 		city: text(),
 		zipPostal: text(),
 		shippingCountry: text(),
-		slackId: text()
+		slackId: text(),
+		airtableSignupsRecordId: text()
 	},
 	(table) => ({
 		emailIdx: index('user_email_idx').on(table.email),
 		isAdminIdx: index('user_is_admin_idx').on(table.isAdmin),
-		countryIdx: index('user_country_idx').on(table.country)
+		countryIdx: index('user_country_idx').on(table.country),
+		airtableSignupsRecordIdIdx: index('user_airtable_signups_record_id_idx').on(
+			table.airtableSignupsRecordId
+		)
 	})
 );
 
@@ -74,11 +78,13 @@ export const shopItems = pgTable(
 		price: integer().notNull(),
 		usd_cost: integer(),
 		type: varchar({ enum: ['hcb', 'third_party'] }),
-		hcbMids: text().array()
+		hcbMids: text().array(),
+		airtableRecordId: text()
 	},
 	(table) => ({
 		typeIdx: index('shop_items_type_idx').on(table.type),
-		priceIdx: index('shop_items_price_idx').on(table.price)
+		priceIdx: index('shop_items_price_idx').on(table.price),
+		airtableRecordIdIdx: index('shop_items_airtable_record_id_idx').on(table.airtableRecordId)
 	})
 );
 
@@ -99,7 +105,8 @@ export const shopOrders = pgTable(
 		createdAt: timestamp().notNull().defaultNow(),
 		userId: text()
 			.notNull()
-			.references(() => rawUsers.id)
+			.references(() => rawUsers.id),
+		airtableRecordId: text()
 	},
 	(table) => ({
 		userIdIdx: index('shop_orders_user_id_idx').on(table.userId),
@@ -107,7 +114,11 @@ export const shopOrders = pgTable(
 		statusIdx: index('shop_orders_status_idx').on(table.status),
 		createdAtIdx: index('shop_orders_created_at_idx').on(table.createdAt),
 		userIdStatusIdx: index('shop_orders_user_id_status_idx').on(table.userId, table.status),
-		statusCreatedAtIdx: index('shop_orders_status_created_at_idx').on(table.status, table.createdAt)
+		statusCreatedAtIdx: index('shop_orders_status_created_at_idx').on(
+			table.status,
+			table.createdAt
+		),
+		airtableRecordIdIdx: index('shop_orders_airtable_record_id_idx').on(table.airtableRecordId)
 	})
 );
 

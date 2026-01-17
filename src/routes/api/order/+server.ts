@@ -1,10 +1,11 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { shopItems, shopOrders, usersWithTokens } from '$lib/server/db/schema';
+import { shopItems, shopOrders, usersWithTokens, rawUsers } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { createOrderSchema } from '$lib/server/validation';
 import { type } from 'arktype';
+import { createShopOrderInAirtable, lookupAirtableShopItemByName } from '$lib/server/airtable';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
@@ -62,6 +63,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			})
 			.returning();
 
+		syncOrderToAirtable(newOrder[0], item, user.email, userId);
+
 		return json({
 			success: true,
 			order: newOrder[0],
@@ -73,3 +76,42 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Internal server error' }, { status: 500 });
 	}
 };
+
+async function syncOrderToAirtable(
+	order: typeof shopOrders.$inferSelect,
+	item: typeof shopItems.$inferSelect,
+	userEmail: string | null,
+	postgresUserId: string
+) {
+	try {
+		const [userRecord] = await db
+			.select({ airtableSignupsRecordId: rawUsers.airtableSignupsRecordId })
+			.from(rawUsers)
+			.where(eq(rawUsers.id, postgresUserId));
+
+		let shopItemAirtableId = item.airtableRecordId;
+		if (!shopItemAirtableId) {
+			shopItemAirtableId = await lookupAirtableShopItemByName(item.name);
+			if (shopItemAirtableId) {
+				await db
+					.update(shopItems)
+					.set({ airtableRecordId: shopItemAirtableId })
+					.where(eq(shopItems.id, item.id));
+			}
+		}
+
+		const airtableRecordId = await createShopOrderInAirtable({
+			itemName: item.name,
+			email: userEmail || '',
+			postgresUserId: postgresUserId,
+			userId: userRecord?.airtableSignupsRecordId ?? undefined,
+			priceAtOrder: order.priceAtOrder,
+			status: 'Pending',
+			shopItemId: shopItemAirtableId ?? undefined
+		});
+
+		await db.update(shopOrders).set({ airtableRecordId }).where(eq(shopOrders.id, order.id));
+	} catch (error) {
+		console.error('Failed to sync order to Airtable:', error);
+	}
+}

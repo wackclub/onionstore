@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import { LOOPS_API_KEY } from '$env/static/private';
 import { updateOrderSchema } from '$lib/server/validation';
 import { ArkErrors } from 'arktype';
+import { updateShopOrderInAirtable } from '$lib/server/airtable';
 
 export const PATCH: RequestHandler = async ({ request, locals }) => {
 	try {
@@ -44,6 +45,13 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 			.from(shopItems)
 			.where(eq(shopItems.id, updatedOrder[0].shopItemId));
 
+		if (updatedOrder[0].airtableRecordId) {
+			syncOrderStatusToAirtable(
+				updatedOrder[0].airtableRecordId,
+				status === 'approved' ? 'Approved' : 'Rejected'
+			);
+		}
+
 		if (user?.email) {
 			const res = await fetch('https://app.loops.so/api/v1/transactional', {
 				method: 'POST',
@@ -77,3 +85,14 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Internal server error' }, { status: 500 });
 	}
 };
+
+async function syncOrderStatusToAirtable(
+	airtableRecordId: string,
+	status: 'Approved' | 'Rejected'
+) {
+	try {
+		await updateShopOrderInAirtable(airtableRecordId, { status });
+	} catch (error) {
+		console.error('Failed to sync order status to Airtable:', error);
+	}
+}
