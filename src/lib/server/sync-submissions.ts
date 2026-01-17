@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { rawUsers, payouts } from '$lib/server/db/schema';
-import { eq, isNotNull, and, ne } from 'drizzle-orm';
+import { eq, isNotNull, and, ne, sql } from 'drizzle-orm';
 import { fetchApprovedSubmissions } from '$lib/server/airtable';
 
 interface SyncResult {
@@ -70,7 +70,7 @@ export async function syncSubmissions() {
 				const user = await db
 					.select()
 					.from(rawUsers)
-					.where(eq(rawUsers.email, submission.email))
+					.where(sql`LOWER(${rawUsers.email}) = ${submission.email}`)
 					.limit(1);
 
 				if (user.length === 0) {
