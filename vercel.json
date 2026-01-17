@@ -3,6 +3,10 @@
 		{
 			"path": "/api/cron/sync-airtable-signups",
 			"schedule": "*/10 * * * *"
+		},
+		{
+			"path": "/api/cron/sync-submissions",
+			"schedule": "*/10 * * * *"
 		}
 	]
 }

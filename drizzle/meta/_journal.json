@@ -36,6 +36,13 @@
       "when": 1768642137873,
       "tag": "0004_white_stardust",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1768642809599,
+      "tag": "0005_small_black_tarantula",
+      "breakpoints": true
     }
   ]
 }

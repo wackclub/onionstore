@@ -136,7 +136,8 @@ export const payouts = pgTable(
 		createdAt: timestamp().notNull().defaultNow(),
 		submittedToUnified: boolean().default(false).notNull(),
 		baseHackatimeHours: decimal().default('0.0').notNull(),
-		overridenHours: decimal().default('0.0')
+		overridenHours: decimal().default('0.0'),
+		submissionAirtableRecordId: text()
 	},
 	(table) => ({
 		userIdIdx: index('payouts_user_id_idx').on(table.userId),
@@ -146,6 +147,9 @@ export const payouts = pgTable(
 		userIdSubmittedIdx: index('payouts_user_id_submitted_idx').on(
 			table.userId,
 			table.submittedToUnified
+		),
+		submissionAirtableRecordIdIdx: index('payouts_submission_airtable_record_id_idx').on(
+			table.submissionAirtableRecordId
 		)
 	})
 );

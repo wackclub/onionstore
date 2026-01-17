@@ -4,6 +4,8 @@ const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
 const SHOP_ITEMS_TABLE_ID = 'tbltUSi4tZ5dtUylt';
 const SIGNUPS_TABLE_ID = 'tblpJEJAfy5rEc5vG';
 const SHOP_ORDERS_TABLE_ID = 'tblOklDMe8jJPdOIq';
+const SUBMISSIONS_TABLE_ID = 'tbl1qlhGJPoHRWgM3';
+const SUBMISSIONS_APPROVED_VIEW_ID = 'viwcZzARJrHGmMZxD';
 
 interface ShopItemData {
 	name: string;
@@ -279,4 +281,68 @@ export async function getAllAirtableShopItems(): Promise<Array<{
 	} while (offset);
 
 	return allRecords;
+}
+
+export interface AirtableSubmission {
+	recordId: string;
+	email: string;
+	tokens: number;
+	name: string;
+	challenge: string;
+}
+
+export async function fetchApprovedSubmissions(): Promise<AirtableSubmission[]> {
+	if (!env.AIRTABLE_API_KEY) {
+		throw new Error('AIRTABLE_API_KEY is not configured');
+	}
+
+	const allSubmissions: AirtableSubmission[] = [];
+	let offset: string | undefined;
+
+	do {
+		const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${SUBMISSIONS_TABLE_ID}`);
+		url.searchParams.set('view', SUBMISSIONS_APPROVED_VIEW_ID);
+		if (offset) {
+			url.searchParams.set('offset', offset);
+		}
+
+		const response = await fetch(url.toString(), {
+			headers: {
+				Authorization: `Bearer ${env.AIRTABLE_API_KEY}`
+			}
+		});
+
+		if (!response.ok) {
+			const error = await response.text();
+			throw new Error(`Failed to fetch approved submissions: ${error}`);
+		}
+
+		const data = await response.json();
+
+		for (const record of data.records) {
+			const fields = record.fields;
+
+			const email = fields['filloutemail']?.trim().toLowerCase();
+			if (!email) continue;
+
+			const ratingArray = fields['Rating'] as string[] | undefined;
+			const tokens = ratingArray?.[0] ? parseInt(ratingArray[0], 10) : 0;
+			if (tokens === 0) continue;
+
+			const challengeArray = fields['Challenge (from Challenge)'] as string[] | undefined;
+			const challenge = challengeArray?.join(', ') || 'Submission';
+
+			allSubmissions.push({
+				recordId: record.id,
+				email,
+				tokens,
+				name: fields['Name'] || 'Unknown',
+				challenge
+			});
+		}
+
+		offset = data.offset;
+	} while (offset);
+
+	return allSubmissions;
 }

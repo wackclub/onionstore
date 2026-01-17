@@ -30,6 +30,11 @@
 		'Test orders cleared!'
 	);
 
+	const handleSyncSubmissions = createSyncHandler(
+		'/api/admin/sync-submissions',
+		'Submissions synced!'
+	);
+
 	$effect(() => {
 		if (form?.givePointsSuccess) {
 			toast.success('Points updated successfully!');
@@ -43,11 +48,9 @@
 	<section class="retro-panel">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div>
-				<pre class="text-coffee-500 mb-2">ADMIN TOOLS v2.0</pre>
-				<h1 class="retro-title text-2xl">System Tools</h1>
-				<p class="retro-subtitle mt-1">TOKEN MANAGEMENT_</p>
+				<h1 class="retro-title text-2xl">Admin Tools</h1>
 			</div>
-			<a href="/admin" class="retro-btn-secondary">[BACK]</a>
+			<a href="/admin" class="retro-btn-secondary">BACK</a>
 		</div>
 	</section>
 
@@ -103,8 +106,23 @@
 				</div>
 			</div>
 
-			<button type="submit" class="retro-btn w-full">[GIVE TOKENS]</button>
+			<button type="submit" class="retro-btn w-full">GIVE TOKENS</button>
 		</form>
+	</section>
+
+	<section class="retro-panel">
+		<div class="mb-6 flex items-center gap-3">
+			<span class="text-coffee-400">&gt;&gt;</span>
+			<h2 class="text-coffee-700 font-bold tracking-wider uppercase">Sync Submissions</h2>
+		</div>
+
+		<div class="space-y-4">
+			<p class="text-coffee-600 leading-relaxed">
+				Sync approved submissions from Airtable to create/update payout rows. Runs automatically
+				every 10 minutes.
+			</p>
+			<button onclick={handleSyncSubmissions} class="retro-btn w-full"> SYNC SUBMISSIONS </button>
+		</div>
 	</section>
 
 	<section class="retro-panel relative">
@@ -163,11 +181,11 @@
 							<path d="M12 17.5v2" />
 						</svg>
 						<h3 class="text-coffee-800 mb-2 font-mono text-xl font-bold uppercase">
-							[DANGER ZONE LOCKED]
+							DANGER ZONE LOCKED
 						</h3>
 						<p class="text-coffee-700 mb-6 font-mono text-sm">
-							&gt; These destructive actions are protected_<br />
-							&gt; Ask Rushmore to unlock manually_
+							&gt; These destructive actions are protected<br />
+							&gt; Ask Rushmore to unlock manually
 						</p>
 						<div class="border-coffee-400 bg-cream-100 inline-block border-2 px-6 py-3">
 							<p class="text-coffee-600 font-mono text-xs">
@@ -202,7 +220,7 @@
 						onclick={handleClearTestOrders}
 						class="w-full border-2 border-black bg-red-600 px-6 py-2 font-bold text-white uppercase transition-colors hover:bg-red-700"
 					>
-						[CLEAR ORDERS]
+						CLEAR ORDERS
 					</button>
 				</div>
 
@@ -213,7 +231,7 @@
 					}}
 					class="border-coffee-700 bg-cream-100 hover:bg-cream-200 w-full border-2 px-6 py-2 font-bold uppercase transition-colors"
 				>
-					[LOCK DANGER ZONE]
+					LOCK DANGER ZONE
 				</button>
 			</div>
 		{/if}
@@ -255,8 +273,7 @@
 				</div>
 			{:else}
 				<div class="text-coffee-500 w-full text-center">
-					<pre class="mb-2 text-2xl">[ ]</pre>
-					<p>RESULTS WILL APPEAR HERE_</p>
+					<p>Results will appear here!</p>
 				</div>
 			{/if}
 		</div>
