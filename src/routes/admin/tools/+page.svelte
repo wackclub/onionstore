@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { PageData, ActionData } from './$types';
+	import type { ActionData } from './$types';
 	import { toast } from 'svelte-sonner';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { form }: { form: ActionData } = $props();
 	let dangerZoneUnlocked = $state(false);
 
 	function createSyncHandler(endpoint: string, successMessage: string) {
@@ -25,55 +25,17 @@
 		};
 	}
 
-	const handleSyncAirtable = createSyncHandler(
-		'/api/admin/sync-airtable',
-		'Airtable sync completed!'
-	);
-	const handleSyncSubmissions = createSyncHandler(
-		'/api/admin/sync-submissions',
-		'Submissions synced! Tokens updated.'
-	);
-
 	const handleClearTestOrders = createSyncHandler(
 		'/api/admin/clear-test-orders',
 		'Test orders cleared!'
 	);
 
-	const handleClearTestPayouts = createSyncHandler(
-		'/api/admin/clear-test-payouts',
-		'Test payouts cleared!'
+	const handleSyncSubmissions = createSyncHandler(
+		'/api/admin/sync-submissions',
+		'Submissions synced!'
 	);
 
-	const handleSyncShopItems = async () => {
-		try {
-			const [itemsResponse, ordersResponse] = await Promise.all([
-				fetch('/api/admin/sync-shop-items-from-airtable', { method: 'POST' }),
-				fetch('/api/admin/sync-shop-orders-from-airtable', { method: 'POST' })
-			]);
-
-			const itemsResult = await itemsResponse.json();
-			const ordersResult = await ordersResponse.json();
-
-			if (itemsResponse.ok && ordersResponse.ok) {
-				toast.success('Shop items & orders synced from Airtable!');
-			} else {
-				const errors = [];
-				if (!itemsResponse.ok) errors.push(`Items: ${itemsResult.error}`);
-				if (!ordersResponse.ok) errors.push(`Orders: ${ordersResult.error}`);
-				toast.error(errors.join(' | '));
-			}
-		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Unknown error occurred');
-		}
-	};
-
 	$effect(() => {
-		if (form?.connectionStatus === 'success') {
-			toast.success('Airtable connection successful!');
-		} else if (form?.connectionStatus === 'error') {
-			toast.error('Airtable connection failed');
-		}
-
 		if (form?.givePointsSuccess) {
 			toast.success('Points updated successfully!');
 		} else if (form?.givePointsError) {
@@ -86,101 +48,11 @@
 	<section class="retro-panel">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div>
-				<pre class="text-coffee-500 mb-2">ADMIN TOOLS v2.0</pre>
-				<h1 class="retro-title text-2xl">System Tools</h1>
-				<p class="retro-subtitle mt-1">AIRTABLE SYNC & MANAGEMENT_</p>
+				<h1 class="retro-title text-2xl">Admin Tools</h1>
 			</div>
-			<a href="/admin" class="retro-btn-secondary">[BACK]</a>
+			<a href="/admin" class="retro-btn-secondary">BACK</a>
 		</div>
 	</section>
-
-	<div class="grid gap-6 lg:grid-cols-2">
-		<section class="retro-panel">
-			<div class="mb-6 flex items-center gap-3">
-				<h2 class="text-coffee-700 font-bold tracking-wider uppercase">Airtable Connection</h2>
-			</div>
-
-			<div class="space-y-4">
-				<div class="border-coffee-400 bg-cream-100 flex items-center gap-3 border-2 p-3">
-					<div
-						class="border-coffee-600 flex h-10 w-10 shrink-0 items-center justify-center border-2 text-lg font-bold {data.hasAirtableKey
-							? 'bg-green-200 text-green-700'
-							: 'bg-red-200 text-red-700'}"
-					>
-						{data.hasAirtableKey ? '✓' : '✗'}
-					</div>
-					<div class="min-w-0 flex-1">
-						<div class="text-coffee-700 font-bold uppercase">API Key Status</div>
-						<div class="text-coffee-600 truncate">
-							{data.hasAirtableKey ? 'Configured' : 'Not configured'}
-						</div>
-					</div>
-				</div>
-
-				<form method="POST" action="?/checkAirtableConnection" use:enhance>
-					<button type="submit" class="retro-btn w-full" disabled={!data.hasAirtableKey}>
-						[TEST CONNECTION]
-					</button>
-				</form>
-			</div>
-		</section>
-
-		<section class="retro-panel">
-			<div class="mb-6 flex items-center gap-3">
-				<span class="text-coffee-400">&gt;&gt;</span>
-				<h2 class="text-coffee-700 font-bold tracking-wider uppercase">Sync Operations</h2>
-			</div>
-
-			<div class="space-y-4">
-				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
-					<h3 class="text-coffee-700 mb-2 font-bold uppercase">Sync Users from Airtable</h3>
-					<p class="text-coffee-600 mb-4 leading-relaxed">
-						Pull all user data from the Onion Wars Airtable (emails, points, addresses, admin
-						status) and update the local database.
-					</p>
-					<button
-						onclick={handleSyncAirtable}
-						disabled={!data.hasAirtableKey}
-						class="retro-btn-secondary w-full disabled:opacity-50"
-					>
-						[SYNC NOW]
-					</button>
-				</div>
-
-				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
-					<h3 class="text-coffee-700 mb-2 font-bold uppercase">
-						Sync Submissions (Ratings → Tokens)
-					</h3>
-					<p class="text-coffee-600 mb-4 leading-relaxed">
-						Pull approved submissions from Airtable and create/update token payouts based on
-						ratings. This is how users earn tokens!
-					</p>
-					<button
-						onclick={handleSyncSubmissions}
-						disabled={!data.hasAirtableKey}
-						class="retro-btn-secondary w-full disabled:opacity-50"
-					>
-						[SYNC SUBMISSIONS]
-					</button>
-				</div>
-
-				<div class="border-coffee-400 bg-cream-100 border-2 p-4">
-					<h3 class="text-coffee-700 mb-2 font-bold uppercase">Sync Shop Items & Orders</h3>
-					<p class="text-coffee-600 mb-4 leading-relaxed">
-						Pull shop items and order statuses from Airtable. Updates item details and order status
-						(Pending/Approved/Rejected).
-					</p>
-					<button
-						disabled={!data.hasAirtableKey}
-						onclick={handleSyncShopItems}
-						class="retro-btn-secondary w-full disabled:opacity-50"
-					>
-						[SYNC ITEMS]
-					</button>
-				</div>
-			</div>
-		</section>
-	</div>
 
 	<section class="retro-panel">
 		<div class="mb-6 flex items-center gap-3">
@@ -234,8 +106,23 @@
 				</div>
 			</div>
 
-			<button type="submit" class="retro-btn w-full">[GIVE TOKENS]</button>
+			<button type="submit" class="retro-btn w-full">GIVE TOKENS</button>
 		</form>
+	</section>
+
+	<section class="retro-panel">
+		<div class="mb-6 flex items-center gap-3">
+			<span class="text-coffee-400">&gt;&gt;</span>
+			<h2 class="text-coffee-700 font-bold tracking-wider uppercase">Sync Submissions</h2>
+		</div>
+
+		<div class="space-y-4">
+			<p class="text-coffee-600 leading-relaxed">
+				Sync approved submissions from Airtable to create/update payout rows. Runs automatically
+				every 10 minutes.
+			</p>
+			<button onclick={handleSyncSubmissions} class="retro-btn w-full"> SYNC SUBMISSIONS </button>
+		</div>
 	</section>
 
 	<section class="retro-panel relative">
@@ -247,10 +134,12 @@
 			{#if !dangerZoneUnlocked}
 				<div class="flex items-center gap-2">
 					<svg class="h-6 w-6 text-red-700" fill="currentColor" viewBox="0 0 24 24">
-						<path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zM9 7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9V7zm9 13H6v-8h12v8z"/>
-						<circle cx="12" cy="16" r="1.5"/>
+						<path
+							d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zM9 7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9V7zm9 13H6v-8h12v8z"
+						/>
+						<circle cx="12" cy="16" r="1.5" />
 					</svg>
-					<span class="text-red-700 text-sm font-bold uppercase">Locked</span>
+					<span class="text-sm font-bold text-red-700 uppercase">Locked</span>
 				</div>
 			{/if}
 		</div>
@@ -258,23 +147,17 @@
 		{#if !dangerZoneUnlocked}
 			<!-- Locked Overlay -->
 			<div class="relative">
-				<div class="border-red-500 bg-red-900/20 blur-sm border-2 p-4">
+				<div class="border-2 border-red-500 bg-red-900/20 p-4 blur-sm">
 					<div class="space-y-4 opacity-50">
-						<div class="bg-red-100 border-2 border-red-300 p-4">
-							<h3 class="text-red-700 mb-2 font-bold uppercase">Clear All Test Orders</h3>
-							<p class="text-red-600 mb-4 leading-relaxed">
+						<div class="border-2 border-red-300 bg-red-100 p-4">
+							<h3 class="mb-2 font-bold text-red-700 uppercase">Clear All Test Orders</h3>
+							<p class="mb-4 leading-relaxed text-red-600">
 								Delete all shop orders from the database.
 							</p>
-							<button disabled class="w-full border-2 border-black bg-gray-400 px-6 py-2 font-bold uppercase text-white">
-								[LOCKED]
-							</button>
-						</div>
-						<div class="bg-red-100 border-2 border-red-300 p-4">
-							<h3 class="text-red-700 mb-2 font-bold uppercase">Clear Test Payouts</h3>
-							<p class="text-red-600 mb-4 leading-relaxed">
-								Delete all manual payouts.
-							</p>
-							<button disabled class="w-full border-2 border-black bg-gray-400 px-6 py-2 font-bold uppercase text-white">
+							<button
+								disabled
+								class="w-full border-2 border-black bg-gray-400 px-6 py-2 font-bold text-white uppercase"
+							>
 								[LOCKED]
 							</button>
 						</div>
@@ -282,23 +165,31 @@
 				</div>
 
 				<!-- Lock Screen -->
-				<div class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-red-100/95 to-red-50/95">
+				<div
+					class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-red-100/95 to-red-50/95"
+				>
 					<div class="border-coffee-700 bg-cream-50 border-4 p-8 text-center">
-						<svg class="mx-auto mb-4 h-24 w-24 text-red-700" fill="currentColor" viewBox="0 0 24 24">
-							<path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zM9 7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9V7zm9 13H6v-8h12v8z"/>
-							<circle cx="12" cy="16" r="1.5"/>
-							<path d="M12 17.5v2"/>
+						<svg
+							class="mx-auto mb-4 h-24 w-24 text-red-700"
+							fill="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zM9 7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9V7zm9 13H6v-8h12v8z"
+							/>
+							<circle cx="12" cy="16" r="1.5" />
+							<path d="M12 17.5v2" />
 						</svg>
 						<h3 class="text-coffee-800 mb-2 font-mono text-xl font-bold uppercase">
-							[DANGER ZONE LOCKED]
+							DANGER ZONE LOCKED
 						</h3>
 						<p class="text-coffee-700 mb-6 font-mono text-sm">
-							&gt; These destructive actions are protected_<br/>
-							&gt; Ask Rushmore to unlock manually_
+							&gt; These destructive actions are protected<br />
+							&gt; Ask Rushmore to unlock manually
 						</p>
 						<div class="border-coffee-400 bg-cream-100 inline-block border-2 px-6 py-3">
 							<p class="text-coffee-600 font-mono text-xs">
-								SECURITY: ENABLED<br/>
+								SECURITY: ENABLED<br />
 								PROTECTION: ACTIVE
 							</p>
 						</div>
@@ -308,47 +199,39 @@
 		{:else}
 			<!-- Unlocked State -->
 			<div class="space-y-4">
-				<div class="border-yellow-500 bg-yellow-50 border-2 p-4">
+				<div class="border-2 border-yellow-500 bg-yellow-50 p-4">
 					<div class="mb-4 flex items-center gap-2">
 						<svg class="h-5 w-5 text-yellow-700" fill="currentColor" viewBox="0 0 24 24">
-							<path d="M12 2C9.243 2 7 4.243 7 7v1h1V7c0-1.654 1.346-3 3-3s3 1.346 3 3v1h1V7c0-2.757-2.243-5-5-5z"/>
-							<path d="M18 10H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2zm0 10H6v-8h12v8z"/>
+							<path
+								d="M12 2C9.243 2 7 4.243 7 7v1h1V7c0-1.654 1.346-3 3-3s3 1.346 3 3v1h1V7c0-2.757-2.243-5-5-5z"
+							/>
+							<path
+								d="M18 10H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2zm0 10H6v-8h12v8z"
+							/>
 						</svg>
-						<span class="text-yellow-700 font-bold uppercase">⚠️ Unlocked - Proceed with Caution</span>
+						<span class="font-bold text-yellow-700 uppercase">Unlocked - Proceed with Caution</span>
 					</div>
 				</div>
 
-				<div class="border-red-500 bg-red-50 border-2 p-4">
-					<h3 class="text-red-700 mb-2 font-bold uppercase">Clear All Test Orders</h3>
-					<p class="text-red-600 mb-4 leading-relaxed">
-						Delete all shop orders from the database. Use this after wiping Airtable to reset the system.
-					</p>
+				<div class="border-2 border-red-500 bg-red-50 p-4">
+					<h3 class="mb-2 font-bold text-red-700 uppercase">Clear All Test Orders</h3>
+					<p class="mb-4 leading-relaxed text-red-600">Delete all shop orders from the database.</p>
 					<button
 						onclick={handleClearTestOrders}
-						class="bg-red-600 hover:bg-red-700 w-full border-2 border-black px-6 py-2 font-bold uppercase text-white transition-colors"
+						class="w-full border-2 border-black bg-red-600 px-6 py-2 font-bold text-white uppercase transition-colors hover:bg-red-700"
 					>
-						[CLEAR ORDERS]
-					</button>
-				</div>
-
-				<div class="border-red-500 bg-red-50 border-2 p-4">
-					<h3 class="text-red-700 mb-2 font-bold uppercase">Clear Test Payouts</h3>
-					<p class="text-red-600 mb-4 leading-relaxed">
-						Delete all manual payouts (like TEST) that aren't linked to Airtable submissions.
-					</p>
-					<button
-						onclick={handleClearTestPayouts}
-						class="bg-red-600 hover:bg-red-700 w-full border-2 border-black px-6 py-2 font-bold uppercase text-white transition-colors"
-					>
-						[CLEAR TEST PAYOUTS]
+						CLEAR ORDERS
 					</button>
 				</div>
 
 				<button
-					onclick={() => { dangerZoneUnlocked = false; toast.info('Danger Zone locked'); }}
+					onclick={() => {
+						dangerZoneUnlocked = false;
+						toast.info('Danger Zone locked');
+					}}
 					class="border-coffee-700 bg-cream-100 hover:bg-cream-200 w-full border-2 px-6 py-2 font-bold uppercase transition-colors"
 				>
-					🔒 [LOCK DANGER ZONE]
+					LOCK DANGER ZONE
 				</button>
 			</div>
 		{/if}
@@ -365,7 +248,7 @@
 				<div class="w-full space-y-3">
 					<div class="text-coffee-700 mb-3 flex items-center gap-2 font-bold uppercase">
 						<span class="border-2 border-green-700 bg-green-200 px-2 py-1 text-green-700"
-							>✓ Success</span
+							>Success</span
 						>
 					</div>
 					<div class="space-y-2">
@@ -375,26 +258,22 @@
 						</div>
 						<div class="flex justify-between">
 							<span class="text-coffee-600">Previous:</span>
-							<span class="text-coffee-800 font-bold">{form.user.previousTotal} points</span>
+							<span class="text-coffee-800 font-bold">{form.user.previousTotal} tokens</span>
 						</div>
 						<div class="flex justify-between">
 							<span class="text-coffee-600">Change:</span>
-							<span class="font-bold text-green-700">+{form.user.pointsChanged} points</span>
+							<span class="font-bold text-green-700">+{form.user.pointsChanged} tokens</span>
 						</div>
 						<hr class="border-coffee-400 my-2 border-t-2 border-dashed" />
 						<div class="flex justify-between">
 							<span class="text-coffee-700 font-bold">New Total:</span>
-							<span class="text-coffee-800 text-lg font-bold">{form.user.newTotal} points</span>
+							<span class="text-coffee-800 text-lg font-bold">{form.user.newTotal} tokens</span>
 						</div>
 					</div>
-					{#if form.airtableSynced ?? data.hasAirtableKey}
-						<p class="text-coffee-600 mt-4">✓ Synced to Airtable</p>
-					{/if}
 				</div>
 			{:else}
 				<div class="text-coffee-500 w-full text-center">
-					<pre class="mb-2 text-2xl">[ ]</pre>
-					<p>RESULTS WILL APPEAR HERE_</p>
+					<p>Results will appear here!</p>
 				</div>
 			{/if}
 		</div>

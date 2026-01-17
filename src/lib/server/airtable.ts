@@ -1,210 +1,348 @@
-import { AIRTABLE_API_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 const AIRTABLE_BASE_ID = 'appNasWZkM6JW1nj3';
-const AIRTABLE_USERS_TABLE = 'tblpJEJAfy5rEc5vG';
-const AIRTABLE_ORDERS_TABLE = 'tblOklDMe8jJPdOIq';
-const AIRTABLE_SHOP_ITEMS_TABLE = 'tbltUSi4tZ5dtUylt';
-const AIRTABLE_SUBMISSIONS_TABLE = 'tbl1qlhGJPoHRWgM3';
+const SHOP_ITEMS_TABLE_ID = 'tbltUSi4tZ5dtUylt';
+const SIGNUPS_TABLE_ID = 'tblpJEJAfy5rEc5vG';
+const SHOP_ORDERS_TABLE_ID = 'tblOklDMe8jJPdOIq';
+const SUBMISSIONS_TABLE_ID = 'tbl1qlhGJPoHRWgM3';
+const SUBMISSIONS_APPROVED_VIEW_ID = 'viwcZzARJrHGmMZxD';
 
-interface AirtableRecord {
-	id: string;
-	fields: Record<string, unknown>;
+interface ShopItemData {
+	name: string;
+	description: string;
+	imageUrl: string;
+	price: number;
+	usd_cost: number | null;
+	type: 'hcb' | 'third_party' | null;
 }
 
-interface AirtableResponse {
-	records: AirtableRecord[];
-	offset?: string;
-}
-
-export async function fetchAirtableRecords(
-	tableId: string,
-	filterFormula?: string
-): Promise<AirtableRecord[]> {
-	if (!AIRTABLE_API_KEY) {
-		throw new Error('AIRTABLE_API_KEY environment variable is required');
+export async function syncShopItemToAirtable(item: ShopItemData): Promise<void> {
+	if (!env.AIRTABLE_API_KEY) {
+		throw new Error('AIRTABLE_API_KEY is not configured');
 	}
 
-	const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableId)}`;
-	const headers = {
-		Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-		'Content-Type': 'application/json'
+	const response = await fetch(
+		`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${SHOP_ITEMS_TABLE_ID}`,
+		{
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${env.AIRTABLE_API_KEY}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				fields: {
+					name: item.name,
+					description: item.description,
+					imageUrl: item.imageUrl,
+					price: item.price,
+					usd_cost: item.usd_cost,
+					type: item.type
+				}
+			})
+		}
+	);
+
+	if (!response.ok) {
+		const error = await response.text();
+		throw new Error(`Failed to sync shop item to Airtable: ${error}`);
+	}
+}
+
+export async function lookupAirtableSignupByEmail(email: string): Promise<string | null> {
+	if (!env.AIRTABLE_API_KEY) {
+		console.error('AIRTABLE_API_KEY is not configured');
+		return null;
+	}
+
+	const filterFormula = encodeURIComponent(`{filloutemail}="${email}"`);
+	const response = await fetch(
+		`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${SIGNUPS_TABLE_ID}?filterByFormula=${filterFormula}&maxRecords=1`,
+		{
+			headers: {
+				Authorization: `Bearer ${env.AIRTABLE_API_KEY}`
+			}
+		}
+	);
+
+	if (!response.ok) {
+		console.error('Failed to lookup Airtable signup:', await response.text());
+		return null;
+	}
+
+	const data = await response.json();
+	return data.records?.[0]?.id || null;
+}
+
+export async function lookupAirtableShopItemByName(name: string): Promise<string | null> {
+	if (!env.AIRTABLE_API_KEY) {
+		console.error('AIRTABLE_API_KEY is not configured');
+		return null;
+	}
+
+	const filterFormula = encodeURIComponent(`{name}="${name}"`);
+	const response = await fetch(
+		`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${SHOP_ITEMS_TABLE_ID}?filterByFormula=${filterFormula}&maxRecords=1`,
+		{
+			headers: {
+				Authorization: `Bearer ${env.AIRTABLE_API_KEY}`
+			}
+		}
+	);
+
+	if (!response.ok) {
+		console.error('Failed to lookup Airtable shop item:', await response.text());
+		return null;
+	}
+
+	const data = await response.json();
+	return data.records?.[0]?.id || null;
+}
+
+type AirtableOrderStatus = 'Pending' | 'Approved' | 'Rejected';
+
+interface CreateShopOrderData {
+	itemName: string;
+	email: string;
+	postgresUserId: string;
+	userId?: string;
+	priceAtOrder: number;
+	status: AirtableOrderStatus;
+	shopItemId?: string;
+}
+
+export async function createShopOrderInAirtable(data: CreateShopOrderData): Promise<string> {
+	if (!env.AIRTABLE_API_KEY) {
+		throw new Error('AIRTABLE_API_KEY is not configured');
+	}
+
+	const fields: Record<string, unknown> = {
+		'Item Name': data.itemName,
+		Email: data.email,
+		postgresUserId: data.postgresUserId,
+		priceAtOrder: data.priceAtOrder,
+		status: data.status
 	};
 
-	let allRecords: AirtableRecord[] = [];
+	if (data.userId) {
+		fields['userId'] = [data.userId];
+	}
+
+	if (data.shopItemId) {
+		fields['shopItemId'] = [data.shopItemId];
+	}
+
+	const response = await fetch(
+		`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${SHOP_ORDERS_TABLE_ID}`,
+		{
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${env.AIRTABLE_API_KEY}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ fields })
+		}
+	);
+
+	if (!response.ok) {
+		const error = await response.text();
+		throw new Error(`Failed to create shop order in Airtable: ${error}`);
+	}
+
+	const result = await response.json();
+	return result.id;
+}
+
+interface UpdateShopOrderData {
+	status?: AirtableOrderStatus;
+	userId?: string;
+}
+
+export async function updateShopOrderInAirtable(
+	recordId: string,
+	data: UpdateShopOrderData
+): Promise<void> {
+	if (!env.AIRTABLE_API_KEY) {
+		throw new Error('AIRTABLE_API_KEY is not configured');
+	}
+
+	const fields: Record<string, unknown> = {};
+
+	if (data.status) {
+		fields['status'] = data.status;
+	}
+
+	if (data.userId) {
+		fields['userId'] = [data.userId];
+	}
+
+	if (Object.keys(fields).length === 0) {
+		return;
+	}
+
+	const response = await fetch(
+		`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${SHOP_ORDERS_TABLE_ID}/${recordId}`,
+		{
+			method: 'PATCH',
+			headers: {
+				Authorization: `Bearer ${env.AIRTABLE_API_KEY}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ fields })
+		}
+	);
+
+	if (!response.ok) {
+		const error = await response.text();
+		throw new Error(`Failed to update shop order in Airtable: ${error}`);
+	}
+}
+
+interface BatchUpdateRecord {
+	recordId: string;
+	fields: { userId?: string };
+}
+
+export async function batchUpdateShopOrdersInAirtable(updates: BatchUpdateRecord[]): Promise<void> {
+	if (!env.AIRTABLE_API_KEY) {
+		throw new Error('AIRTABLE_API_KEY is not configured');
+	}
+
+	if (updates.length === 0) {
+		return;
+	}
+
+	const batches: BatchUpdateRecord[][] = [];
+	for (let i = 0; i < updates.length; i += 10) {
+		batches.push(updates.slice(i, i + 10));
+	}
+
+	for (const batch of batches) {
+		const records = batch.map((update) => ({
+			id: update.recordId,
+			fields: {
+				...(update.fields.userId && { userId: [update.fields.userId] })
+			}
+		}));
+
+		const response = await fetch(
+			`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${SHOP_ORDERS_TABLE_ID}`,
+			{
+				method: 'PATCH',
+				headers: {
+					Authorization: `Bearer ${env.AIRTABLE_API_KEY}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ records })
+			}
+		);
+
+		if (!response.ok) {
+			const error = await response.text();
+			console.error(`Failed to batch update shop orders in Airtable: ${error}`);
+		}
+	}
+}
+
+export async function getAllAirtableShopItems(): Promise<Array<{
+	id: string;
+	name: string;
+}> | null> {
+	if (!env.AIRTABLE_API_KEY) {
+		console.error('AIRTABLE_API_KEY is not configured');
+		return null;
+	}
+
+	const allRecords: Array<{ id: string; name: string }> = [];
 	let offset: string | undefined;
 
 	do {
-		const params = new URLSearchParams();
-		if (filterFormula) params.set('filterByFormula', filterFormula);
-		if (offset) params.set('offset', offset);
-
-		const response = await fetch(`${url}?${params}`, { headers });
-		if (!response.ok) {
-			throw new Error(
-				`Failed to fetch Airtable records: ${response.status} ${response.statusText}`
-			);
+		const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${SHOP_ITEMS_TABLE_ID}`);
+		url.searchParams.set('fields[]', 'name');
+		if (offset) {
+			url.searchParams.set('offset', offset);
 		}
 
-		const data: AirtableResponse = await response.json();
-		allRecords = allRecords.concat(data.records);
+		const response = await fetch(url.toString(), {
+			headers: {
+				Authorization: `Bearer ${env.AIRTABLE_API_KEY}`
+			}
+		});
+
+		if (!response.ok) {
+			console.error('Failed to fetch Airtable shop items:', await response.text());
+			return null;
+		}
+
+		const data = await response.json();
+		for (const record of data.records) {
+			allRecords.push({ id: record.id, name: record.fields.name });
+		}
 		offset = data.offset;
 	} while (offset);
 
 	return allRecords;
 }
 
-export async function createAirtableRecord(
-	tableId: string,
-	fields: Record<string, unknown>
-): Promise<AirtableRecord> {
-	if (!AIRTABLE_API_KEY) {
-		throw new Error('AIRTABLE_API_KEY environment variable is required');
-	}
-
-	const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableId)}`;
-	const response = await fetch(url, {
-		method: 'POST',
-		headers: {
-			Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({ fields })
-	});
-
-	if (!response.ok) {
-		const error = await response.text();
-		throw new Error(`Failed to create Airtable record: ${response.status} - ${error}`);
-	}
-
-	return response.json();
-}
-
-export async function updateAirtableRecord(
-	tableId: string,
-	recordId: string,
-	fields: Record<string, unknown>
-): Promise<AirtableRecord> {
-	if (!AIRTABLE_API_KEY) {
-		throw new Error('AIRTABLE_API_KEY environment variable is required');
-	}
-
-	const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableId)}/${recordId}`;
-	const response = await fetch(url, {
-		method: 'PATCH',
-		headers: {
-			Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({ fields })
-	});
-
-	if (!response.ok) {
-		const error = await response.text();
-		throw new Error(`Failed to update Airtable record: ${response.status} - ${error}`);
-	}
-
-	return response.json();
-}
-
-export async function findAirtableRecordByField(
-	tableId: string,
-	fieldName: string,
-	value: string
-): Promise<AirtableRecord | null> {
-	const sanitizedFieldName = fieldName.replace(/[{}"']/g, '');
-	const sanitizedValue = value.replace(/"/g, '\\"');
-	const records = await fetchAirtableRecords(tableId, `{${sanitizedFieldName}} = "${sanitizedValue}"`);
-	return records.length > 0 ? records[0] : null;
-}
-
-export interface ShopItemAirtableData {
-	name: string;
-	description: string;
-	imageUrl: string;
-	price: number;
-	usdCost?: number | null;
-	type?: 'hcb' | 'third_party' | null;
-}
-
-export async function syncShopItemToAirtable(
-	data: ShopItemAirtableData,
-	existingAirtableId?: string | null
-): Promise<string> {
-	if (!AIRTABLE_API_KEY) {
-		throw new Error('AIRTABLE_API_KEY not set');
-	}
-
-	const fields: Record<string, unknown> = {
-		name: data.name,
-		description: data.description,
-		imageUrl: data.imageUrl,
-		price: data.price
-	};
-
-	if (data.usdCost != null) {
-		fields['usd_cost'] = data.usdCost;
-	}
-	if (data.type) {
-		fields['type'] = data.type;
-	}
-
-	if (existingAirtableId) {
-		await updateAirtableRecord(AIRTABLE_SHOP_ITEMS_TABLE, existingAirtableId, fields);
-		return existingAirtableId;
-	} else {
-		const record = await createAirtableRecord(AIRTABLE_SHOP_ITEMS_TABLE, fields);
-		return record.id;
-	}
-}
-
-export interface ShopOrderAirtableData {
-	itemName: string;
+export interface AirtableSubmission {
+	recordId: string;
 	email: string;
-	userAirtableId?: string | null;
-	shopItemAirtableId?: string | null;
-	priceAtOrder: number;
-	status: string;
+	tokens: number;
+	name: string;
+	challenge: string;
 }
 
-export async function syncShopOrderToAirtable(
-	data: ShopOrderAirtableData,
-	existingAirtableId?: string | null
-): Promise<string> {
-	if (!AIRTABLE_API_KEY) {
-		throw new Error('AIRTABLE_API_KEY not set');
+export async function fetchApprovedSubmissions(): Promise<AirtableSubmission[]> {
+	if (!env.AIRTABLE_API_KEY) {
+		throw new Error('AIRTABLE_API_KEY is not configured');
 	}
 
-	const fields: Record<string, unknown> = {
-		'Item Name': data.itemName,
-		Email: data.email,
-		priceAtOrder: data.priceAtOrder,
-		status: capitalizeFirst(data.status)
-	};
+	const allSubmissions: AirtableSubmission[] = [];
+	let offset: string | undefined;
 
-	if (data.userAirtableId) {
-		fields['userId'] = [data.userAirtableId];
-	}
-	if (data.shopItemAirtableId) {
-		fields['shopItemId'] = [data.shopItemAirtableId];
-	}
+	do {
+		const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${SUBMISSIONS_TABLE_ID}`);
+		url.searchParams.set('view', SUBMISSIONS_APPROVED_VIEW_ID);
+		if (offset) {
+			url.searchParams.set('offset', offset);
+		}
 
-	if (existingAirtableId) {
-		await updateAirtableRecord(AIRTABLE_ORDERS_TABLE, existingAirtableId, fields);
-		return existingAirtableId;
-	} else {
-		const record = await createAirtableRecord(AIRTABLE_ORDERS_TABLE, fields);
-		return record.id;
-	}
+		const response = await fetch(url.toString(), {
+			headers: {
+				Authorization: `Bearer ${env.AIRTABLE_API_KEY}`
+			}
+		});
+
+		if (!response.ok) {
+			const error = await response.text();
+			throw new Error(`Failed to fetch approved submissions: ${error}`);
+		}
+
+		const data = await response.json();
+
+		for (const record of data.records) {
+			const fields = record.fields;
+
+			const email = fields['filloutemail']?.trim().toLowerCase();
+			if (!email) continue;
+
+			const ratingArray = fields['Rating'] as string[] | undefined;
+			const tokens = ratingArray?.[0] ? parseInt(ratingArray[0], 10) : 0;
+			if (tokens === 0) continue;
+
+			const challengeArray = fields['Challenge (from Challenge)'] as string[] | undefined;
+			const challenge = challengeArray?.join(', ') || 'Submission';
+
+			allSubmissions.push({
+				recordId: record.id,
+				email,
+				tokens,
+				name: fields['Name'] || 'Unknown',
+				challenge
+			});
+		}
+
+		offset = data.offset;
+	} while (offset);
+
+	return allSubmissions;
 }
-
-function capitalizeFirst(str: string): string {
-	return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-export {
-	AIRTABLE_BASE_ID,
-	AIRTABLE_USERS_TABLE,
-	AIRTABLE_ORDERS_TABLE,
-	AIRTABLE_SHOP_ITEMS_TABLE,
-	AIRTABLE_SUBMISSIONS_TABLE
-};

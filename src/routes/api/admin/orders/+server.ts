@@ -4,9 +4,9 @@ import { db } from '$lib/server/db';
 import { shopItems, shopOrders, rawUsers } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { LOOPS_API_KEY } from '$env/static/private';
-import { syncShopOrderToAirtable } from '$lib/server/airtable';
 import { updateOrderSchema } from '$lib/server/validation';
 import { ArkErrors } from 'arktype';
+import { updateShopOrderInAirtable } from '$lib/server/airtable';
 
 export const PATCH: RequestHandler = async ({ request, locals }) => {
 	try {
@@ -45,26 +45,12 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 			.from(shopItems)
 			.where(eq(shopItems.id, updatedOrder[0].shopItemId));
 
-		syncShopOrderToAirtable(
-			{
-				itemName: shopItem.name,
-				email: user?.email ?? '',
-				userAirtableId: user?.airtableRecordId,
-				shopItemAirtableId: shopItem.airtableRecordId,
-				priceAtOrder: updatedOrder[0].priceAtOrder,
-				status: status
-			},
-			updatedOrder[0].airtableRecordId
-		)
-			.then(async (airtableId) => {
-				if (!updatedOrder[0].airtableRecordId) {
-					await db
-						.update(shopOrders)
-						.set({ airtableRecordId: airtableId })
-						.where(eq(shopOrders.id, updatedOrder[0].id));
-				}
-			})
-			.catch((err) => console.error('Airtable sync failed:', err));
+		if (updatedOrder[0].airtableRecordId) {
+			syncOrderStatusToAirtable(
+				updatedOrder[0].airtableRecordId,
+				status === 'approved' ? 'Approved' : 'Rejected'
+			);
+		}
 
 		if (user?.email) {
 			const res = await fetch('https://app.loops.so/api/v1/transactional', {
@@ -99,3 +85,14 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Internal server error' }, { status: 500 });
 	}
 };
+
+async function syncOrderStatusToAirtable(
+	airtableRecordId: string,
+	status: 'Approved' | 'Rejected'
+) {
+	try {
+		await updateShopOrderInAirtable(airtableRecordId, { status });
+	} catch (error) {
+		console.error('Failed to sync order status to Airtable:', error);
+	}
+}

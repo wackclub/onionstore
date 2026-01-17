@@ -23,9 +23,6 @@ export const rawUsers = pgTable(
 		isAdmin: boolean().default(false).notNull(),
 		country: varchar({ length: 2 }),
 		createdAt: timestamp().notNull().defaultNow(),
-		airtableRecordId: text(),
-		totalEarnedPoints: integer().default(0).notNull(),
-		pointsRedeemed: integer().default(0).notNull(),
 		rating: integer(),
 		review: text(),
 		githubUrl: text(),
@@ -38,13 +35,16 @@ export const rawUsers = pgTable(
 		city: text(),
 		zipPostal: text(),
 		shippingCountry: text(),
-		slackId: text()
+		slackId: text(),
+		airtableSignupsRecordId: text()
 	},
 	(table) => ({
 		emailIdx: index('user_email_idx').on(table.email),
 		isAdminIdx: index('user_is_admin_idx').on(table.isAdmin),
 		countryIdx: index('user_country_idx').on(table.country),
-		airtableRecordIdIdx: index('user_airtable_record_id_idx').on(table.airtableRecordId)
+		airtableSignupsRecordIdIdx: index('user_airtable_signups_record_id_idx').on(
+			table.airtableSignupsRecordId
+		)
 	})
 );
 
@@ -118,9 +118,7 @@ export const shopOrders = pgTable(
 			table.status,
 			table.createdAt
 		),
-		airtableRecordIdIdx: index('shop_orders_airtable_record_id_idx').on(
-			table.airtableRecordId
-		)
+		airtableRecordIdIdx: index('shop_orders_airtable_record_id_idx').on(table.airtableRecordId)
 	})
 );
 
@@ -139,22 +137,19 @@ export const payouts = pgTable(
 		submittedToUnified: boolean().default(false).notNull(),
 		baseHackatimeHours: decimal().default('0.0').notNull(),
 		overridenHours: decimal().default('0.0'),
-		airtableSubmissionId: text()
+		submissionAirtableRecordId: text()
 	},
 	(table) => ({
 		userIdIdx: index('payouts_user_id_idx').on(table.userId),
 		createdAtIdx: index('payouts_created_at_idx').on(table.createdAt),
 		submittedToUnifiedIdx: index('payouts_submitted_to_unified_idx').on(table.submittedToUnified),
-		airtableSubmissionIdIdx: index('payouts_airtable_submission_id_idx').on(
-			table.airtableSubmissionId
-		),
-		userIdCreatedAtIdx: index('payouts_user_id_created_at_idx').on(
-			table.userId,
-			table.createdAt
-		),
+		userIdCreatedAtIdx: index('payouts_user_id_created_at_idx').on(table.userId, table.createdAt),
 		userIdSubmittedIdx: index('payouts_user_id_submitted_idx').on(
 			table.userId,
 			table.submittedToUnified
+		),
+		submissionAirtableRecordIdIdx: index('payouts_submission_airtable_record_id_idx').on(
+			table.submissionAirtableRecordId
 		)
 	})
 );

@@ -1,0 +1,2 @@
+ALTER TABLE "payouts" ADD COLUMN "submissionAirtableRecordId" text;--> statement-breakpoint
+CREATE INDEX "payouts_submission_airtable_record_id_idx" ON "payouts" USING btree ("submissionAirtableRecordId");
