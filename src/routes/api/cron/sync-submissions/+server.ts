@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/private';
-import { syncSubmissions } from '../../admin/sync-submissions/+server';
+import { syncSubmissions } from '$lib/server/sync-submissions';
 
 export const GET: RequestHandler = async ({ request }) => {
 	const authHeader = request.headers.get('authorization');
