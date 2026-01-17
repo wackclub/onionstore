@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageData } from './$types';
-
-	import { createUploader } from '$lib/utils/uploadthing';
-	import { UploadDropzone } from '@uploadthing/svelte';
 	import { toast } from 'svelte-sonner';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
 
 	let imageUrl = $state('');
+	let isUploading = $state(false);
+	let isDragging = $state(false);
+	let fileInputEl: HTMLInputElement;
 
 	$effect(() => {
 		if (form?.success) {
@@ -24,14 +24,66 @@
 		}
 	});
 
-	const uploader = createUploader('imageUploader', {
-		onClientUploadComplete: (res) => {
-			imageUrl = res[0].ufsUrl;
-		},
-		onUploadError: (error: Error) => {
-			alert(`ERROR: ${error.message}`);
+	async function uploadFile(file: File) {
+		if (!file.type.startsWith('image/')) {
+			toast.error('Only image files are allowed');
+			return;
 		}
-	});
+
+		if (file.size > 4 * 1024 * 1024) {
+			toast.error('File size must be under 4MB');
+			return;
+		}
+
+		isUploading = true;
+
+		try {
+			const formData = new FormData();
+			formData.append('file', file);
+
+			const response = await fetch('https://cdn.hackclub.com/api/file', {
+				method: 'POST',
+				headers: {
+					Authorization: 'Bearer beans'
+				},
+				body: formData
+			});
+
+			if (!response.ok) {
+				throw new Error(`Upload failed: ${response.statusText}`);
+			}
+
+			const data = await response.json();
+			imageUrl = data.url;
+			toast.success('Image uploaded successfully');
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : 'Upload failed');
+		} finally {
+			isUploading = false;
+		}
+	}
+
+	function handleFileSelect(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (file) uploadFile(file);
+	}
+
+	function handleDrop(event: DragEvent) {
+		event.preventDefault();
+		isDragging = false;
+		const file = event.dataTransfer?.files?.[0];
+		if (file) uploadFile(file);
+	}
+
+	function handleDragOver(event: DragEvent) {
+		event.preventDefault();
+		isDragging = true;
+	}
+
+	function handleDragLeave() {
+		isDragging = false;
+	}
 </script>
 
 <div class="mx-auto w-full max-w-2xl">
@@ -78,9 +130,35 @@
 						<img src={imageUrl} alt="Uploaded content" class="w-48" />
 					</div>
 				{/if}
-				<div class="border-coffee-400 bg-cream-100 border-2 border-dashed p-4">
-					<UploadDropzone {uploader} />
-				</div>
+				<button
+					type="button"
+					onclick={() => fileInputEl.click()}
+					ondrop={handleDrop}
+					ondragover={handleDragOver}
+					ondragleave={handleDragLeave}
+					disabled={isUploading}
+					class="border-coffee-400 bg-cream-100 hover:bg-cream-200 flex w-full cursor-pointer flex-col items-center justify-center border-2 border-dashed p-8 transition-colors {isDragging
+						? 'border-coffee-600 bg-cream-200'
+						: ''}"
+				>
+					{#if isUploading}
+						<span class="text-coffee-500 text-sm font-bold tracking-wider uppercase"
+							>UPLOADING...</span
+						>
+					{:else}
+						<span class="text-coffee-600 text-sm font-bold tracking-wider uppercase"
+							>DROP IMAGE HERE OR CLICK TO UPLOAD</span
+						>
+						<span class="text-coffee-400 mt-1 text-xs">MAX 4MB - IMAGES ONLY</span>
+					{/if}
+				</button>
+				<input
+					bind:this={fileInputEl}
+					type="file"
+					accept="image/*"
+					onchange={handleFileSelect}
+					class="hidden"
+				/>
 				<input type="hidden" name="imageUrl" value={imageUrl} />
 			</div>
 

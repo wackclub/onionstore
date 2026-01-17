@@ -1,8 +1,6 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
-@import 'uploadthing/tw/v4';
-@source "../node_modules/@uploadthing/svelte/dist";
 
 @font-face {
 	font-family: 'Phantom Sans';
@@ -74,11 +72,13 @@
 		content: '';
 		position: fixed;
 		inset: 0;
-		background: repeating-linear-gradient(0deg,
-				transparent,
-				transparent 2px,
-				rgba(58, 40, 26, 0.03) 2px,
-				rgba(58, 40, 26, 0.03) 4px);
+		background: repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 2px,
+			rgba(58, 40, 26, 0.03) 2px,
+			rgba(58, 40, 26, 0.03) 4px
+		);
 		pointer-events: none;
 		z-index: 9999;
 	}
@@ -305,7 +305,6 @@
 }
 
 @keyframes blink {
-
 	0%,
 	50% {
 		opacity: 1;
@@ -504,7 +503,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-
 	*,
 	*:before,
 	*:after {

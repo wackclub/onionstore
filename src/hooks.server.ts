@@ -40,7 +40,6 @@ const authMiddleware: Handle = async ({ event, resolve }) => {
 };
 
 const redirectMiddleware: Handle = async ({ event, resolve }) => {
-	if (event.url.pathname.startsWith('/api/uploadthing')) return resolve(event);
 	if (event.url.pathname.startsWith('/api/auth')) return resolve(event);
 	if (event.url.pathname.startsWith('/api/cron')) return resolve(event);
 	if (event.url.pathname === '/login') return resolve(event);
