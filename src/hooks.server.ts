@@ -14,7 +14,6 @@ const authMiddleware: Handle = async ({ event, resolve }) => {
 	];
 
 	if (unauthenticatedPaths.includes(event.url.pathname)) return resolve(event);
-	if (event.url.pathname.startsWith('/api/uploadthing')) return resolve(event);
 	if (event.url.pathname.startsWith('/api/cron')) return resolve(event);
 
 	const sessionCookie = event.cookies.get('_boba_mahad_says_hi_session');
@@ -54,7 +53,10 @@ const redirectMiddleware: Handle = async ({ event, resolve }) => {
 		return redirect(302, '/welcome');
 	}
 
-	if (!event.locals.user.isAdmin && (event.url.pathname.startsWith('/admin') || event.url.pathname.startsWith('/api/admin'))) {
+	if (
+		!event.locals.user.isAdmin &&
+		(event.url.pathname.startsWith('/admin') || event.url.pathname.startsWith('/api/admin'))
+	) {
 		return redirect(302, '/');
 	}
 
