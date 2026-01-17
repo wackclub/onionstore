@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { db, shopItems } from '$lib/server/db';
+import { syncShopItemToAirtable } from '$lib/server/airtable';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -38,6 +39,16 @@ export const actions: Actions = {
 		}
 
 		try {
+			// Sync to Airtable first - if this fails, we don't insert to DB
+			await syncShopItemToAirtable({
+				name,
+				description,
+				imageUrl,
+				price,
+				usd_cost: usdCost,
+				type
+			});
+
 			await db.insert(shopItems).values({
 				name,
 				description,
@@ -49,9 +60,10 @@ export const actions: Actions = {
 			});
 
 			return { success: true };
-		} catch {
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Failed to create item';
 			return fail(500, {
-				error: 'Failed to create item',
+				error: errorMessage,
 				name,
 				description,
 				imageUrl,

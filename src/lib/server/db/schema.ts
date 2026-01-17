@@ -23,9 +23,6 @@ export const rawUsers = pgTable(
 		isAdmin: boolean().default(false).notNull(),
 		country: varchar({ length: 2 }),
 		createdAt: timestamp().notNull().defaultNow(),
-		airtableRecordId: text(),
-		totalEarnedPoints: integer().default(0).notNull(),
-		pointsRedeemed: integer().default(0).notNull(),
 		rating: integer(),
 		review: text(),
 		githubUrl: text(),
@@ -43,8 +40,7 @@ export const rawUsers = pgTable(
 	(table) => ({
 		emailIdx: index('user_email_idx').on(table.email),
 		isAdminIdx: index('user_is_admin_idx').on(table.isAdmin),
-		countryIdx: index('user_country_idx').on(table.country),
-		airtableRecordIdIdx: index('user_airtable_record_id_idx').on(table.airtableRecordId)
+		countryIdx: index('user_country_idx').on(table.country)
 	})
 );
 
@@ -78,13 +74,11 @@ export const shopItems = pgTable(
 		price: integer().notNull(),
 		usd_cost: integer(),
 		type: varchar({ enum: ['hcb', 'third_party'] }),
-		hcbMids: text().array(),
-		airtableRecordId: text()
+		hcbMids: text().array()
 	},
 	(table) => ({
 		typeIdx: index('shop_items_type_idx').on(table.type),
-		priceIdx: index('shop_items_price_idx').on(table.price),
-		airtableRecordIdIdx: index('shop_items_airtable_record_id_idx').on(table.airtableRecordId)
+		priceIdx: index('shop_items_price_idx').on(table.price)
 	})
 );
 
@@ -105,8 +99,7 @@ export const shopOrders = pgTable(
 		createdAt: timestamp().notNull().defaultNow(),
 		userId: text()
 			.notNull()
-			.references(() => rawUsers.id),
-		airtableRecordId: text()
+			.references(() => rawUsers.id)
 	},
 	(table) => ({
 		userIdIdx: index('shop_orders_user_id_idx').on(table.userId),
@@ -114,13 +107,7 @@ export const shopOrders = pgTable(
 		statusIdx: index('shop_orders_status_idx').on(table.status),
 		createdAtIdx: index('shop_orders_created_at_idx').on(table.createdAt),
 		userIdStatusIdx: index('shop_orders_user_id_status_idx').on(table.userId, table.status),
-		statusCreatedAtIdx: index('shop_orders_status_created_at_idx').on(
-			table.status,
-			table.createdAt
-		),
-		airtableRecordIdIdx: index('shop_orders_airtable_record_id_idx').on(
-			table.airtableRecordId
-		)
+		statusCreatedAtIdx: index('shop_orders_status_created_at_idx').on(table.status, table.createdAt)
 	})
 );
 
@@ -138,20 +125,13 @@ export const payouts = pgTable(
 		createdAt: timestamp().notNull().defaultNow(),
 		submittedToUnified: boolean().default(false).notNull(),
 		baseHackatimeHours: decimal().default('0.0').notNull(),
-		overridenHours: decimal().default('0.0'),
-		airtableSubmissionId: text()
+		overridenHours: decimal().default('0.0')
 	},
 	(table) => ({
 		userIdIdx: index('payouts_user_id_idx').on(table.userId),
 		createdAtIdx: index('payouts_created_at_idx').on(table.createdAt),
 		submittedToUnifiedIdx: index('payouts_submitted_to_unified_idx').on(table.submittedToUnified),
-		airtableSubmissionIdIdx: index('payouts_airtable_submission_id_idx').on(
-			table.airtableSubmissionId
-		),
-		userIdCreatedAtIdx: index('payouts_user_id_created_at_idx').on(
-			table.userId,
-			table.createdAt
-		),
+		userIdCreatedAtIdx: index('payouts_user_id_created_at_idx').on(table.userId, table.createdAt),
 		userIdSubmittedIdx: index('payouts_user_id_submitted_idx').on(
 			table.userId,
 			table.submittedToUnified

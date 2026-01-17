@@ -22,6 +22,13 @@
       "when": 1766938964315,
       "tag": "0002_kind_power_pack",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1768640503066,
+      "tag": "0003_fresh_stellaris",
+      "breakpoints": true
     }
   ]
 }
