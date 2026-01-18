@@ -42,6 +42,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Welcome - Boba Olympics</title>
+</svelte:head>
+
 <div class="flex min-h-[80vh] items-center justify-center">
 	<div class="retro-panel w-full max-w-md">
 		<div class="flex flex-col gap-6">

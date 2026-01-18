@@ -1,8 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { shopItems, shopOrders, usersWithTokens, rawUsers } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { shopItems, shopOrders, rawUsers, payouts } from '$lib/server/db/schema';
+import { eq, sql } from 'drizzle-orm';
 import { createOrderSchema } from '$lib/server/validation';
 import { type } from 'arktype';
 import { createShopOrderInAirtable, lookupAirtableShopItemByName } from '$lib/server/airtable';
@@ -23,53 +23,97 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Authentication required' }, { status: 401 });
 		}
 
-		const shopItem = await db.select().from(shopItems).where(eq(shopItems.id, shopItemId)).limit(1);
-		if (!shopItem.length) {
-			return json({ error: 'Shop item not found' }, { status: 404 });
-		}
+		// Use transaction with serializable isolation to prevent race conditions
+		const orderResult = await db.transaction(async (tx) => {
+			// Lock the user's row and calculate token balance atomically
+			const userWithTokens = await tx
+				.select({
+					id: rawUsers.id,
+					email: rawUsers.email,
+					tokens: sql<number>`
+						GREATEST(
+							COALESCE(
+								(SELECT SUM(tokens) FROM ${payouts} WHERE "userId" = ${rawUsers.id}),
+								0
+							) -
+							COALESCE(
+								(SELECT SUM("priceAtOrder") FROM ${shopOrders} WHERE "userId" = ${rawUsers.id} AND status IN ('pending', 'approved')),
+								0
+							),
+							0
+						)
+					`.as('tokens')
+				})
+				.from(rawUsers)
+				.where(eq(rawUsers.id, userId))
+				.for('update')
+				.limit(1);
 
-		const item = shopItem[0];
+			if (!userWithTokens.length) {
+				return { error: 'User not found', status: 404 };
+			}
 
-		const userWithTokens = await db
-			.select()
-			.from(usersWithTokens)
-			.where(eq(usersWithTokens.id, userId))
-			.limit(1);
-		if (!userWithTokens.length) {
-			return json({ error: 'User not found' }, { status: 404 });
-		}
+			const user = userWithTokens[0];
 
-		const user = userWithTokens[0];
+			// Lock the shop item row
+			const shopItem = await tx
+				.select()
+				.from(shopItems)
+				.where(eq(shopItems.id, shopItemId))
+				.for('update')
+				.limit(1);
 
-		if (user.tokens < item.price) {
-			return json(
-				{
+			if (!shopItem.length) {
+				return { error: 'Shop item not found', status: 404 };
+			}
+
+			const item = shopItem[0];
+
+			if (user.tokens < item.price) {
+				return {
 					error: 'Insufficient tokens',
-					required: item.price,
-					available: user.tokens
-				},
-				{ status: 400 }
+					status: 400,
+					details: {
+						required: item.price,
+						available: user.tokens
+					}
+				};
+			}
+
+			const remainingTokens = user.tokens - item.price;
+			const newOrder = await tx
+				.insert(shopOrders)
+				.values({
+					shopItemId: item.id,
+					priceAtOrder: item.price,
+					userId: userId,
+					status: 'pending'
+				})
+				.returning();
+
+			return {
+				success: true,
+				order: newOrder[0],
+				remainingTokens,
+				userEmail: user.email,
+				item
+			};
+		});
+
+		if ('error' in orderResult) {
+			return json(
+				{ error: orderResult.error, ...(orderResult.details || {}) },
+				{ status: orderResult.status }
 			);
 		}
 
-		const remainingTokens = user.tokens - item.price;
-		const newOrder = await db
-			.insert(shopOrders)
-			.values({
-				shopItemId: item.id,
-				priceAtOrder: item.price,
-				userId: userId,
-				status: 'pending'
-			})
-			.returning();
-
-		syncOrderToAirtable(newOrder[0], item, user.email, userId);
+		syncOrderToAirtable(orderResult.order, orderResult.item, orderResult.userEmail, userId);
 
 		return json({
 			success: true,
-			order: newOrder[0],
+			order: orderResult.order,
 			message: 'Order created successfully',
-			remainingTokens
+			remainingTokens: orderResult.remainingTokens
 		});
 	} catch (error) {
 		console.error('Order creation error:', error);
