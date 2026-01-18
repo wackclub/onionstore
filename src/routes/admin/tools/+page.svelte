@@ -24,11 +24,6 @@
 		};
 	}
 
-	const handleClearTestOrders = createSyncHandler(
-		'/api/admin/clear-test-orders',
-		'Test orders cleared!'
-	);
-
 	const handleSyncSubmissions = createSyncHandler(
 		'/api/admin/sync-submissions',
 		'Submissions synced!'
@@ -42,6 +37,10 @@
 		}
 	});
 </script>
+
+<svelte:head>
+	<title>Admin Tools - Boba Olympics</title>
+</svelte:head>
 
 <div class="flex flex-col gap-8">
 	<section class="retro-panel">

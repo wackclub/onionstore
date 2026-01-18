@@ -87,6 +87,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Add New Item - Admin - Boba Olympics</title>
+</svelte:head>
+
 <div class="mx-auto w-full max-w-2xl">
 	<section class="retro-panel">
 		<div class="mb-6">

@@ -11,6 +11,8 @@
 	}
 </script>
 
+<svelte:head><title>Store - Boba Olympics</title></svelte:head>
+
 {#if user}
 	<div class="flex flex-col gap-8">
 		<section class="retro-panel py-8 text-center">

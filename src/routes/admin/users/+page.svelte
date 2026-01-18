@@ -79,6 +79,10 @@
 	};
 </script>
 
+<svelte:head>
+	<title>All Users - Admin - Boba Olympics</title>
+</svelte:head>
+
 <div class="flex flex-col gap-8">
 	<section class="retro-panel">
 		<div class="flex flex-wrap items-center justify-between gap-4">

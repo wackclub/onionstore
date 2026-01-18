@@ -5,6 +5,10 @@
 	const { items } = data;
 </script>
 
+<svelte:head>
+	<title>Admin Control Panel - Boba Olympics</title>
+</svelte:head>
+
 <div class="flex flex-col gap-8">
 	<section class="retro-panel">
 		<div class="flex flex-wrap items-center justify-between gap-6">
