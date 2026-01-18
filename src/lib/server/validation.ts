@@ -8,8 +8,9 @@ export const sendLinkSchema = type({
 	email: 'string.email'
 });
 
-export const updateCountrySchema = type({
-	country: /^[A-Z]{2}$/
+export const updateUserSchema = type({
+	country: /^[A-Z]{2}$/,
+	name: '0 < string <= 100'
 });
 
 export const createOrderSchema = type({
@@ -23,6 +24,6 @@ export const updateOrderSchema = type({
 });
 
 export type SendLinkInput = typeof sendLinkSchema.infer;
-export type UpdateCountryInput = typeof updateCountrySchema.infer;
+export type UpdateCountryInput = typeof updateUserSchema.infer;
 export type CreateOrderInput = typeof createOrderSchema.infer;
 export type UpdateOrderInput = typeof updateOrderSchema.infer;

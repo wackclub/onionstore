@@ -32,8 +32,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		const newUser = await db
 			.insert(rawUsers)
 			.values({
-				email,
-				displayName: email.split('@')[0]
+				email
 			})
 			.returning();
 		user = newUser;

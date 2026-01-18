@@ -215,6 +215,18 @@
 					/>
 				</div>
 
+				<div>
+					<label for="hcbMids" class="retro-label">HCB Category Locks (Optional)</label>
+					<input
+						type="text"
+						id="hcbCategoryLock"
+						name="hcbCategoryLock"
+						value={form && 'hcbCategoryLock' in form ? form.hcbCategoryLock || '' : ''}
+						placeholder="grocery_stores_supermarkets,fast_food_restaurants"
+						class="retro-input"
+					/>
+				</div>
+
 				<div class="flex items-center gap-3">
 					<input
 						type="checkbox"

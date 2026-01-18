@@ -50,6 +50,13 @@
       "when": 1768731212879,
       "tag": "0006_add-hcb-preauth-and-purpose-fields",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1768731409407,
+      "tag": "0007_add-hcb-category-locks",
+      "breakpoints": true
     }
   ]
 }

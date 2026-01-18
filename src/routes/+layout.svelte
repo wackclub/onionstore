@@ -3,12 +3,14 @@
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 	import { Toaster } from 'svelte-sonner';
+	import { page } from '$app/state';
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
+	const showHeader = $derived(data.user && page.url.pathname !== '/welcome');
 </script>
 
 <div class="min-h-screen w-full">
-	{#if data.user}
+	{#if showHeader && data.user}
 		<nav class="fixed top-0 right-0 left-0 z-50 p-4">
 			<div class="mx-auto max-w-6xl">
 				<div class="retro-panel flex flex-wrap items-center justify-between gap-4 !p-3">
@@ -38,7 +40,7 @@
 			</div>
 		</nav>
 	{/if}
-	<main class="w-full {data.user ? 'pt-28' : ''}">
+	<main class="w-full {showHeader ? 'pt-28' : ''}">
 		<div class="retro-shell">
 			{@render children()}
 		</div>

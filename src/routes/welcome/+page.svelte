@@ -3,6 +3,7 @@
 	import countryList from 'country-list';
 
 	let country = $state('');
+	let name = $state('');
 	let loading = $state(false);
 	let error = $state('');
 
@@ -18,12 +19,12 @@
 		error = '';
 
 		try {
-			const response = await fetch('/api/auth/update-country', {
+			const response = await fetch('/api/auth/update-user', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ country })
+				body: JSON.stringify({ country, name })
 			});
 
 			if (!response.ok) {
@@ -46,7 +47,6 @@
 		<div class="flex flex-col gap-6">
 			<div class="text-center">
 				<h1 class="retro-title text-2xl">Hey there!</h1>
-				<p class="retro-subtitle mt-2">where you at?</p>
 			</div>
 
 			<form
@@ -57,11 +57,16 @@
 				class="flex flex-col gap-4"
 			>
 				<div class="flex flex-col gap-2">
+					<label for="name" class="retro-label">Preferred Name</label>
+					<input id="name" type="text" bind:value={name} class="retro-input" />
+				</div>
+
+				<div class="flex flex-col gap-2">
 					<label for="country" class="retro-label">Select Country</label>
 					<select id="country" bind:value={country} required class="retro-input">
-						<option value="">-- SELECT REGION --</option>
+						<option value="">Select country...</option>
 						{#each countries as c}
-							<option value={c.code}>{c.name.toUpperCase()}</option>
+							<option value={c.code}>{c.name}</option>
 						{/each}
 					</select>
 				</div>

@@ -13,10 +13,10 @@
 				<p class="retro-subtitle mt-1">what's cooking?</p>
 			</div>
 			<div class="flex flex-wrap items-center gap-2">
-				<a href="/admin/users" class="retro-btn-secondary">[USERS]</a>
-				<a href="/admin/orders" class="retro-btn-secondary">[ORDERS]</a>
-				<a href="/admin/tools" class="retro-btn-secondary">[TOOLS]</a>
-				<a href="/admin/new" class="retro-btn">[+ NEW ITEM]</a>
+				<a href="/admin/users" class="retro-btn-secondary">USERS</a>
+				<a href="/admin/orders" class="retro-btn-secondary">ORDERS</a>
+				<a href="/admin/tools" class="retro-btn-secondary">TOOLS</a>
+				<a href="/admin/new" class="retro-btn">+ NEW ITEM</a>
 			</div>
 		</div>
 	</section>

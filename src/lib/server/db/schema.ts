@@ -79,6 +79,7 @@ export const shopItems = pgTable(
 		usd_cost: integer(),
 		type: varchar({ enum: ['hcb', 'third_party'] }),
 		hcbMids: text().array(),
+		hcbCategoryLock: text().array(),
 		hcbIsPreauth: boolean().default(false).notNull(),
 		hcbPurpose: text(),
 		airtableRecordId: text()

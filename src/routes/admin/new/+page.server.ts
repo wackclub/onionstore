@@ -24,6 +24,7 @@ export const actions: Actions = {
 		const usdCost = parseFloat(formData.get('usd-cost') as string);
 		const type = formData.get('type') as 'hcb' | 'third_party';
 		const hcbMids = formData.get('hcbMids') as string;
+		const hcbCategoryLock = formData.get('hcbCategoryLock') as string;
 		const hcbIsPreauth = formData.get('hcbIsPreauth') === 'on';
 		const hcbPurpose = formData.get('hcbPurpose') as string;
 
@@ -37,7 +38,9 @@ export const actions: Actions = {
 				usdCost: usdCost.toString(),
 				type,
 				hcbMids,
-				hcbPurpose
+				hcbPurpose,
+				hcbCategoryLock,
+				hcbIsPreauth
 			});
 		}
 
@@ -61,7 +64,11 @@ export const actions: Actions = {
 				type,
 				hcbMids: hcbMids ? hcbMids.split(',').map((mid) => mid.trim()) : null,
 				hcbIsPreauth: type === 'hcb' ? hcbIsPreauth : false,
-				hcbPurpose: type === 'hcb' ? hcbPurpose || null : null
+				hcbPurpose: type === 'hcb' ? hcbPurpose || null : null,
+				hcbCategoryLock:
+					type === 'hcb' && hcbCategoryLock
+						? hcbCategoryLock.split(',').map((cat) => cat.trim())
+						: null
 			});
 
 			return { success: true };
@@ -76,7 +83,9 @@ export const actions: Actions = {
 				usdCost: usdCost.toString(),
 				type,
 				hcbMids,
-				hcbPurpose
+				hcbPurpose,
+				hcbCategoryLock,
+				hcbIsPreauth
 			});
 		}
 	}

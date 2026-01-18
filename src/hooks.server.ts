@@ -48,7 +48,10 @@ const redirectMiddleware: Handle = async ({ event, resolve }) => {
 		return redirect(302, '/login');
 	}
 
-	if (!event.locals.user.country && event.url.pathname !== '/welcome') {
+	if (
+		(!event.locals.user.country || !event.locals.user.displayName) &&
+		event.url.pathname !== '/welcome'
+	) {
 		return redirect(302, '/welcome');
 	}
 

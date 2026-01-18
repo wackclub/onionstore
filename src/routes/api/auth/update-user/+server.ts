@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { rawUsers } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
-import { updateCountrySchema } from '$lib/server/validation';
+import { updateUserSchema } from '$lib/server/validation';
 import { ArkErrors } from 'arktype';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -12,16 +12,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const body = await request.json();
-	const parsed = updateCountrySchema(body);
+	const parsed = updateUserSchema(body);
 
 	if (parsed instanceof ArkErrors) {
-		return json({ error: 'Invalid country code' }, { status: 400 });
+		return json({ error: 'Invalid user details' }, { status: 400 });
 	}
 
 	try {
 		await db
 			.update(rawUsers)
-			.set({ country: parsed.country.toUpperCase() })
+			.set({ country: parsed.country.toUpperCase(), displayName: parsed.name })
 			.where(eq(rawUsers.id, locals.user.id));
 
 		return json({ success: true });
