@@ -37,8 +37,8 @@
 					<span class="border-coffee-300 flex-1 border-t-2 border-dashed"></span>
 				</div>
 				<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-					{#each items as item}
-						<ItemCard {item} userTokens={user.tokens} />
+					{#each items as item, index}
+						<ItemCard {item} userTokens={user.tokens} {index} />
 					{/each}
 				</div>
 			</section>

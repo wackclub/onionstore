@@ -6,9 +6,9 @@
 	interface Props {
 		item: ShopItem;
 		userTokens: number;
-		appearanceDelay?: number;
+		index: number;
 	}
-	const { item, userTokens, appearanceDelay = 0 }: Props = $props();
+	const { item, userTokens, index }: Props = $props();
 
 	let isOrdering = $state(false);
 	let orderMessage = $state('');
@@ -59,7 +59,12 @@
 
 <article class="retro-card flex h-full flex-col">
 	<div class="bg-cream-200 border-coffee-700 relative aspect-[4/3] overflow-hidden border-b-2">
-		<img src={item.imageUrl} alt={item.name} class="h-full w-full object-cover" />
+		<img
+			src={item.imageUrl}
+			alt={item.name}
+			class="h-full w-full object-cover"
+			fetchpriority={index < 3 ? 'high' : null}
+		/>
 		<div class="absolute top-2 right-2">
 			<div class="retro-chip">
 				<span class="font-bold">{item.price}</span>
