@@ -9,16 +9,17 @@
 	let isUploading = $state(false);
 	let isDragging = $state(false);
 	let fileInputEl: HTMLInputElement;
+	let selectedType = $state('');
 
 	$effect(() => {
 		if (form?.success) {
 			imageUrl = '';
-			toast.success('ITEM CREATED SUCCESSFULLY', {
+			toast.success('Item created successfully!', {
 				duration: 3000
 			});
 		}
 		if (form?.error) {
-			toast.error(`ERROR: ${form.error}`, {
+			toast.error(`Error: ${form.error}`, {
 				duration: 5000
 			});
 		}
@@ -194,36 +195,54 @@
 
 			<div>
 				<label for="type" class="retro-label">Item Type</label>
-				<select id="type" name="type" required class="retro-input">
-					<option value="">-- SELECT TYPE --</option>
-					<option value="hcb" selected={form && 'type' in form ? form.type === 'hcb' : false}
-						>HCB</option
-					>
-					<option
-						value="third_party"
-						selected={form && 'type' in form ? form.type === 'third_party' : false}
-						>THIRD PARTY</option
-					>
+				<select id="type" name="type" required class="retro-input" bind:value={selectedType}>
+					<option value="">Select Type</option>
+					<option value="hcb">HCB</option>
+					<option value="third_party">Third Party</option>
 				</select>
 			</div>
 
-			<div>
-				<label for="hcbMids" class="retro-label">HCB MIDs (Optional)</label>
-				<input
-					type="text"
-					id="hcbMids"
-					name="hcbMids"
-					value={form && 'hcbMids' in form ? form.hcbMids || '' : ''}
-					placeholder="mid1, mid2, mid3"
-					class="retro-input"
-				/>
-			</div>
+			{#if selectedType === 'hcb'}
+				<div>
+					<label for="hcbMids" class="retro-label">HCB MIDs (Optional)</label>
+					<input
+						type="text"
+						id="hcbMids"
+						name="hcbMids"
+						value={form && 'hcbMids' in form ? form.hcbMids || '' : ''}
+						placeholder="mid1, mid2, mid3"
+						class="retro-input"
+					/>
+				</div>
+
+				<div class="flex items-center gap-3">
+					<input
+						type="checkbox"
+						id="hcbIsPreauth"
+						name="hcbIsPreauth"
+						class="retro-checkbox h-5 w-5"
+					/>
+					<label for="hcbIsPreauth" class="retro-label mb-0">HCB Pre-Authorization</label>
+				</div>
+
+				<div>
+					<label for="hcbPurpose" class="retro-label">HCB Purpose (Optional)</label>
+					<textarea
+						id="hcbPurpose"
+						name="hcbPurpose"
+						rows="2"
+						class="retro-input resize-none"
+						placeholder="ENTER HCB PURPOSE"
+						>{form && 'hcbPurpose' in form ? form.hcbPurpose || '' : ''}</textarea
+					>
+				</div>
+			{/if}
 
 			<hr class="retro-divider" />
 
 			<div class="flex gap-3">
-				<a href="/admin" class="retro-btn-secondary flex-1 text-center">[CANCEL]</a>
-				<button type="submit" disabled={!imageUrl} class="retro-btn flex-1"> [CREATE ITEM] </button>
+				<a href="/admin" class="retro-btn-secondary flex-1 text-center">CANCEL</a>
+				<button type="submit" disabled={!imageUrl} class="retro-btn flex-1"> CREATE ITEM </button>
 			</div>
 		</form>
 	</section>

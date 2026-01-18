@@ -24,6 +24,8 @@ export const actions: Actions = {
 		const usdCost = parseFloat(formData.get('usd-cost') as string);
 		const type = formData.get('type') as 'hcb' | 'third_party';
 		const hcbMids = formData.get('hcbMids') as string;
+		const hcbIsPreauth = formData.get('hcbIsPreauth') === 'on';
+		const hcbPurpose = formData.get('hcbPurpose') as string;
 
 		if (!name || !description || !imageUrl || !price || !usdCost || !type) {
 			return fail(400, {
@@ -34,7 +36,8 @@ export const actions: Actions = {
 				price: price.toString(),
 				usdCost: usdCost.toString(),
 				type,
-				hcbMids
+				hcbMids,
+				hcbPurpose
 			});
 		}
 
@@ -56,7 +59,9 @@ export const actions: Actions = {
 				price,
 				usd_cost: usdCost,
 				type,
-				hcbMids: hcbMids ? hcbMids.split(',').map((mid) => mid.trim()) : null
+				hcbMids: hcbMids ? hcbMids.split(',').map((mid) => mid.trim()) : null,
+				hcbIsPreauth: type === 'hcb' ? hcbIsPreauth : false,
+				hcbPurpose: type === 'hcb' ? hcbPurpose || null : null
 			});
 
 			return { success: true };
@@ -70,7 +75,8 @@ export const actions: Actions = {
 				price: price.toString(),
 				usdCost: usdCost.toString(),
 				type,
-				hcbMids
+				hcbMids,
+				hcbPurpose
 			});
 		}
 	}

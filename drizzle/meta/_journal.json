@@ -43,6 +43,13 @@
       "when": 1768642809599,
       "tag": "0005_small_black_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1768731212879,
+      "tag": "0006_add-hcb-preauth-and-purpose-fields",
+      "breakpoints": true
     }
   ]
 }
