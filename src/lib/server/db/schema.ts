@@ -166,7 +166,7 @@ export const usersWithTokens = pgView('users_with_tokens').as((qb) => {
 			isAdmin: rawUsers.isAdmin,
 			country: rawUsers.country,
 			tokens: sql<number>`
-			GREATEST(
+			(GREATEST(
 				COALESCE(
 					(SELECT SUM(tokens) FROM payouts WHERE "userId" = "user"."id"),
 					0
@@ -176,7 +176,7 @@ export const usersWithTokens = pgView('users_with_tokens').as((qb) => {
 					0
 				),
 				0
-			)
+			))::int
 		`.as('tokens')
 		})
 		.from(rawUsers);

@@ -31,7 +31,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					id: rawUsers.id,
 					email: rawUsers.email,
 					tokens: sql<number>`
-						GREATEST(
+						(GREATEST(
 							COALESCE(
 								(SELECT SUM(tokens) FROM ${payouts} WHERE "userId" = ${rawUsers.id}),
 								0
@@ -41,7 +41,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 								0
 							),
 							0
-						)
+						))::int
 					`.as('tokens')
 				})
 				.from(rawUsers)
