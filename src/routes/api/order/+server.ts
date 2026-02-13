@@ -1,8 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { shopItems, shopOrders, rawUsers, payouts } from '$lib/server/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { shopItems, shopOrders, rawUsers, tokenBalanceSql } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
 import { createOrderSchema } from '$lib/server/validation';
 import { type } from 'arktype';
 import { createShopOrderInAirtable, lookupAirtableShopItemByName } from '$lib/server/airtable';
@@ -30,19 +30,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				.select({
 					id: rawUsers.id,
 					email: rawUsers.email,
-					tokens: sql<number>`
-						(GREATEST(
-							COALESCE(
-								(SELECT SUM(tokens) FROM ${payouts} WHERE "userId" = ${rawUsers.id}),
-								0
-							) -
-							COALESCE(
-								(SELECT SUM("priceAtOrder") FROM ${shopOrders} WHERE "userId" = ${rawUsers.id} AND status IN ('pending', 'approved')),
-								0
-							),
-							0
-						))::int
-					`.as('tokens')
+					tokens: tokenBalanceSql.as('tokens')
 				})
 				.from(rawUsers)
 				.where(eq(rawUsers.id, userId))

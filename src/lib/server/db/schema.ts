@@ -157,6 +157,24 @@ export const payouts = pgTable(
 	})
 );
 
+/**
+ * SQL expression to calculate a user's available token balance.
+ * Used in both the `users_with_tokens` view and the order API to ensure consistency.
+ */
+export const tokenBalanceSql = sql<number>`
+	(GREATEST(
+		COALESCE(
+			(SELECT SUM(tokens) FROM ${payouts} WHERE "userId" = ${rawUsers.id}),
+			0
+		) -
+		COALESCE(
+			(SELECT SUM("priceAtOrder") FROM ${shopOrders} WHERE "userId" = ${rawUsers.id} AND status IN ('pending', 'approved')),
+			0
+		),
+		0
+	))::int
+`;
+
 export const usersWithTokens = pgView('users_with_tokens').as((qb) => {
 	return qb
 		.select({
@@ -165,19 +183,7 @@ export const usersWithTokens = pgView('users_with_tokens').as((qb) => {
 			displayName: rawUsers.displayName,
 			isAdmin: rawUsers.isAdmin,
 			country: rawUsers.country,
-			tokens: sql<number>`
-			(GREATEST(
-				COALESCE(
-					(SELECT SUM(tokens) FROM payouts WHERE "userId" = "user"."id"),
-					0
-				) -
-				COALESCE(
-					(SELECT SUM("priceAtOrder") FROM shop_orders WHERE "userId" = "user"."id" AND status IN ('pending', 'approved')),
-					0
-				),
-				0
-			))::int
-		`.as('tokens')
+			tokens: tokenBalanceSql.as('tokens')
 		})
 		.from(rawUsers);
 });
