@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { shopOrders, shopItems, rawUsers } from '../src/lib/server/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const HCBAPI_KEY = process.env.HCBAPI_KEY;
@@ -78,7 +78,7 @@ async function createCardGrant(
 	}
 }
 
-async function getApprovedHcbOrders(): Promise<OrderWithDetails[]> {
+async function getPendingHcbOrders(): Promise<OrderWithDetails[]> {
 	const orders = await db
 		.select({
 			orderId: shopOrders.id,
@@ -95,9 +95,18 @@ async function getApprovedHcbOrders(): Promise<OrderWithDetails[]> {
 		.from(shopOrders)
 		.innerJoin(shopItems, eq(shopOrders.shopItemId, shopItems.id))
 		.innerJoin(rawUsers, eq(shopOrders.userId, rawUsers.id))
-		.where(and(eq(shopOrders.status, 'approved'), eq(shopItems.type, 'hcb')));
+		.where(and(eq(shopOrders.status, 'pending'), eq(shopItems.type, 'hcb')));
 
 	return orders.filter((o) => o.usdCost !== null) as OrderWithDetails[];
+}
+
+async function markOrdersApproved(orderIds: string[]) {
+	if (orderIds.length === 0) return;
+
+	await db
+		.update(shopOrders)
+		.set({ status: 'approved' })
+		.where(and(eq(shopOrders.status, 'pending'), inArray(shopOrders.id, orderIds)));
 }
 
 interface GroupedGrant {
@@ -141,9 +150,9 @@ function groupOrders(orders: OrderWithDetails[]): GroupedGrant[] {
 }
 
 async function main() {
-	console.log('Fetching approved HCB orders...');
-	const orders = await getApprovedHcbOrders();
-	console.log(`Found ${orders.length} approved HCB orders`);
+	console.log('Fetching pending HCB orders...');
+	const orders = await getPendingHcbOrders();
+	console.log(`Found ${orders.length} pending HCB orders`);
 
 	if (orders.length === 0) {
 		console.log('No orders to process');
@@ -180,7 +189,9 @@ async function main() {
 		const result = await createCardGrant(grantRequest);
 
 		if (result.success) {
+			await markOrdersApproved(grant.orderIds);
 			console.log(`  ✓ Grant created successfully`);
+			console.log(`  ✓ Marked ${grant.orderIds.length} order(s) as approved`);
 			successCount++;
 		} else {
 			console.error(`  ✗ Failed: ${result.error}`);

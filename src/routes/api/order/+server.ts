@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { shopItems, shopOrders, rawUsers, tokenBalanceSql } from '$lib/server/db/schema';
+import { shopItems, shopOrders, rawUsers, usersWithTokens } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { createOrderSchema } from '$lib/server/validation';
 import { type } from 'arktype';
@@ -25,16 +25,27 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Use transaction with serializable isolation to prevent race conditions
 		const orderResult = await db.transaction(async (tx) => {
-			// Lock the user's row and calculate token balance atomically
-			const userWithTokens = await tx
-				.select({
-					id: rawUsers.id,
-					email: rawUsers.email,
-					tokens: tokenBalanceSql.as('tokens')
-				})
+			// Lock the base user row first so concurrent orders can't double-spend.
+			const lockedUser = await tx
+				.select({ id: rawUsers.id })
 				.from(rawUsers)
 				.where(eq(rawUsers.id, userId))
 				.for('update')
+				.limit(1);
+
+			if (!lockedUser.length) {
+				return { error: 'User not found', status: 404 };
+			}
+
+			// Read token balance from the users_with_tokens view to keep logic consistent.
+			const userWithTokens = await tx
+				.select({
+					id: usersWithTokens.id,
+					email: usersWithTokens.email,
+					tokens: usersWithTokens.tokens
+				})
+				.from(usersWithTokens)
+				.where(eq(usersWithTokens.id, userId))
 				.limit(1);
 
 			if (!userWithTokens.length) {

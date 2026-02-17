@@ -47,7 +47,15 @@
 				});
 				await invalidateAll();
 			} else {
-				orderMessage = result.error || 'ERROR: FAILED';
+				if (
+					result?.error === 'Insufficient tokens' &&
+					typeof result?.required === 'number' &&
+					typeof result?.available === 'number'
+				) {
+					orderMessage = `INSUFFICIENT TOKENS (${result.available}/${result.required})`;
+				} else {
+					orderMessage = result.error || 'ERROR: FAILED';
+				}
 			}
 		} catch (error) {
 			orderMessage = 'ERROR: NETWORK';
