@@ -42,11 +42,8 @@
 			const formData = new FormData();
 			formData.append('file', file);
 
-			const response = await fetch('https://cdn.hackclub.com/api/file', {
+			const response = await fetch('/api/admin/upload-image', {
 				method: 'POST',
-				headers: {
-					Authorization: 'Bearer beans'
-				},
 				body: formData
 			});
 
