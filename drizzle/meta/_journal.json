@@ -57,6 +57,13 @@
       "when": 1768731409407,
       "tag": "0007_add-hcb-category-locks",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1739404800000,
+      "tag": "0008_fix-token-view-int-cast",
+      "breakpoints": true
     }
   ]
 }
